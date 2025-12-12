@@ -27,3 +27,5 @@ dist-ssr
 cursorignore
 
 .env
+.env.local
+.env.*.local
