@@ -2,8 +2,10 @@ import CustomButton from "@/components/common/customButton";
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
 import { BiSolidMagicWand } from "react-icons/bi";
+import { useNavigate } from "react-router";
 
 const FirstPage = () => {
+  const navigate = useNavigate();
   return (
     <Stack className="h-screen bg-[url('/general/start.png')] bg-cover max-md:bg-center">
       <Stack className="h-full flex items-start justify-center ml-28 max-lg:ml-10 max-md:ml-5 max-sm:ml-2 gap-8">
@@ -42,6 +44,7 @@ const FirstPage = () => {
           icon={<BiSolidMagicWand className="text-white size-6" />}
           wrapperClassName="w-[202px] h-[47px]"
           className="w-[201px] h-[46px] text-[13px] font-semibold tracking-widest"
+          onClick={() => navigate("/select-methods")}
         />
       </Stack>
     </Stack>
