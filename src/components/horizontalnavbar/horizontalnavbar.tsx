@@ -47,9 +47,9 @@ const SelectMethodsNavbar = () => {
         </Flex>
 
         <p
-          className="text-white text-[15px] font-extralight tracking-widest uppercase"
+          className="text-white text-[12px] font-extralight"
           style={{
-            letterSpacing: "6.5px",
+            letterSpacing: "1.5px",
             userSelect: "none",
           }}
         >

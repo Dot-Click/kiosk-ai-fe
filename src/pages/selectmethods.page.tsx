@@ -1,11 +1,41 @@
 import { Box } from "@/components/ui/box";
+import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
 
 const SelectMethodsPage = () => {
   return (
-    <Box className="h-screen bg-[url('/general/start.png')] bg-cover max-md:bg-center">
-      <Stack className="h-full flex items-start justify-center ml-28 max-lg:ml-10 max-md:ml-5 max-sm:ml-2 gap-8">
-        <h1 className="text-white text-2xl font-bold">Select Methods</h1>
+    <Box className="h-screen w-full bg-[url('/general/selectmethod.png')] bg-cover max-md:bg-center bg-[#080319] bg-no-repeat">
+      <Stack className="h-full flex items-center justify-center">
+        <Flex className="flex-wrap justify-center items-center w-[600px] ">
+          <img
+            src="/general/photo.png"
+            alt="photo"
+            className="w-50 h-50 cursor-pointer hover:scale-110 transition-all duration-300"
+          />
+          <img
+            src="/general/bluetooth.png"
+            alt="bluetooth"
+            className="w-50 h-50 cursor-pointer hover:scale-110 transition-all duration-300"
+          />
+          <img
+            src="/general/type.png"
+            alt="type"
+            className="w-50 h-50 cursor-pointer hover:scale-110 transition-all duration-300"
+          />
+          <img
+            src="/general/speak.png"
+            alt="speak"
+            className="w-50 h-50 cursor-pointer hover:scale-110 transition-all duration-300"
+          />
+          {/* <Stack>
+            <h1 className="text-white text-2xl font-bold">Take a photo</h1>
+            <p>capture your photo</p>
+          </Stack> */}
+        </Flex>
+
+        {/* <h1 className="text-white text-2xl font-bold">via bluethooth</h1>
+        <h1 className="text-white text-2xl font-bold">Type Prompt</h1>
+        <h1 className="text-white text-2xl font-bold">Speak Prompt</h1> */}
       </Stack>
     </Box>
   );
