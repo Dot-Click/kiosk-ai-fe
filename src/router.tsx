@@ -3,6 +3,7 @@ import { NotFound } from "./pages/notfound.page";
 import { DashboardLayout } from "./layouts/dashboard.layout";
 import DashboardPage from "./pages/dashboard.page";
 import SelectMethodsPage from "./pages/selectmethods.page";
+import CapturePhotoPage from "./pages/capturephoto.page";
 
 export const Router = () => {
   return (
@@ -11,6 +12,10 @@ export const Router = () => {
         <Route path="/" element={<DashboardLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="/select-methods" element={<SelectMethodsPage />} />
+          <Route
+            path="/select-methods/capture-photo"
+            element={<CapturePhotoPage />}
+          />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

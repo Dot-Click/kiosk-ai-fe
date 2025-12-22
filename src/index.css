@@ -96,6 +96,34 @@
     @apply bg-background text-foreground;
   }
 
+  /* Kiosk and touch device optimizations */
+  @media (pointer: coarse) {
+    button,
+    a,
+    [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Prevent text selection on kiosk screens */
+  @media (min-width: 1024px) {
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    input,
+    textarea {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
+    }
+  }
+
   .scroll-hidden::-webkit-scrollbar {
     display: none;
   }

@@ -41,9 +41,11 @@ const FirstPage = () => {
 
         <CustomButton
           title="START DESIGNING"
-          icon={<BiSolidMagicWand className="text-white size-6" />}
-          wrapperClassName="w-[202px] h-[47px]"
-          className="w-[201px] h-[46px] text-[13px] font-semibold tracking-widest"
+          icon={
+            <BiSolidMagicWand className="text-white size-4 sm:size-5 md:size-6" />
+          }
+          wrapperClassName="w-[160px] h-[40px] sm:w-[180px] sm:h-[44px] md:w-[202px] md:h-[47px] lg:w-[220px] lg:h-[50px]"
+          className="w-full h-full text-[11px] sm:text-[12px] md:text-[13px] font-semibold tracking-widest"
           onClick={() => navigate("/select-methods")}
         />
       </Stack>
