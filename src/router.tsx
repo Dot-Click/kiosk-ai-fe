@@ -4,6 +4,7 @@ import { DashboardLayout } from "./layouts/dashboard.layout";
 import DashboardPage from "./pages/dashboard.page";
 import SelectMethodsPage from "./pages/selectmethods.page";
 import CapturePhotoPage from "./pages/capturephoto.page";
+import BluetoothPage from "./pages/bluetooth.page";
 
 export const Router = () => {
   return (
@@ -16,6 +17,7 @@ export const Router = () => {
             path="/select-methods/capture-photo"
             element={<CapturePhotoPage />}
           />
+          <Route path="/select-methods/bluetooth" element={<BluetoothPage />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

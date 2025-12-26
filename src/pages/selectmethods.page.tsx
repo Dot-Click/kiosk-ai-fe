@@ -125,7 +125,7 @@ const SelectMethodsPage = () => {
       description: "Send any image from phone",
       imageSrc: "/general/onlybluetooth.svg",
       onClick: () => {
-        console.log("Via Bluetooth");
+        navigate("/select-methods/bluetooth");
       },
     },
     {
@@ -133,7 +133,7 @@ const SelectMethodsPage = () => {
       description: "Describe the Image",
       imageSrc: "/general/onlyprompt.svg",
       onClick: () => {
-        console.log("Type Prompt");
+        navigate("/select-methods/type-prompt");
       },
     },
     {
@@ -141,7 +141,7 @@ const SelectMethodsPage = () => {
       description: "Use your Voice",
       imageSrc: "/general/onlyspeak.svg",
       onClick: () => {
-        console.log("Speak Prompt");
+        navigate("/select-methods/speak-prompt");
       },
     },
   ];
