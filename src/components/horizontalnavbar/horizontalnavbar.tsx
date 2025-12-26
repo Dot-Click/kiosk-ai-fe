@@ -82,7 +82,7 @@ const GoBackButton = ({
 const Navbar = ({ handleNavigate }: { handleNavigate: () => void }) => {
   return (
     <NavbarWrapper
-      className="items-center gap-2 text-red-400 font-bold top-8 left-26 max-lg:left-10 max-md:left-10 max-sm:left-2"
+      className="items-center gap-2 text-red-400 font-bold top-8 left-26 max-lg:left-10 max-md:left-10 max-sm:left-2 z-50"
       onClick={handleNavigate}
     >
       <img src="/logo/logo.svg" alt="logo" width={150} height={150} />

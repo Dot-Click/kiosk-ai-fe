@@ -72,13 +72,14 @@ const BluetoothPage = () => {
   return (
     <Box className="h-screen w-full bg-[#080319] bg-[url('/general/capture-bg.png')] bg-cover bg-no-repeat flex items-center justify-center p-4">
       <Stack className="w-full max-w-[650px] max-sm:size-[90%] items-center justify-center gap-8">
+        {/* Bluetooth Icon with Glow - Centered */}
         <Center
-          className="w-full p-2 h-[400px] rounded-2xl max-sm:h-[300px] cursor-pointer flex flex-col items-center justify-center relative"
+          className="w-full h-[200px] max-sm:h-[150px] relative flex items-center justify-center mt-12"
           style={{ userSelect: "none" }}
         >
           {/* Glow Effect */}
           <Box
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className="absolute top-18 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{
               width: "197.74px",
               height: "197.74px",
@@ -91,27 +92,30 @@ const BluetoothPage = () => {
             alt="bluetooth"
             className="size-46 object-cover relative z-10"
           />
-
-          <Stack className="w-full items-center justify-center border-2 border-white/10 rounded-2xl p-2 bg-gradient-to-t from-[#111111] via-[#111111]/50 to-transparent">
-            <Stack className="w-full gap-2.5">
-              <h1 className="text-[#F70353] text-xl lg:text-[2.15rem] xl:text-[1.30rem] p-0">
-                Instructions:
-              </h1>
-              <p className="text-white/80 text-sm font-extralight tracking-widest uppercase">
-                1. Enable Bluetooth on your phone.
-              </p>
-              <p className="text-white/80 text-sm font-extralight tracking-widest uppercase">
-                2: Tap the button below to start pairing.
-              </p>
-              <p className="text-white/80 text-sm font-extralight tracking-widest uppercase">
-                3. Select "Kiosk AI" from your phone's Bluetooth devices
-              </p>
-              <p className="text-sm font-extralight tracking-widest uppercase bg-gradient-to-b from-white to-white/16 bg-clip-text text-transparent">
-                4. Choose an image from your gallery to send
-              </p>
-            </Stack>
-          </Stack>
         </Center>
+
+        {/* Instructions Section - No Background */}
+        <Stack className="w-lg max-w-[470px] max-sm:w-full items-center justify-center border-2 border-white/10 rounded-2xl p-0">
+          <Stack className="gap-2.5 items-start w-full p-4">
+            <h1 className="text-[#F70353] text-xl lg:text-[2.15rem] xl:text-[1.30rem] p-0 text-center">
+              Instructions:
+            </h1>
+            <p className="text-white/80 text-xs font-extralight tracking-widest uppercase text-center">
+              1. Enable Bluetooth on your phone.
+            </p>
+            <p className="text-white/80 text-xs font-extralight tracking-widest uppercase text-center">
+              2: Tap the button below to start pairing.
+            </p>
+            <p className="text-white/80 text-xs font-extralight tracking-widest uppercase text-center">
+              3. Select "Kiosk AI" from your phone's Bluetooth devices
+            </p>
+            <p className="text-xs font-extralight tracking-widest uppercase bg-gradient-to-b from-white to-white/16 bg-clip-text text-transparent text-center">
+              4. Choose an image from your gallery to send
+            </p>
+          </Stack>
+        </Stack>
+
+        {/* Button - Centered */}
         <CustomButton
           wrapperClassName="w-[188px] h-[48px]"
           title="Connect via Bluetooth"
