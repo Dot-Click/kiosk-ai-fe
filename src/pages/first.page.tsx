@@ -9,7 +9,7 @@ const FirstPage = () => {
   const navigate = useNavigate();
 
   // Use CDN URL if available, otherwise fallback to local
-  const gifUrl = import.meta.env.VITE_GIF_URL || "/general/gif22.gif";
+  const gifUrl = "/general/gif22.gif";
 
   return (
     <Stack
