@@ -8,14 +8,36 @@ import { useNavigate } from "react-router";
 const FirstPage = () => {
   const navigate = useNavigate();
 
-  // Use CDN URL if available, otherwise fallback to local
-  const gifUrl = "/general/gif22.gif";
-
+  // <Stack className="h-screen relative overflow-hidden">
+  // {/* GIF Background with smooth loop - using img for better control */}
+  // <img
+  //   src="/general/gif2.gif"
+  //   alt="background"
+  //   className="absolute inset-0 w-full h-full object-cover max-md:object-center"
+  //   style={{
+  //     willChange: "filter",
+  //     backfaceVisibility: "hidden",
+  //     transform: "translateZ(0)",
+  //     imageRendering: "auto",
+  //     filter: "blur(0px)",
+  //     animation: "smoothLoop 0.1s ease-in-out infinite",
+  //   }}
+  // />
+  // <style>{`
+  //   @keyframes smoothLoop {
+  //     0%, 100% {
+  //       filter: blur(0px);
+  //       opacity: 1;
+  //     }
+  //     50% {
+  //       filter: blur(0.3px);
+  //       opacity: 0.99;
+  //     }
+  //   }
+  // `}</style>
+  // <Stack className="h-full flex items-start justify-center ml-28 max-lg:ml-10 max-md:ml-5 max-sm:ml-2 gap-8 relative z-10">
   return (
-    <Stack
-      className="h-screen bg-cover max-md:bg-center"
-      style={{ backgroundImage: `url('${gifUrl}')` }}
-    >
+    <Stack className="h-screen bg-[url('/general/gif22.gif')] bg-cover max-md:bg-center">
       <Box
         className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
