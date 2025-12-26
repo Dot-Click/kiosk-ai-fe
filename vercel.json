@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm install -g git-lfs && git lfs install && git lfs pull && npm run build",
   "rewrites": [
     {
       "source": "/(.*)",

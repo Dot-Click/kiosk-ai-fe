@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "prebuild": "git lfs install || true && git lfs pull || true",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "start": "vite preview"
