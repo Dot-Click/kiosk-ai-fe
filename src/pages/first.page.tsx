@@ -40,7 +40,7 @@ const FirstPage = () => {
     <Stack className="h-screen relative overflow-hidden">
       {/* GIF Background */}
       <img
-        src="/general/gif22.gif"
+        src="/general/gif222.gif"
         alt="background"
         className="absolute inset-0 w-full h-full object-cover max-md:object-center"
         style={{
