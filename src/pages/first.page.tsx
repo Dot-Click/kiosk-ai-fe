@@ -39,7 +39,8 @@ const FirstPage = () => {
   return (
     <Stack className="h-screen bg-[url('/general/gif22.gif')] bg-cover max-md:bg-center">
       <Box
-        className="absolute inset-0 w-full h-full pointer-events-none"
+        className="absolute inset-0 w-full h-full poin
+        ter-events-none"
         style={{
           background:
             "linear-gradient(to right, black 0%, transparent 20%, transparent 80%, black 100%)",
