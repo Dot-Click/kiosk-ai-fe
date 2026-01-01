@@ -195,6 +195,65 @@ const BluetoothNavbar = () => {
   );
 };
 
+const DescribeDesignNavbar = () => {
+  const navigate = useNavigate();
+
+  const handleGoBack = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate("/select-methods/capture-photo");
+  };
+
+  return (
+    <>
+      <Box className="absolute items-center gap-2 text-red-400 font-bold top-8 left-26 max-lg:left-10 max-md:left-10 max-sm:left-2 z-50">
+        <GoBackButton onClick={handleGoBack} />
+      </Box>
+      <NavbarWrapper className="flex items-center gap-2 justify-center text-white font-bold w-full">
+        <Stack className="z-20 justify-center items-center mt-8 p-0 gap-0 max-sm:mt-18">
+          <Flex className="gap-0 font-bold flex-col items-center justify-center text-center">
+            <Flex className="gap-0">
+              <h1
+                className="bg-clip-text text-transparent tracking-wide sm:text-[0.75rem] text-base lg:text-[1.75rem] xl:text-[1.30rem] p-0 m-0"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(5deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 0%, #E5E5E1 40%, #E5E5E5 100%)",
+                }}
+              >
+                Describe your
+              </h1>
+
+              <Box className="relative inline-flex items-center justify-center ml-2">
+                <Box
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40px] h-[40px] sm:w-[50px] sm:h-[50px] md:w-[60px] md:h-[60px] lg:w-[70px] lg:h-[70px] rounded-full"
+                  style={{
+                    background:
+                      "radial-gradient(circle, rgba(247, 3, 83, 0.4) 0%, rgba(247, 3, 83, 0.2) 40%, transparent 70%)",
+                    filter: "blur(20px)",
+                  }}
+                />
+                <h1 className="text-[#F70353] sm:text-[1.10rem] text-xl lg:text-[2.15rem] xl:text-[1.50rem] p-0 relative z-10">
+                  Design
+                </h1>
+              </Box>
+            </Flex>
+
+            <p
+              className="text-white/80 text-[12px] font-extralight tracking-widest text-center"
+              style={{
+                letterSpacing: "1.6px",
+                userSelect: "none",
+              }}
+            >
+              Be as creative as you want! The AI will generate artwork based on
+              your description.
+            </p>
+          </Flex>
+        </Stack>
+      </NavbarWrapper>
+    </>
+  );
+};
+
 export const HorizontalNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -205,6 +264,8 @@ export const HorizontalNavbar = () => {
 
   const isSelectMethods = location.pathname === "/select-methods";
   const isCapturePhoto = location.pathname === "/select-methods/capture-photo";
+  const isDescribeDesign =
+    location.pathname === "/select-methods/capture-photo/describe-design";
   const isBluetooth = location.pathname === "/select-methods/bluetooth";
   const isHome = location.pathname === "/";
 
@@ -213,6 +274,7 @@ export const HorizontalNavbar = () => {
       {isHome && <Navbar handleNavigate={handleNavigate} />}
       {isSelectMethods && <SelectMethodsNavbar />}
       {isCapturePhoto && <CapturePhotoNavbar />}
+      {isDescribeDesign && <DescribeDesignNavbar />}
       {isBluetooth && <BluetoothNavbar />}
     </>
   );
