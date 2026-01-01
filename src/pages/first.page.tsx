@@ -37,16 +37,27 @@ const FirstPage = () => {
   // `}</style>
   // <Stack className="h-full flex items-start justify-center ml-28 max-lg:ml-10 max-md:ml-5 max-sm:ml-2 gap-8 relative z-10">
   return (
-    <Stack className="h-screen bg-[url('/general/gif22.gif')] bg-cover max-md:bg-center">
+    <Stack className="h-screen relative overflow-hidden">
+      {/* GIF Background */}
+      <img
+        src="/general/gif22.gif"
+        alt="background"
+        className="absolute inset-0 w-full h-full object-cover max-md:object-center"
+        style={{
+          willChange: "transform",
+          backfaceVisibility: "hidden",
+          transform: "translateZ(0)",
+        }}
+      />
+      {/* Gradient Overlay */}
       <Box
-        className="absolute inset-0 w-full h-full poin
-        ter-events-none"
+        className="absolute inset-0 w-full h-full pointer-events-none"
         style={{
           background:
             "linear-gradient(to right, black 0%, transparent 20%, transparent 80%, black 100%)",
         }}
       />
-      <Stack className="h-full flex items-start justify-center ml-28 max-lg:ml-10 max-md:ml-5 max-sm:ml-2 gap-8">
+      <Stack className="h-full flex items-start justify-center ml-28 max-lg:ml-10 max-md:ml-5 max-sm:ml-2 gap-8 relative z-10">
         <Stack className="gap-0" style={{ userSelect: "none" }}>
           <Flex className="z-50">
             <h1 className="bg-[linear-gradient(0deg,#000000_-2%,#E5E5E5_59%)] bg-clip-text text-transparent tracking-wide text-6xl font-bold ">
