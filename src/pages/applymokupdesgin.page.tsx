@@ -5,12 +5,18 @@ import { Stack } from "@/components/ui/stack";
 import { Flex } from "@/components/ui/flex";
 import { useImageStore } from "@/store/image.store";
 import { cn } from "@/utils/cn.util";
-import { ChevronDown, ChevronUp, Minus, Plus } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ChevronRight,
+  Minus,
+  Plus,
+} from "lucide-react";
 
 const productOptions = [
   { id: "cup", label: "Cup", image: "/general/cup.png" },
-  { id: "tshirt", label: "T-Shirt", image: "/general/cup.png" }, // Add tshirt.png when available
-  { id: "lamp", label: "Lamp", image: "/general/cup.png" }, // Add lamp.png when available
+  { id: "tshirt", label: "T-Shirt", image: "/general/tshirt.png" }, // Add tshirt.png when available
+  { id: "lamp", label: "Lamp", image: "/general/lamp.svg" }, // Add lamp.png when available
 ];
 
 const colorOptions = [
@@ -108,12 +114,12 @@ const ApplyMokupDesignPage = () => {
   };
 
   return (
-    <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover bg-no-repeat overflow-y-auto p-4">
-      <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 p-4 sm:p-6 md:p-8 max-md:flex-col max-md:items-center max-md:justify-start max-md:py-6 max-sm:mt-30 mt-12">
+    <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">
+      <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-md:flex-col max-md:items-center max-md:justify-start max-md:py-6 max-sm:mt-30 mt-12">
         {/* Left Side - Product Options Sidebar */}
-        <Box className="flex flex-col items-center justify-center gap-4 flex-shrink-0">
+        <Box className="flex flex-col items-center justify-center gap-4 xl:gap-6 2xl:gap-8 flex-shrink-0">
           <Box
-            className="relative w-[310.9px] h-[396.77px] overflow-hidden rounded-[10px]"
+            className="relative w-[310.9px] xl:w-[380px] 2xl:w-[450px] h-[396.77px] xl:h-[480px] 2xl:h-[570px] overflow-hidden rounded-[10px] xl:rounded-[12px] 2xl:rounded-[14px]"
             style={{ fontFamily: "Outfit, sans-serif" }}
           >
             {/* Background with Drop Effect */}
@@ -127,44 +133,68 @@ const ApplyMokupDesignPage = () => {
               }}
             />
 
-            {/* "New" Tag */}
+            {/* Product Photos Header with Arrow */}
             <Box
-              className="absolute z-10"
+              className="absolute z-10 xl:left-[22px] 2xl:left-[26px] xl:top-[5px] 2xl:top-[6px]"
               style={{
-                left: "57.46px",
-                top: "4px",
-                width: "29px",
-                height: "18px",
-                lineHeight: "16px",
+                left: "38.11px",
+                top: "48px",
               }}
             >
-              <span
-                style={{
-                  fontFamily: "Outfit",
-                  fontStyle: "normal",
-                  fontWeight: 400,
-                  fontSize: "14px",
-                  lineHeight: "18px",
-                  letterSpacing: "0.03em",
-                  color: "#C1C1C5",
-                }}
-              >
-                Product Photos
-              </span>
+              <Flex className="items-center gap-2 xl:gap-3 2xl:gap-4">
+                <img
+                  src="/general/cup.svg"
+                  alt="new"
+                  className="w-8 h-8 object-cover rounded"
+                />
+                <Stack className="gap-0">
+                  <span
+                    className="text-sm xl:text-base 2xl:text-lg"
+                    style={{
+                      fontFamily: "Outfit",
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      fontSize: "14px",
+                      lineHeight: "18px",
+                      letterSpacing: "0.03em",
+                      color: "#C1C1C5",
+                    }}
+                  >
+                    Product
+                  </span>
+                  <span
+                    className="text-sm xl:text-base 2xl:text-lg"
+                    style={{
+                      fontFamily: "Outfit",
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      fontSize: "14px",
+                      lineHeight: "18px",
+                      letterSpacing: "0.03em",
+                      color: "#C1C1C5",
+                    }}
+                  >
+                    Photos
+                  </span>
+                </Stack>
+
+                <ChevronDown className="w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 text-[#C1C1C5]" />
+              </Flex>
             </Box>
 
-            {/* Product Options */}
-            <Box
-              className="absolute"
-              style={{
-                left: "18.11px",
-                top: "80.59px",
-                height: "240.77px",
-                width: "279.16px",
-              }}
-            >
-              <Flex className="flex-col gap-3 p-4">
+            {/* Square SVG Icon and Heading */}
+            <Box className="absolute left-[18.11px] top-[40px] xl:left-[22px] 2xl:left-[72px] xl:top-[50px] 2xl:top-[85px]">
+              <Flex className="items-center gap-3 xl:gap-4 2xl:gap-5 mt-14 xl:mt-15 2xl:mt-16">
+                {/* Square SVG Icon */}
+                <Box className="w-8 h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 flex-shrink-0 flex items-center justify-center">
+                  <img
+                    src="/general/squre.svg"
+                    alt="square"
+                    className="w-full h-full object-cover"
+                  />
+                </Box>
                 <span
+                  className="text-base xl:text-lg 2xl:text-xl"
                   style={{
                     fontFamily: "Outfit",
                     fontStyle: "normal",
@@ -172,37 +202,77 @@ const ApplyMokupDesignPage = () => {
                     fontSize: "16px",
                     lineHeight: "20px",
                     color: "#FFFFFF",
-                    marginBottom: "8px",
                   }}
                 >
                   Customize Your Designs:
                 </span>
+              </Flex>
+            </Box>
+
+            {/* Product Options */}
+            <Box
+              className="absolute left-[52.11px] top-[160px] xl:left-[50px] 2xl:left-[86px] xl:top-[160px] 2xl:top-[188px] 3xl:top-[160px] "
+              style={{
+                width: "279.16px",
+              }}
+            >
+              <Flex className="flex-col">
                 {productOptions.map((product) => (
                   <Box
                     key={product.id}
                     onClick={() => setSelectedProduct(product.id)}
                     className={cn(
-                      "cursor-pointer rounded-lg px-4 py-3 transition-all duration-200",
+                      "cursor-pointer rounded-lg p-3 transition-all duration-200 xl:rounded-xl 2xl:rounded-2xl flex items-center gap-3 xl:gap-4 2xl:gap-5",
                       selectedProduct === product.id
-                        ? "bg-[#F70353]/20 border border-[#F70353]"
-                        : "bg-[#29292D]/50 border border-transparent hover:bg-[#29292D]/70"
+                        ? "border border-[#F70353] xl:border-2 2xl:border-2"
+                        : "border border-transparent hover:bg-[#29292D]/70"
                     )}
+                    style={
+                      selectedProduct === product.id
+                        ? {
+                            background: `linear-gradient(to bottom, rgba(247, 3, 83, 0.06) 0%, rgba(247, 3, 83, 0.06) 73%, rgba(23, 7, 38, 1) 100%)`,
+                            borderColor: "#F70353",
+                            borderWidth: "1px",
+                          }
+                        : {
+                            background: `linear-gradient(to top, rgba(23, 7, 38, 1) 0%, rgba(23, 7, 38, 1) 73%, rgba(23, 7, 38, 1) 100%)`,
+                            borderColor: "#170726",
+                            borderWidth: "1px",
+                          }
+                    }
                   >
-                    <span
-                      style={{
-                        fontFamily: "Outfit",
-                        fontStyle: "normal",
-                        fontWeight: selectedProduct === product.id ? 500 : 300,
-                        fontSize: "14px",
-                        lineHeight: "20px",
-                        color:
-                          selectedProduct === product.id
-                            ? "#FFFFFF"
-                            : "#C1C1C5",
-                      }}
-                    >
-                      {product.label}
-                    </span>
+                    {/* Product Image */}
+                    <Box className="w-12 h-12 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 flex-shrink-0 rounded-lg xl:rounded-xl 2xl:rounded-2xl overflow-hidden bg-[#29292D]/50">
+                      <img
+                        src={product.image}
+                        alt={product.label}
+                        className="w-full h-full object-cover"
+                      />
+                    </Box>
+
+                    {/* Product Text */}
+                    <Flex className="flex-col flex-1 min-w-0">
+                      <span
+                        className="text-sm xl:text-base 2xl:text-lg"
+                        style={{
+                          fontFamily: "Outfit",
+                          fontStyle: "normal",
+                          fontWeight:
+                            selectedProduct === product.id ? 500 : 300,
+                          fontSize: "14px",
+                          lineHeight: "20px",
+                          color:
+                            selectedProduct === product.id
+                              ? "#FFFFFF"
+                              : "#C1C1C5",
+                        }}
+                      >
+                        Apply your design on {product.label}
+                      </span>
+                    </Flex>
+
+                    {/* Chevron Right Icon */}
+                    <ChevronRight className="w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 text-[#C1C1C5] flex-shrink-0" />
                   </Box>
                 ))}
               </Flex>
@@ -212,9 +282,9 @@ const ApplyMokupDesignPage = () => {
 
         {/* Center - Product Mockup with Image Overlay */}
         <Box className="flex-1 flex items-center justify-center min-w-0 max-md:w-full max-md:flex-1 max-md:mt-4">
-          <Stack className="w-full max-w-[650px] items-center justify-center">
+          <Stack className="w-full max-w-[650px] xl:max-w-[800px] 2xl:max-w-[950px] items-center justify-center">
             <Center
-              className="w-full bg-transparent p-2 h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] rounded-2xl overflow-visible relative"
+              className="w-full bg-transparent p-2 xl:p-3 2xl:p-4 h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] xl:h-[550px] 2xl:h-[650px] rounded-2xl xl:rounded-3xl 2xl:rounded-[32px] overflow-visible relative"
               style={{ userSelect: "none" }}
             >
               {(() => {
@@ -373,27 +443,20 @@ const ApplyMokupDesignPage = () => {
         </Box>
 
         {/* Right Side - Color, Zoom, Rotation Controls */}
-        <Box className="flex flex-col items-center justify-center gap-4 flex-shrink-0">
+        <Box className="flex flex-col items-center justify-center gap-4 xl:gap-6 2xl:gap-8 flex-shrink-0">
           <Box
-            className="relative w-[310.9px] overflow-hidden rounded-[10px]"
+            className="relative w-[310.9px] xl:w-[380px] 2xl:w-[450px] overflow-hidden rounded-[10px] xl:rounded-[12px] 2xl:rounded-[14px]"
             style={{ fontFamily: "Outfit, sans-serif" }}
           >
             {/* Background with Drop Effect */}
-            <Box
-              className="absolute inset-0 rounded-[10px]"
-              style={{
-                backgroundImage: "url('/general/dropeffect.svg')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-              }}
-            />
+            <Box className="absolute inset-0 rounded-[10px] bg-black" />
 
             {/* Content Container */}
-            <Box className="relative z-10 p-6 flex flex-col gap-6">
+            <Box className="relative z-10 p-6 xl:p-7 2xl:p-8 flex flex-col gap-6 xl:gap-7 2xl:gap-8">
               {/* Select Color Dropdown */}
-              <Box className="flex flex-col gap-2">
+              <Box className="flex flex-col gap-2 xl:gap-3 2xl:gap-4">
                 <span
+                  className="text-base xl:text-lg 2xl:text-xl"
                   style={{
                     fontFamily: "Outfit",
                     fontStyle: "normal",
@@ -409,20 +472,23 @@ const ApplyMokupDesignPage = () => {
                 <Box className="relative">
                   <Box
                     onClick={() => setIsColorDropdownOpen(!isColorDropdownOpen)}
-                    className="cursor-pointer flex items-center justify-between px-4 py-3 rounded-lg bg-[#29292D]/50 border border-[#464646] hover:bg-[#29292D]/70 transition-all"
+                    className="cursor-pointer flex items-center justify-between px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D]/50 border border-[#464646] xl:border-2 2xl:border-2 hover:bg-[#29292D]/70 transition-all"
                   >
-                    <Flex className="items-center gap-3">
+                    <Flex className="items-center gap-3 xl:gap-4 2xl:gap-5">
                       {selectedColor.value === "none" ? (
-                        <Box className="w-6 h-6 rounded-full border-2 border-dashed border-[#464646] flex items-center justify-center">
-                          <span className="text-[10px] text-[#C1C1C5]">×</span>
+                        <Box className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 rounded-full border-2 xl:border-[3px] 2xl:border-[3px] border-dashed border-[#464646] flex items-center justify-center">
+                          <span className="text-[10px] xl:text-xs 2xl:text-sm text-[#C1C1C5]">
+                            ×
+                          </span>
                         </Box>
                       ) : (
                         <Box
-                          className="w-6 h-6 rounded-full border border-[#464646]"
+                          className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 rounded-full border border-[#464646] xl:border-2 2xl:border-2"
                           style={{ backgroundColor: selectedColor.value }}
                         />
                       )}
                       <span
+                        className="text-sm xl:text-base 2xl:text-lg"
                         style={{
                           fontFamily: "Outfit",
                           fontStyle: "normal",
@@ -436,16 +502,16 @@ const ApplyMokupDesignPage = () => {
                       </span>
                     </Flex>
                     {isColorDropdownOpen ? (
-                      <ChevronUp className="w-4 h-4 text-[#C1C1C5]" />
+                      <ChevronUp className="w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 text-[#C1C1C5]" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-[#C1C1C5]" />
+                      <ChevronDown className="w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 text-[#C1C1C5]" />
                     )}
                   </Box>
 
                   {/* Dropdown Menu */}
                   {isColorDropdownOpen && (
                     <Box
-                      className="absolute top-full left-0 right-0 mt-2 rounded-lg bg-[#29292D] border border-[#464646] z-20 max-h-[200px] overflow-y-auto"
+                      className="absolute top-full left-0 right-0 mt-2 xl:mt-3 2xl:mt-4 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D] border border-[#464646] xl:border-2 2xl:border-2 z-20 max-h-[200px] xl:max-h-[240px] 2xl:max-h-[280px] overflow-y-auto"
                       style={{ boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.3)" }}
                     >
                       {colorOptions.map((color) => (
@@ -455,21 +521,22 @@ const ApplyMokupDesignPage = () => {
                             setSelectedColor(color);
                             setIsColorDropdownOpen(false);
                           }}
-                          className="cursor-pointer flex items-center gap-3 px-4 py-3 hover:bg-[#464646]/50 transition-all border-b border-[#464646]/50 last:border-b-0"
+                          className="cursor-pointer flex items-center gap-3 xl:gap-4 2xl:gap-5 px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 hover:bg-[#464646]/50 transition-all border-b border-[#464646]/50 last:border-b-0"
                         >
                           {color.value === "none" ? (
-                            <Box className="w-6 h-6 rounded-full border-2 border-dashed border-[#464646] flex items-center justify-center">
-                              <span className="text-[10px] text-[#C1C1C5]">
+                            <Box className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 rounded-full border-2 xl:border-[3px] 2xl:border-[3px] border-dashed border-[#464646] flex items-center justify-center">
+                              <span className="text-[10px] xl:text-xs 2xl:text-sm text-[#C1C1C5]">
                                 ×
                               </span>
                             </Box>
                           ) : (
                             <Box
-                              className="w-6 h-6 rounded-full border border-[#464646]"
+                              className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 rounded-full border border-[#464646] xl:border-2 2xl:border-2"
                               style={{ backgroundColor: color.value }}
                             />
                           )}
                           <span
+                            className="text-sm xl:text-base 2xl:text-lg"
                             style={{
                               fontFamily: "Outfit",
                               fontStyle: "normal",
@@ -489,8 +556,9 @@ const ApplyMokupDesignPage = () => {
               </Box>
 
               {/* Zoom Scale */}
-              <Box className="flex flex-col gap-2">
+              <Box className="flex flex-col gap-2 xl:gap-3 2xl:gap-4">
                 <span
+                  className="text-base xl:text-lg 2xl:text-xl"
                   style={{
                     fontFamily: "Outfit",
                     fontStyle: "normal",
@@ -503,15 +571,16 @@ const ApplyMokupDesignPage = () => {
                 >
                   Zoom Scale
                 </span>
-                <Flex className="items-center gap-3">
+                <Flex className="items-center gap-3 xl:gap-4 2xl:gap-5">
                   <Box
                     onClick={handleZoomOut}
-                    className="cursor-pointer flex items-center justify-center w-10 h-10 rounded-lg bg-[#29292D]/50 border border-[#464646] hover:bg-[#29292D]/70 transition-all"
+                    className="cursor-pointer flex items-center justify-center w-10 h-10 xl:w-12 xl:h-12 2xl:w-14 2xl:h-14 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D]/50 border border-[#464646] xl:border-2 2xl:border-2 hover:bg-[#29292D]/70 transition-all"
                   >
-                    <Minus className="w-5 h-5 text-[#C1C1C5]" />
+                    <Minus className="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 text-[#C1C1C5]" />
                   </Box>
-                  <Box className="flex-1 px-4 py-3 rounded-lg bg-[#29292D]/50 border border-[#464646] text-center">
+                  <Box className="flex-1 px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D]/50 border border-[#464646] xl:border-2 2xl:border-2 text-center">
                     <span
+                      className="text-base xl:text-lg 2xl:text-xl"
                       style={{
                         fontFamily: "Outfit",
                         fontStyle: "normal",
@@ -526,16 +595,17 @@ const ApplyMokupDesignPage = () => {
                   </Box>
                   <Box
                     onClick={handleZoomIn}
-                    className="cursor-pointer flex items-center justify-center w-10 h-10 rounded-lg bg-[#29292D]/50 border border-[#464646] hover:bg-[#29292D]/70 transition-all"
+                    className="cursor-pointer flex items-center justify-center w-10 h-10 xl:w-12 xl:h-12 2xl:w-14 2xl:h-14 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D]/50 border border-[#464646] xl:border-2 2xl:border-2 hover:bg-[#29292D]/70 transition-all"
                   >
-                    <Plus className="w-5 h-5 text-[#C1C1C5]" />
+                    <Plus className="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 text-[#C1C1C5]" />
                   </Box>
                 </Flex>
               </Box>
 
               {/* Cup Flip */}
-              <Box className="flex flex-col gap-2">
+              <Box className="flex flex-col gap-2 xl:gap-3 2xl:gap-4">
                 <span
+                  className="text-base xl:text-lg 2xl:text-xl"
                   style={{
                     fontFamily: "Outfit",
                     fontStyle: "normal",
@@ -548,17 +618,18 @@ const ApplyMokupDesignPage = () => {
                 >
                   Cup Flip
                 </span>
-                <Flex className="items-center gap-3">
+                <Flex className="items-center gap-3 xl:gap-4 2xl:gap-5">
                   <Box
                     onClick={() => setCupFlip("left")}
                     className={cn(
-                      "cursor-pointer flex-1 px-4 py-3 rounded-lg border transition-all text-center",
+                      "cursor-pointer flex-1 px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 rounded-lg xl:rounded-xl 2xl:rounded-2xl border xl:border-2 2xl:border-2 transition-all text-center",
                       cupFlip === "left"
                         ? "bg-[#F70353] border-[#F70353]"
                         : "bg-[#29292D]/50 border-[#464646] hover:bg-[#29292D]/70"
                     )}
                   >
                     <span
+                      className="text-sm xl:text-base 2xl:text-lg"
                       style={{
                         fontFamily: "Outfit",
                         fontStyle: "normal",
@@ -574,13 +645,14 @@ const ApplyMokupDesignPage = () => {
                   <Box
                     onClick={() => setCupFlip("right")}
                     className={cn(
-                      "cursor-pointer flex-1 px-4 py-3 rounded-lg border transition-all text-center",
+                      "cursor-pointer flex-1 px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 rounded-lg xl:rounded-xl 2xl:rounded-2xl border xl:border-2 2xl:border-2 transition-all text-center",
                       cupFlip === "right"
                         ? "bg-[#F70353] border-[#F70353]"
                         : "bg-[#29292D]/50 border-[#464646] hover:bg-[#29292D]/70"
                     )}
                   >
                     <span
+                      className="text-sm xl:text-base 2xl:text-lg"
                       style={{
                         fontFamily: "Outfit",
                         fontStyle: "normal",
