@@ -15,7 +15,7 @@ import {
 
 const productOptions = [
   { id: "cup", label: "Cup", image: "/general/cup.png" },
-  { id: "tshirt", label: "T-Shirt", image: "/general/tshirt.png" }, // Add tshirt.png when available
+  { id: "tshirt", label: "Shirt", image: "/general/tshirt.png" }, // Add tshirt.png when available
   { id: "lamp", label: "Lamp", image: "/general/lamp.svg" }, // Add lamp.png when available
 ];
 
@@ -116,104 +116,65 @@ const ApplyMokupDesignPage = () => {
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">
       <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-md:flex-col max-md:items-center max-md:justify-start max-md:py-6 max-sm:mt-30 mt-12">
-        {/* Left Side - Product Options Sidebar */}
-        <Box className="flex flex-col items-center justify-center gap-4 xl:gap-6 2xl:gap-8 flex-shrink-0">
-          <Box
-            className="relative w-[310.9px] xl:w-[380px] 2xl:w-[450px] h-[396.77px] xl:h-[480px] 2xl:h-[570px] overflow-hidden rounded-[10px] xl:rounded-[12px] 2xl:rounded-[14px]"
-            style={{ fontFamily: "Outfit, sans-serif" }}
-          >
-            {/* Background with Drop Effect */}
-            <Box
-              className="absolute inset-0 rounded-[10px]"
-              style={{
-                backgroundImage: "url('/general/productphotos.svg')",
-                // backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-              }}
-            />
+       {/* Left Side - Product Options Sidebar */}
+<Box className="flex flex-col items-center justify-center gap-4 xl:gap-6 2xl:gap-8 flex-shrink-0">
+  <Box
+    className="relative w-[310.9px] xl:w-[380px] 2xl:w-[450px] h-[410px] xl:h-[490px] 2xl:h-[590px] overflow-hidden rounded-[10px] xl:rounded-[12px] 2xl:rounded-[14px]"
+    style={{ fontFamily: "Outfit, sans-serif" }}
+  >
+    {/* Background Frame - Set to 100% to ensure it scales perfectly */}
+    <Box
+      className="absolute inset-0 rounded-[10px]"
+      style={{
+        backgroundImage: "url('/general/productphotos.svg')",
+        backgroundSize: "81% 81%",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    />
 
-            {/* Product Photos Header with Arrow */}
-            <Box
-              className="absolute z-10 xl:left-[22px] 2xl:left-[26px] xl:top-[5px] 2xl:top-[6px]"
-              style={{
-                left: "38.11px",
-                top: "48px",
-              }}
-            >
-              <Flex className="items-center gap-2 xl:gap-3 2xl:gap-4">
-                <img
-                  src="/general/cup.svg"
-                  alt="new"
-                  className="w-8 h-8 object-cover rounded"
-                />
-                <Stack className="gap-0">
-                  <span
-                    className="text-sm xl:text-base 2xl:text-lg"
-                    style={{
-                      fontFamily: "Outfit",
-                      fontStyle: "normal",
-                      fontWeight: 400,
-                      fontSize: "14px",
-                      lineHeight: "18px",
-                      letterSpacing: "0.03em",
-                      color: "#C1C1C5",
-                    }}
-                  >
-                    Product
-                  </span>
-                  <span
-                    className="text-sm xl:text-base 2xl:text-lg"
-                    style={{
-                      fontFamily: "Outfit",
-                      fontStyle: "normal",
-                      fontWeight: 400,
-                      fontSize: "14px",
-                      lineHeight: "18px",
-                      letterSpacing: "0.03em",
-                      color: "#C1C1C5",
-                    }}
-                  >
-                    Photos
-                  </span>
-                </Stack>
+    {/* 1. Product Photos Header - Positioned by % for perfect gap from Top/Left */}
+    <Box className="absolute z-10 left-[12%] top-[11.5%] xl:top-[11.5%] 2xl:top-[12.5%]">
+      <Flex className="items-center gap-2 xl:gap-3">
+        <img
+          src="/general/cup.svg"
+          alt="icon"
+          className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 object-cover rounded shadow-sm"
+        />
+        <Stack className="gap-0">
+          <span className="text-[10px] xl:text-[12px] 2xl:text-sm text-[#C1C1C5] leading-none  tracking-wider">
+            Product
+          </span>
+          <span className="text-[10px] xl:text-[12px] 2xl:text-sm  text-[#C1C1C5] font-medium leading-tight">
+            Photos
+          </span>
+        </Stack>
+        <ChevronDown className="w-3 h-3 xl:w-4 xl:h-4 text-[#C1C1C5]" />
+      </Flex>
+    </Box>
 
-                <ChevronDown className="w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 text-[#C1C1C5]" />
-              </Flex>
-            </Box>
+    {/* 2. Customize Heading - Responsive vertical spacing */}
+    <Box className="absolute left-[13%] top-[24%] xl:top-[25%] 2xl:top-[27%]">
+      <Flex className="items-center gap-3">
+        <Box className="w-7 h-7 xl:w-8 xl:h-8 2xl:w-10 2xl:h-10 flex-shrink-0">
+          <img src="/general/squre.svg" alt="square" className="w-full h-full" />
+        </Box>
+        <span className="text-sm xl:text-base 2xl:text-lg text-white font-light">
+          Customize Your Designs:
+        </span>
+      </Flex>
+    </Box>
 
-            {/* Square SVG Icon and Heading */}
-            <Box className="absolute left-[18.11px] top-[40px] xl:left-[22px] 2xl:left-[72px] xl:top-[50px] 2xl:top-[85px]">
-              <Flex className="items-center gap-3 xl:gap-4 2xl:gap-5 mt-14 xl:mt-15 2xl:mt-16">
-                {/* Square SVG Icon */}
-                <Box className="w-8 h-8 xl:w-10 xl:h-10 2xl:w-12 2xl:h-12 flex-shrink-0 flex items-center justify-center">
-                  <img
-                    src="/general/squre.svg"
-                    alt="square"
-                    className="w-full h-full object-cover"
-                  />
-                </Box>
-                <span
-                  className="text-base xl:text-lg 2xl:text-xl"
-                  style={{
-                    fontFamily: "Outfit",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    fontSize: "16px",
-                    lineHeight: "20px",
-                    color: "#FFFFFF",
-                  }}
-                >
-                  Customize Your Designs:
-                </span>
-              </Flex>
-            </Box>
-
+   
             {/* Product Options */}
             <Box
-              className="absolute left-[52.11px] top-[160px] xl:left-[50px] 2xl:left-[86px] xl:top-[160px] 2xl:top-[188px] 3xl:top-[160px] "
+              className="absolute
+    left-[52px]  top-[160px]
+    xl:left-[50px]  xl:top-[160px]
+    2xl:left-[60px]  2xl:top-[212px]
+    3xl:top-[160px] 2xl:w-[330px] w-[279.16px]"
               style={{
-                width: "279.16px",
+                // width: ".16px",
               }}
             >
               <Flex className="flex-col">
@@ -277,9 +238,8 @@ const ApplyMokupDesignPage = () => {
                 ))}
               </Flex>
             </Box>
-          </Box>
-        </Box>
-
+  </Box>
+</Box>
         {/* Center - Product Mockup with Image Overlay */}
         <Box className="flex-1 flex items-center justify-center min-w-0 max-md:w-full max-md:flex-1 max-md:mt-4">
           <Stack className="w-full max-w-[650px] xl:max-w-[800px] 2xl:max-w-[950px] items-center justify-center">
