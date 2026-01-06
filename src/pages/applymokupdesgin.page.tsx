@@ -10,6 +10,10 @@ import {
   ChevronUp,
   ChevronRight,
   Minus,
+  Redo2,
+  Undo2,
+  Search,
+  RotateCcw,
   Plus,
 } from "lucide-react";
 
@@ -83,6 +87,7 @@ const ApplyMokupDesignPage = () => {
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isColorsOpen, setIsColorsOpen] = useState(true);
 
   const handleZoomIn = () => {
     setZoomScale((prev) => Math.min(prev + 10, 200));
@@ -115,7 +120,7 @@ const ApplyMokupDesignPage = () => {
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">
-      <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-md:flex-col max-md:items-center max-md:justify-start max-md:py-6 max-sm:mt-30 mt-12">
+      <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-lg:flex-col max-md:items-center max-md:justify-start max-md:py-6 max-sm:mt-30 mt-12">
        {/* Left Side - Product Options Sidebar */}
 <Box className="flex flex-col items-center justify-center gap-4 xl:gap-6 2xl:gap-8 flex-shrink-0">
   <Box
@@ -402,234 +407,123 @@ const ApplyMokupDesignPage = () => {
           </Stack>
         </Box>
 
-        {/* Right Side - Color, Zoom, Rotation Controls */}
-        <Box className="flex flex-col items-center justify-center gap-4 xl:gap-6 2xl:gap-8 flex-shrink-0">
-          <Box
-            className="relative w-[310.9px] xl:w-[380px] 2xl:w-[450px] overflow-hidden rounded-[10px] xl:rounded-[12px] 2xl:rounded-[14px]"
-            style={{ fontFamily: "Outfit, sans-serif" }}
-          >
-            {/* Background with Drop Effect */}
-            <Box className="absolute inset-0 rounded-[10px] bg-black" />
+     {/* right side start */}
+<Box className="flex flex-col items-center justify-center gap-4 mr-10 xl:gap-5 flex-shrink-0 bg-transparent">
+{/* TOP SECTION: Select Colors (Collapsible) */}
+<Box 
+  className="relative w-[260px] xl:w-[290px] 2xl:w-[320px] p-4 rounded-[20px] border border-white/10 overflow-hidden bg-cover bg-center shadow-2xl transition-all duration-300"
+  style={{ backgroundImage: "url('/general/specialbg.png')" }}
+>
+  {/* Header - Clicking this toggles the collapse */}
+  <Flex 
+    className="items-center justify-between mb-3 cursor-pointer select-none"
+    onClick={() => setIsColorsOpen(!isColorsOpen)}
+  >
+    <Flex className="items-center gap-2">
+      <Box className="w-5 h-5 flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="5" fill="#00BED5" fillOpacity="0.8"/>
+              <circle cx="8" cy="15" r="5" fill="#FF3A02" fillOpacity="0.8"/>
+              <circle cx="16" cy="15" r="5" fill="#FBAF00" fillOpacity="0.8"/>
+          </svg>
+      </Box>
+      <span className="text-white text-base font-medium">Select Colors</span>
+    </Flex>
+    
+    {/* Icon changes based on state */}
+    <button className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 border border-white/20">
+      {isColorsOpen ? (
+        <ChevronUp className="w-4 h-4 text-white" />
+      ) : (
+        <ChevronDown className="w-4 h-4 text-white" />
+      )}
+    </button>
+  </Flex>
 
-            {/* Content Container */}
-            <Box className="relative z-10 p-6 xl:p-7 2xl:p-8 flex flex-col gap-6 xl:gap-7 2xl:gap-8">
-              {/* Select Color Dropdown */}
-              <Box className="flex flex-col gap-2 xl:gap-3 2xl:gap-4">
-                <span
-                  className="text-base xl:text-lg 2xl:text-xl"
-                  style={{
-                    fontFamily: "Outfit",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    fontSize: "16px",
-                    lineHeight: "20px",
-                    color: "#FFFFFF",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Select Color
-                </span>
-                <Box className="relative">
-                  <Box
-                    onClick={() => setIsColorDropdownOpen(!isColorDropdownOpen)}
-                    className="cursor-pointer flex items-center justify-between px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D]/50 border border-[#464646] xl:border-2 2xl:border-2 hover:bg-[#29292D]/70 transition-all"
-                  >
-                    <Flex className="items-center gap-3 xl:gap-4 2xl:gap-5">
-                      {selectedColor.value === "none" ? (
-                        <Box className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 rounded-full border-2 xl:border-[3px] 2xl:border-[3px] border-dashed border-[#464646] flex items-center justify-center">
-                          <span className="text-[10px] xl:text-xs 2xl:text-sm text-[#C1C1C5]">
-                            ×
-                          </span>
-                        </Box>
-                      ) : (
-                        <Box
-                          className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 rounded-full border border-[#464646] xl:border-2 2xl:border-2"
-                          style={{ backgroundColor: selectedColor.value }}
-                        />
-                      )}
-                      <span
-                        className="text-sm xl:text-base 2xl:text-lg"
-                        style={{
-                          fontFamily: "Outfit",
-                          fontStyle: "normal",
-                          fontWeight: 300,
-                          fontSize: "14px",
-                          lineHeight: "20px",
-                          color: "#C1C1C5",
-                        }}
-                      >
-                        {selectedColor.name}
-                      </span>
-                    </Flex>
-                    {isColorDropdownOpen ? (
-                      <ChevronUp className="w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 text-[#C1C1C5]" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6 text-[#C1C1C5]" />
-                    )}
-                  </Box>
+  {/* Color List Container - Only shows if isColorsOpen is true */}
+  <Box 
+    className={`transition-all duration-500 ease-in-out overflow-hidden ${
+      isColorsOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+    }`}
+  >
+    <Box className="rounded-xl overflow-hidden border border-white/10 mt-1">
+      {[
+        { name: "Conquelicot", hex: "#FF3A02", bg: "bg-[#FF3A02]" },
+        { name: "Arlequin", hex: "#70E22B", bg: "bg-[#70E22B]" },
+        { name: "Violet", hex: "#9C04ED", bg: "bg-[#9C04ED]" },
+        { name: "Purple", hex: "#6B1BFF", bg: "bg-[#6B1BFF]" },
+        { name: "Chrome", hex: "#FBAF00", bg: "bg-[#FBAF00]" },
+        { name: "Blaze", hex: "#FF6E01", bg: "bg-[#FF6E01]" },
+        { name: "Turquoise", hex: "#00BED5", bg: "bg-[#00BED5]" },
+        { name: "Chestnut", hex: "#9A614D", bg: "bg-[#9A614D]" },
+      ].map((color, idx) => (
+        <Flex key={idx} className={`px-3 py-1.5 justify-between items-center ${color.bg}`}>
+          <span className="text-white text-[10px] font-bold uppercase tracking-wider">{color.name}</span>
+          <span className="text-white text-[10px] font-mono font-bold">{color.hex}</span>
+        </Flex>
+      ))}
+    </Box>
+  </Box>
+</Box>
 
-                  {/* Dropdown Menu */}
-                  {isColorDropdownOpen && (
-                    <Box
-                      className="absolute top-full left-0 right-0 mt-2 xl:mt-3 2xl:mt-4 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D] border border-[#464646] xl:border-2 2xl:border-2 z-20 max-h-[200px] xl:max-h-[240px] 2xl:max-h-[280px] overflow-y-auto"
-                      style={{ boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.3)" }}
-                    >
-                      {colorOptions.map((color) => (
-                        <Box
-                          key={color.id}
-                          onClick={() => {
-                            setSelectedColor(color);
-                            setIsColorDropdownOpen(false);
-                          }}
-                          className="cursor-pointer flex items-center gap-3 xl:gap-4 2xl:gap-5 px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 hover:bg-[#464646]/50 transition-all border-b border-[#464646]/50 last:border-b-0"
-                        >
-                          {color.value === "none" ? (
-                            <Box className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 rounded-full border-2 xl:border-[3px] 2xl:border-[3px] border-dashed border-[#464646] flex items-center justify-center">
-                              <span className="text-[10px] xl:text-xs 2xl:text-sm text-[#C1C1C5]">
-                                ×
-                              </span>
-                            </Box>
-                          ) : (
-                            <Box
-                              className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 rounded-full border border-[#464646] xl:border-2 2xl:border-2"
-                              style={{ backgroundColor: color.value }}
-                            />
-                          )}
-                          <span
-                            className="text-sm xl:text-base 2xl:text-lg"
-                            style={{
-                              fontFamily: "Outfit",
-                              fontStyle: "normal",
-                              fontWeight: 300,
-                              fontSize: "14px",
-                              lineHeight: "20px",
-                              color: "#C1C1C5",
-                            }}
-                          >
-                            {color.name}
-                          </span>
-                        </Box>
-                      ))}
-                    </Box>
-                  )}
-                </Box>
-              </Box>
+  {/* MIDDLE SECTION: Scale */}
+  <Box 
+    className="relative w-[260px] xl:w-[290px] 2xl:w-[320px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
+    style={{ backgroundImage: "url('/general/bgofbg.png')" }}
+  >
+    <Flex className="items-center gap-3 mb-4">
+       <Box className="p-2 bg-[#4A0E64] rounded-lg border border-white/10">
+          <Search className="w-4 h-4 text-white" />
+       </Box>
+       <span className="text-white/80 text-base font-medium">Scale</span>
+    </Flex>
 
-              {/* Zoom Scale */}
-              <Box className="flex flex-col gap-2 xl:gap-3 2xl:gap-4">
-                <span
-                  className="text-base xl:text-lg 2xl:text-xl"
-                  style={{
-                    fontFamily: "Outfit",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    fontSize: "16px",
-                    lineHeight: "20px",
-                    color: "#FFFFFF",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Zoom Scale
-                </span>
-                <Flex className="items-center gap-3 xl:gap-4 2xl:gap-5">
-                  <Box
-                    onClick={handleZoomOut}
-                    className="cursor-pointer flex items-center justify-center w-10 h-10 xl:w-12 xl:h-12 2xl:w-14 2xl:h-14 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D]/50 border border-[#464646] xl:border-2 2xl:border-2 hover:bg-[#29292D]/70 transition-all"
-                  >
-                    <Minus className="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 text-[#C1C1C5]" />
-                  </Box>
-                  <Box className="flex-1 px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D]/50 border border-[#464646] xl:border-2 2xl:border-2 text-center">
-                    <span
-                      className="text-base xl:text-lg 2xl:text-xl"
-                      style={{
-                        fontFamily: "Outfit",
-                        fontStyle: "normal",
-                        fontWeight: 400,
-                        fontSize: "16px",
-                        lineHeight: "20px",
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      {zoomScale}%
-                    </span>
-                  </Box>
-                  <Box
-                    onClick={handleZoomIn}
-                    className="cursor-pointer flex items-center justify-center w-10 h-10 xl:w-12 xl:h-12 2xl:w-14 2xl:h-14 rounded-lg xl:rounded-xl 2xl:rounded-2xl bg-[#29292D]/50 border border-[#464646] xl:border-2 2xl:border-2 hover:bg-[#29292D]/70 transition-all"
-                  >
-                    <Plus className="w-5 h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 text-[#C1C1C5]" />
-                  </Box>
-                </Flex>
-              </Box>
+    <Flex className="items-center justify-between">
+      <button 
+        onClick={handleZoomOut}
+        className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all"
+      >
+        <Minus className="w-5 h-5 text-white" />
+      </button>
+      
+      <span className="text-white text-lg font-semibold">100%</span>
+      
+      <button 
+        onClick={handleZoomIn}
+        className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all"
+      >
+        <Plus className="w-5 h-5 text-white" />
+      </button>
+    </Flex>
+  </Box>
 
-              {/* Cup Flip */}
-              <Box className="flex flex-col gap-2 xl:gap-3 2xl:gap-4">
-                <span
-                  className="text-base xl:text-lg 2xl:text-xl"
-                  style={{
-                    fontFamily: "Outfit",
-                    fontStyle: "normal",
-                    fontWeight: 400,
-                    fontSize: "16px",
-                    lineHeight: "20px",
-                    color: "#FFFFFF",
-                    marginBottom: "4px",
-                  }}
-                >
-                  Cup Flip
-                </span>
-                <Flex className="items-center gap-3 xl:gap-4 2xl:gap-5">
-                  <Box
-                    onClick={() => setCupFlip("left")}
-                    className={cn(
-                      "cursor-pointer flex-1 px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 rounded-lg xl:rounded-xl 2xl:rounded-2xl border xl:border-2 2xl:border-2 transition-all text-center",
-                      cupFlip === "left"
-                        ? "bg-[#F70353] border-[#F70353]"
-                        : "bg-[#29292D]/50 border-[#464646] hover:bg-[#29292D]/70"
-                    )}
-                  >
-                    <span
-                      className="text-sm xl:text-base 2xl:text-lg"
-                      style={{
-                        fontFamily: "Outfit",
-                        fontStyle: "normal",
-                        fontWeight: 400,
-                        fontSize: "14px",
-                        lineHeight: "20px",
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      Left
-                    </span>
-                  </Box>
-                  <Box
-                    onClick={() => setCupFlip("right")}
-                    className={cn(
-                      "cursor-pointer flex-1 px-4 py-3 xl:px-5 xl:py-4 2xl:px-6 2xl:py-5 rounded-lg xl:rounded-xl 2xl:rounded-2xl border xl:border-2 2xl:border-2 transition-all text-center",
-                      cupFlip === "right"
-                        ? "bg-[#F70353] border-[#F70353]"
-                        : "bg-[#29292D]/50 border-[#464646] hover:bg-[#29292D]/70"
-                    )}
-                  >
-                    <span
-                      className="text-sm xl:text-base 2xl:text-lg"
-                      style={{
-                        fontFamily: "Outfit",
-                        fontStyle: "normal",
-                        fontWeight: 400,
-                        fontSize: "14px",
-                        lineHeight: "20px",
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      Right
-                    </span>
-                  </Box>
-                </Flex>
-              </Box>
-            </Box>
-          </Box>
-        </Box>
+  {/* BOTTOM SECTION: Rotation */}
+  <Box 
+    className="relative w-[260px] xl:w-[290px] 2xl:w-[320px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
+    style={{ backgroundImage: "url('/general/bgofbg.png')" }}
+  >
+    <Flex className="items-center gap-3 mb-4">
+       <Box className="p-2 bg-[#401F45] rounded-lg border border-white/10">
+          <RotateCcw className="w-4 h-4 text-[#F70353]" />
+       </Box>
+       <span className="text-white/80 text-base font-medium">Rotation</span>
+    </Flex>
+
+    <Flex className="items-center justify-between">
+      <button className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all">
+        <Undo2 className="w-5 h-5 text-white" />
+      </button>
+      
+      <span className="text-white text-lg font-semibold">0</span>
+      
+      <button className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all">
+        <Redo2 className="w-5 h-5 text-white" />
+      </button>
+    </Flex>
+  </Box>
+
+</Box>
+{/* right side end */}
       </Box>
     </Box>
   );
