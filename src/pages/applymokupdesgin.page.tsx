@@ -124,17 +124,17 @@ const ApplyMokupDesignPage = () => {
   >
     {/* Background Frame - Set to 100% to ensure it scales perfectly */}
     <Box
-      className="absolute inset-0 rounded-[10px]"
+      className="absolute inset-0 xl:bg-[length:81%_81%] bg-[length:90%_90%] rounded-[10px]"
       style={{
         backgroundImage: "url('/general/productphotos.svg')",
-        backgroundSize: "81% 81%",
+        // backgroundSize: "81% 81%",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
     />
 
     {/* 1. Product Photos Header - Positioned by % for perfect gap from Top/Left */}
-    <Box className="absolute z-10 left-[12%] top-[11.5%] xl:top-[11.5%] 2xl:top-[12.5%]">
+    <Box className="absolute z-10 xl:left-[12%] left-[10%] top-[8.5%] xl:top-[11.5%] 2xl:top-[12.5%]">
       <Flex className="items-center gap-2 xl:gap-3">
         <img
           src="/general/cup.svg"
@@ -169,10 +169,10 @@ const ApplyMokupDesignPage = () => {
             {/* Product Options */}
             <Box
               className="absolute
-    left-[52px]  top-[160px]
+    left-[35px]  top-[130px]
     xl:left-[50px]  xl:top-[160px]
     2xl:left-[60px]  2xl:top-[212px]
-    3xl:top-[160px] 2xl:w-[330px] w-[279.16px]"
+    3xl:top-[160px] 2xl:w-[330px] xl:w-[279.16px] w-[240.16px]"
               style={{
                 // width: ".16px",
               }}
