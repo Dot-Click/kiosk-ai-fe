@@ -5,6 +5,10 @@ import { Stack } from "@/components/ui/stack";
 import { Flex } from "@/components/ui/flex";
 import { useImageStore } from "@/store/image.store";
 import { cn } from "@/utils/cn.util";
+import CustomButton from "../components/common/customButton"
+import CustomBlackButton from "../components/common/customBlackButton"
+import { toast } from "sonner";
+import { useNavigate } from "react-router";
 import {
   ChevronDown,
   ChevronUp,
@@ -80,14 +84,15 @@ const getHueRotation = (colorHex: string): number => {
 const ApplyMokupDesignPage = () => {
   const selectedImage = useImageStore((state) => state.selectedImage);
   const [selectedProduct, setSelectedProduct] = useState<string>("cup");
-  const [selectedColor, setSelectedColor] = useState(colorOptions[0]); // No Color by default
-  const [isColorDropdownOpen, setIsColorDropdownOpen] = useState(false);
+  const [selectedColor,] = useState(colorOptions[0]); 
   const [zoomScale, setZoomScale] = useState(100);
-  const [cupFlip, setCupFlip] = useState<"left" | "right">("left"); // Cup flip direction
+  const [cupFlip,] = useState<"left" | "right">("left"); // Cup flip direction
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  // ... other states
   const [isColorsOpen, setIsColorsOpen] = useState(true);
+  const [isApplied, setIsApplied] = useState(false); // Add this line
 
   const handleZoomIn = () => {
     setZoomScale((prev) => Math.min(prev + 10, 200));
@@ -118,13 +123,16 @@ const ApplyMokupDesignPage = () => {
     setIsDragging(false);
   };
 
+
+  const navigate = useNavigate();
+
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">
       <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-lg:flex-col max-md:items-center max-md:justify-start max-md:py-6 max-sm:mt-30 mt-12">
        {/* Left Side - Product Options Sidebar */}
-<Box className="flex flex-col items-center justify-center gap-4 xl:gap-6 2xl:gap-8 flex-shrink-0">
+<Box className="flex mt-20 flex-col items-center justify-center gap-4 xl:gap-6 2xl:gap-8 flex-shrink-0">
   <Box
-    className="relative w-[310.9px] xl:w-[380px] 2xl:w-[450px] h-[410px] xl:h-[490px] 2xl:h-[590px] overflow-hidden rounded-[10px] xl:rounded-[12px] 2xl:rounded-[14px]"
+    className="relative mb-10 w-[310.9px] xl:w-[380px] 2xl:w-[450px] h-[410px] xl:h-[490px] 2xl:h-[590px] overflow-hidden rounded-[10px] xl:rounded-[12px] 2xl:rounded-[14px]"
     style={{ fontFamily: "Outfit, sans-serif" }}
   >
     {/* Background Frame - Set to 100% to ensure it scales perfectly */}
@@ -243,7 +251,94 @@ const ApplyMokupDesignPage = () => {
                 ))}
               </Flex>
             </Box>
+            
   </Box>
+  {selectedImage && (
+  <Box className="flex flex-col gap-4  items-center">
+    
+    {/* Main Design Card with background image */}
+    <Box 
+      className="w-[330px] h-[225px] bg-no-repeat bg-contain relative"
+      style={{ backgroundImage: "url('/general/applybg.png')" }}
+    >
+      {/* 
+          Inner Content Wrapper 
+          Adjust 'top' and 'left' values below to match the exact 
+          hollow "tray" area in your applybg.png 
+      */}
+     <div className="flex flex-col gap-6 items-center w-full max-w-[460px] relative">
+  
+  {/* The Glassmorphism Tray Section */}
+  <div className="relative w-full h-[215px] bg-no-repeat bg-contain" style={{ backgroundImage: "url('/general/applybg.png')" }}>
+    
+    <div className="absolute bg-[#130E29]/50 backdrop-blur-xl 
+                    border border-white/10 
+                    rounded-[30px] p-4 
+                    shadow-[inset_0_4px_12px_rgba(0,0,0,0.6)]
+                    top-[32%] left-[10px] right-[10px] flex items-center justify-between">
+      
+      {/* Thumbnail Preview */}
+      <div className="w-[85px] h-[85px] rounded-2xl overflow-hidden border border-white/10 shadow-md">
+        <img 
+          src={selectedImage} 
+          alt="My Design" 
+          className="w-full h-full object-cover" 
+        />
+      </div>
+
+      {/* Apply Button using CustomButton component */}
+      <CustomButton
+        title={isApplied ? "Applied" : "Apply"}
+        onClick={() => {
+          setIsApplied(true);
+          toast.success("Design applied to object!");
+        }}
+        // Small adjustments to fit inside the tray
+        wrapperClassName={cn(
+          "w-[140px] h-[52px] rounded-[18px]",
+          isApplied && "bg-none   shadow-none" 
+        )}
+        className={cn(
+          "text-[18px] rounded-[16px]",
+          isApplied && " shadow-none"
+        )}
+      />
+    </div>
+  </div>
+
+  {/* Continue to Checkout Button using CustomButton component */}
+  <CustomButton
+    title="Continue to Checkout"
+    onClick={() => navigate("/checkout")}
+    icon={
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12h14m-7-7 7 7-7 7"/>
+      </svg>
+    }
+    // Matching the size of the original Figma design
+    wrapperClassName="w-full h-[68px] rounded-[28px]"
+    className="text-[20px] rounded-[26px] tracking-wide"
+  />
+
+  {/* Optional Remove Button */}
+  
+</div>
+    </Box>
+
+     
+
+    {/* Optional: Remove Button */}
+    {isApplied && (
+      <button 
+        onClick={() => setIsApplied(false)}
+        className="text-white/40 text-xs hover:text-white underline transition-colors"
+      >
+        Remove design from object
+      </button>
+    )}
+  </Box>
+)}
+
 </Box>
         {/* Center - Product Mockup with Image Overlay */}
         <Box className="flex-1 flex items-center justify-center min-w-0 max-md:w-full max-md:flex-1 max-md:mt-4">
@@ -313,15 +408,16 @@ const ApplyMokupDesignPage = () => {
                     </Box>
 
                     {/* User's Image Overlay - Full Cup Wrap with Flip Sync */}
-                    {selectedImage && (
-                      <Box
-                        className="absolute inset-0 flex items-center justify-center"
-                        style={{
+                   {/* User's Image Overlay - ONLY SHOWS IF APPLIED */}
+{selectedImage && isApplied && ( // Updated this condition
+  <Box
+    className="absolute inset-0 flex items-center justify-center"
+    style={{
                           // Mask to cup shape - only show on cup
-                          maskImage: `url(${currentProduct.image})`,
                           maskSize: "contain",
                           maskRepeat: "no-repeat",
-                          maskPosition: "center",
+                          maskPosition: "center", 
+                           maskImage: `url(${currentProduct.image})`,
                           WebkitMaskImage: `url(${currentProduct.image})`,
                           WebkitMaskSize: "contain",
                           WebkitMaskRepeat: "no-repeat",
@@ -525,6 +621,40 @@ const ApplyMokupDesignPage = () => {
 </Box>
 {/* right side end */}
       </Box>
+
+      {isApplied && (
+  
+     <div className="absolute lg:top-[140px] top-[110px] left-[45%] z-50"> 
+  <CustomBlackButton
+    // wrapperClassName: 'rounded-full' makes the outer border glow pill-shaped
+    wrapperClassName="w-fit px-[2px] h-[48px] rounded-full" 
+    
+    // className: 'rounded-full' makes the inner button pill-shaped
+    className="rounded-full px-4 text-[14px] sm:text-[16px] md:text-[18px]"
+    
+    title="Reset"
+       onClick={() => setIsApplied(false)}
+    
+    // Adding the Reset Icon (SVG)
+    icon={
+      <svg 
+        width="20" 
+        height="20" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2.5" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      >
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </svg>
+    }
+  />
+</div>
+  )}
+    
     </Box>
   );
 };

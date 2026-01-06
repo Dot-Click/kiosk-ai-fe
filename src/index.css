@@ -333,3 +333,18 @@ textarea::-webkit-scrollbar-thumb:hover {
   border-radius: 2px;
   background: transparent;
 }
+
+
+/* Add to your global CSS */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}

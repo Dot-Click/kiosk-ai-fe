@@ -7,6 +7,7 @@ import CapturePhotoPage from "./pages/capturephoto.page";
 import BluetoothPage from "./pages/bluetooth.page";
 import DescribeDesignPage from "./pages/describedesign.page";
 import ApplyMokupDesignPage from "./pages/applymokupdesgin.page";
+import Checkout from "./pages/checkout.page";
 
 export const Router = () => {
   return (
@@ -26,6 +27,10 @@ export const Router = () => {
           <Route
             path="/select-methods/capture-photo/describe-design/apply-mokup-design"
             element={<ApplyMokupDesignPage />}
+          />
+          <Route
+            path="/checkout"
+            element={<Checkout />}
           />
           <Route path="/select-methods/bluetooth" element={<BluetoothPage />} />
         </Route>
