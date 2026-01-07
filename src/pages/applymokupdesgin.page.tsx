@@ -96,8 +96,8 @@ const [isApplied, setIsApplied] = useState(false);
 
 
 
-const handleRotateRight = () => setRotation((prev) => prev + 15);
-const handleRotateLeft = () => setRotation((prev) => prev - 15);
+// const handleRotateRight = () => setRotation((prev) => prev + 15);
+// const handleRotateLeft = () => setRotation((prev) => prev - 15);
 
   const handleZoomIn = () => {
     setZoomScale((prev) => Math.min(prev + 10, 200));

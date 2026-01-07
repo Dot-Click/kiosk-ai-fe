@@ -119,7 +119,7 @@ const Checkout = () => {
           <button 
             onClick={() => setFulfillment("express")}
             className={cn(
-              "w-full text-left py-3 px-5 mb-4 flex items-center gap-5 border transition-all duration-300 rounded-2xl",
+              "w-full text-left py-5 px-5 mb-4 flex items-center gap-5 border transition-all duration-300 rounded-2xl",
               fulfillment === "express" 
               ? "border-[#F70353] bg-[#F70353]/10 backdrop-blur-md" 
         : "border-[#6B6B6B] bg-[#171717] hover:opacity-100"

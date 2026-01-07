@@ -8,6 +8,7 @@ import BluetoothPage from "./pages/bluetooth.page";
 import DescribeDesignPage from "./pages/describedesign.page";
 import ApplyMokupDesignPage from "./pages/applymokupdesgin.page";
 import Checkout from "./pages/checkout.page";
+import SpeakPrompt from "./pages/speakprompt.page";
 
 export const Router = () => {
   return (
@@ -23,6 +24,9 @@ export const Router = () => {
           <Route
             path="/select-methods/capture-photo/describe-design"
             element={<DescribeDesignPage />}
+          /> <Route
+            path="/select-methods/speak-prompt"
+            element={<SpeakPrompt />}
           />
           <Route
             path="/select-methods/capture-photo/describe-design/apply-mokup-design"

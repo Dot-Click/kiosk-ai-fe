@@ -127,15 +127,7 @@ const SelectMethodsPage = () => {
       onClick: () => {
         navigate("/select-methods/bluetooth");
       },
-    },
-    {
-      title: "Type Prompt",
-      description: "Describe the Image",
-      imageSrc: "/general/onlyprompt.svg",
-      onClick: () => {
-        navigate("/select-methods/type-prompt");
-      },
-    },
+    }, 
     {
       title: "Speak Prompt",
       description: "Use your Voice",
