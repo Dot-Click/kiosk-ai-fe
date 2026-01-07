@@ -84,15 +84,20 @@ const getHueRotation = (colorHex: string): number => {
 const ApplyMokupDesignPage = () => {
   const selectedImage = useImageStore((state) => state.selectedImage);
   const [selectedProduct, setSelectedProduct] = useState<string>("cup");
-  const [selectedColor,] = useState(colorOptions[0]); 
-  const [zoomScale, setZoomScale] = useState(100);
-  const [cupFlip,] = useState<"left" | "right">("left"); // Cup flip direction
+  const [cupFlip,] = useState<"left" | "right">("left"); 
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  // ... other states
-  const [isColorsOpen, setIsColorsOpen] = useState(true);
-  const [isApplied, setIsApplied] = useState(false); // Add this line
+const [selectedColor, setSelectedColor] = useState(colorOptions[0]);
+const [zoomScale, setZoomScale] = useState(100);
+const [rotation, setRotation] = useState(0);
+const [isColorsOpen, setIsColorsOpen] = useState(true);
+const [isApplied, setIsApplied] = useState(false);
+
+
+
+const handleRotateRight = () => setRotation((prev) => prev + 15);
+const handleRotateLeft = () => setRotation((prev) => prev - 15);
 
   const handleZoomIn = () => {
     setZoomScale((prev) => Math.min(prev + 10, 200));
@@ -128,7 +133,8 @@ const ApplyMokupDesignPage = () => {
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">
-      <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-lg:flex-col max-md:items-center max-md:justify-start max-md:py-6 max-sm:mt-30 mt-30">
+     
+      <Box  className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-lg:flex-col max-lg:items-center items-start max-md:justify-start max-md:py-6 max-sm:mt-30 mt-30">
    
    {/* Left Side - Product Options Sidebar */}
 <Box className="flex flex-col items-center ml-18 justify-start gap-1 flex-shrink-0"> 
@@ -392,62 +398,50 @@ const ApplyMokupDesignPage = () => {
                           transition: "transform 0.3s ease",
                         }}
                       >
-                        {/* Container - Full width for wrapping around cup */}
-                        <Box
-                          className={cn(
-                            "relative",
-                            isDragging ? "cursor-grabbing" : "cursor-grab"
-                          )}
-                          style={{
-                            // Full width to wrap around entire cup
-                            width: selectedProduct === "cup" ? "100%" : "100%",
-                            height: selectedProduct === "cup" ? "82%" : "100%",
-                            position: "absolute",
-                            top: selectedProduct === "cup" ? "13%" : "0%",
-                            left: selectedProduct === "cup" ? "0%" : "0%",
-                            transform: `
-                              translate(${imagePosition.x}px, ${
-                              imagePosition.y
-                            }px) 
-                              scale(${zoomScale / 100})
-                            `,
-                            transformOrigin: "center center",
-                            transformStyle: "preserve-3d",
-                            pointerEvents: "auto",
-                            userSelect: "none",
-                            transition: isDragging
-                              ? "none"
-                              : "transform 0.1s ease",
-                          }}
-                          onMouseDown={handleMouseDown}
-                        >
-                          {/* Image with cylindrical wrap - covers full cup */}
-                          <img
-                            src={selectedImage}
-                            alt="design-overlay"
-                            className="w-full h-full"
-                            style={{
-                              objectFit: "cover",
-                              filter:
-                                "drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.4)) brightness(0.98) contrast(1.05)",
-                              opacity: 1,
-                              mixBlendMode: "normal",
-                              // Cylindrical wrap - curves around entire cup surface
-                              transform:
-                                selectedProduct === "cup"
-                                  ? `
-                                  perspective(400px) 
-                                  rotateY(0deg) 
-                                  scaleX(1) 
-                                  scaleY(1.05)
-                                `
-                                  : "none",
-                              // Ensure image repeats/wraps around
-                              willChange: "transform",
-                            }}
-                            draggable={false}
-                          />
-                        </Box>
+                      {/* Container - Full width for wrapping around cup */}
+<Box
+  className={cn(
+    "relative",
+    isDragging ? "cursor-grabbing" : "cursor-grab"
+  )}
+  style={{
+    width: selectedProduct === "cup" ? "100%" : "100%",
+    height: selectedProduct === "cup" ? "82%" : "100%",
+    position: "absolute",
+    top: selectedProduct === "cup" ? "13%" : "0%",
+    left: selectedProduct === "cup" ? "0%" : "0%",
+    
+    // THE FIX IS HERE: Added rotate(${rotation}deg)
+    transform: `
+      translate(${imagePosition.x}px, ${imagePosition.y}px) 
+      scale(${zoomScale / 100})
+      rotate(${rotation}deg)
+    `,
+    
+    transformOrigin: "center center",
+    transformStyle: "preserve-3d",
+    pointerEvents: "auto",
+    userSelect: "none",
+    transition: isDragging ? "none" : "transform 0.1s ease",
+  }}
+  onMouseDown={handleMouseDown}
+>
+  {/* Image with cylindrical wrap */}
+  <img
+    src={selectedImage}
+    alt="design-overlay"
+    className="w-full h-full"
+    style={{
+      objectFit: "cover",
+      filter: "drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.4))",
+      transform: selectedProduct === "cup"
+          ? `perspective(400px) rotateY(0deg) scaleX(1) scaleY(1.05)`
+          : "none",
+      willChange: "transform",
+    }}
+    draggable={false}
+  />
+</Box>
                       </Box>
                     )}
                   </Box>
@@ -455,126 +449,141 @@ const ApplyMokupDesignPage = () => {
               })()}
             </Center>
           </Stack>
-        </Box>
+        </Box>  
 
-     {/* right side start */}
+        {/* Right Side - Functional Controls */}
 <Box className="flex flex-col items-center justify-center gap-4 mr-18 xl:gap-8 flex-shrink-0 bg-transparent">
-{/* TOP SECTION: Select Colors (Collapsible) */}
-<Box 
-  className="relative
-   w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 rounded-[20px] border border-white/10 overflow-hidden bg-cover bg-center shadow-2xl transition-all duration-300"
-  style={{ backgroundImage: "url('/general/specialbg.png')" }}
->
-  {/* Header - Clicking this toggles the collapse */}
-  <Flex 
-    className="items-center justify-between mb-3 cursor-pointer select-none"
-    onClick={() => setIsColorsOpen(!isColorsOpen)}
-  >
-    <Flex className="items-center gap-2">
-      <Box className="w-5 h-5 flex items-center justify-center">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="8" r="5" fill="#00BED5" fillOpacity="0.8"/>
-              <circle cx="8" cy="15" r="5" fill="#FF3A02" fillOpacity="0.8"/>
-              <circle cx="16" cy="15" r="5" fill="#FBAF00" fillOpacity="0.8"/>
-          </svg>
-      </Box>
-      <span className="text-white text-base font-medium">Select Colors</span>
-    </Flex>
-    
-    {/* Icon changes based on state */}
-    <button className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 border border-white/20">
-      {isColorsOpen ? (
-        <ChevronUp className="w-4 h-4 text-white" />
-      ) : (
-        <ChevronDown className="w-4 h-4 text-white" />
-      )}
-    </button>
-  </Flex>
-
-  {/* Color List Container - Only shows if isColorsOpen is true */}
+  
+  {/* 1. SELECT COLORS SECTION */}
   <Box 
-    className={`transition-all duration-500 ease-in-out overflow-hidden ${
-      isColorsOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-    }`}
+    className="relative w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 rounded-[20px] border border-white/10 overflow-hidden bg-cover bg-center shadow-2xl transition-all duration-300"
+    style={{ backgroundImage: "url('/general/specialbg.png')" }}
   >
-    <Box className="rounded-xl overflow-hidden border border-white/10 mt-1">
-      {[
-        { name: "Conquelicot", hex: "#FF3A02", bg: "bg-[#FF3A02]" },
-        { name: "Arlequin", hex: "#70E22B", bg: "bg-[#70E22B]" },
-        { name: "Violet", hex: "#9C04ED", bg: "bg-[#9C04ED]" },
-        { name: "Purple", hex: "#6B1BFF", bg: "bg-[#6B1BFF]" },
-        { name: "Chrome", hex: "#FBAF00", bg: "bg-[#FBAF00]" },
-        { name: "Blaze", hex: "#FF6E01", bg: "bg-[#FF6E01]" },
-        { name: "Turquoise", hex: "#00BED5", bg: "bg-[#00BED5]" },
-        { name: "Chestnut", hex: "#9A614D", bg: "bg-[#9A614D]" },
-      ].map((color, idx) => (
-        <Flex key={idx} className={`px-3 py-1.5 justify-between items-center ${color.bg}`}>
-          <span className="text-white text-[10px] font-bold uppercase tracking-wider">{color.name}</span>
-          <span className="text-white text-[10px] font-mono font-bold">{color.hex}</span>
-        </Flex>
-      ))}
+    {/* Header - Toggles Dropdown */}
+    <Flex 
+      className="items-center justify-between mb-3 cursor-pointer select-none"
+      onClick={() => setIsColorsOpen(!isColorsOpen)}
+    >
+      <Flex className="items-center gap-2">
+        <Box className="w-5 h-5 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="8" r="5" fill="#00BED5" fillOpacity="0.8"/>
+                <circle cx="8" cy="15" r="5" fill="#FF3A02" fillOpacity="0.8"/>
+                <circle cx="16" cy="15" r="5" fill="#FBAF00" fillOpacity="0.8"/>
+            </svg>
+        </Box>
+        <span className="text-white text-base font-medium">Select Colors</span>
+      </Flex>
+      
+      <button className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 border border-white/20">
+        {isColorsOpen ? (
+          <ChevronUp className="w-4 h-4 text-white" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-white" />
+        )}
+      </button>
+    </Flex>
+
+    {/* Color List Container */}
+    <Box 
+      className={`transition-all duration-500 ease-in-out overflow-hidden ${
+        isColorsOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+      }`}
+    >
+      <Box className="rounded-xl overflow-hidden border border-white/10 mt-1">
+        {[
+          { name: "Conquelicot", hex: "#FF3A02" },
+          { name: "Arlequin", hex: "#70E22B" },
+          { name: "Violet", hex: "#9C04ED" },
+          { name: "Purple", hex: "#6B1BFF" },
+          { name: "Chrome", hex: "#FBAF00" },
+          { name: "Blaze", hex: "#FF6E01" },
+          { name: "Turquoise", hex: "#00BED5" },
+          { name: "Chestnut", hex: "#9A614D" },
+        ].map((color, idx) => (
+          <Flex 
+            key={idx} 
+            onClick={() => setSelectedColor({ id: color.name, name: color.name, value: color.hex })}
+            className="px-3 py-1.5 justify-between items-center cursor-pointer hover:brightness-125 transition-all"
+            style={{ backgroundColor: color.hex }}
+          >
+            <span className="text-white text-[10px] font-bold uppercase tracking-wider">{color.name}</span>
+            <span className="text-white text-[10px] font-mono font-bold">{color.hex}</span>
+          </Flex>
+        ))}
+      </Box>
     </Box>
   </Box>
-</Box>
 
-  {/* MIDDLE SECTION: Scale */}
-  <Box 
-    className="relative gap-12 w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
-    style={{ backgroundImage: "url('/general/bgofbg.png')" }}
-  >
-    <Flex className="items-center  gap-3 mb-4">
-       <Box className="p-2 bg-[#4A0E64] rounded-lg border border-white/10">
-          <Search className="w-4 h-4 text-white" />
-       </Box>
-       <span className="text-white/80 text-base font-medium">Scale</span>
-    </Flex>
-
-    <Flex className="items-center mt-10 justify-between">
-      <button 
-        onClick={handleZoomOut}
-        className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all"
-      >
-        <Minus className="w-5 h-5 text-white" />
-      </button>
-      
-      <span className="text-white text-lg font-semibold">100%</span>
-      
-      <button 
-        onClick={handleZoomIn}
-        className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all"
-      >
-        <Plus className="w-5 h-5 text-white" />
-      </button>
-    </Flex>
-  </Box>
-
-  {/* BOTTOM SECTION: Rotation */}
+  {/* 2. SCALE SECTION */}
   <Box 
     className="relative w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
     style={{ backgroundImage: "url('/general/bgofbg.png')" }}
   >
     <Flex className="items-center gap-3 mb-4">
-       <Box className="p-2 bg-[#401F45] rounded-lg border border-white/10">
-          <RotateCcw className="w-4 h-4 text-[#F70353]" />
+       <Box className="p-3 bg-[#4A0E64] rounded-lg border border-white/10">
+          <Search className="w-6 h-6 text-white" />
        </Box>
-       <span className="text-white/80 text-base font-medium">Rotation</span>
+       <span className="text-white/80 text-lg font-normal">Scale</span>
     </Flex>
 
-    <Flex className="items-center mt-10 justify-between">
-      <button className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all">
-        <Undo2 className="w-5 h-5 text-white" />
+    <Flex className="items-center mt-10 justify-between px-2">
+      <button 
+        onClick={handleZoomOut}
+        className="w-14 h-12 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] active:scale-95 transition-all"
+      >
+        <Minus className="w-6 h-6 text-white" />
       </button>
       
-      <span className="text-white text-lg font-semibold">0</span>
+      <span className="text-white text-xl font-semibold min-w-[60px] text-center">
+        {zoomScale}%
+      </span>
       
-      <button className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all">
-        <Redo2 className="w-5 h-5 text-white" />
+      <button 
+        onClick={handleZoomIn}
+        className="w-14 h-12 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] active:scale-95 transition-all"
+      >
+        <Plus className="w-6 h-6 text-white" />
+      </button>
+    </Flex>
+  </Box>
+
+  {/* 3. ROTATION SECTION */}
+  <Box 
+    className="relative w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
+    style={{ backgroundImage: "url('/general/bgofbg.png')" }}
+  >
+    <Flex className="items-center gap-3 mb-4">
+       <Box className="p-3 bg-[#401F45] rounded-lg border border-white/10">
+          <RotateCcw className="w-6 h-6 text-[#F70353]" />
+       </Box>
+       <span className="text-white/80 text-lg font-normal">Rotation</span>
+    </Flex>
+
+    <Flex className="items-center mt-10 justify-between px-2">
+      <button 
+        onClick={() => setRotation((prev) => prev - 15)}
+        className="w-14 h-12 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] active:scale-95 transition-all"
+      >
+        <Undo2 className="w-6 h-6 text-white" />
+      </button>
+      
+      <span className="text-white text-xl font-semibold min-w-[60px] text-center">
+        {rotation}°
+      </span>
+      
+      <button 
+        onClick={() => setRotation((prev) => prev + 15)}
+        className="w-14 h-12 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] active:scale-95 transition-all"
+      >
+        <Redo2 className="w-6 h-6 text-white" />
       </button>
     </Flex>
   </Box>
 
 </Box>
-{/* right side end */}
+
+       
       </Box>
 
       {isApplied && (
@@ -588,7 +597,12 @@ const ApplyMokupDesignPage = () => {
     className="rounded-full px-4 text-[14px] sm:text-[16px] md:text-[18px]"
     
     title="Reset"
-       onClick={() => setIsApplied(false)}
+      onClick={() => {
+  setIsApplied(false);
+  setRotation(0); 
+  setZoomScale(100); 
+  setImagePosition({ x: 0, y: 0 }); 
+}}
     
     // Adding the Reset Icon (SVG)
     icon={
