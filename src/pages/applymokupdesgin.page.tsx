@@ -7,7 +7,7 @@ import { useImageStore } from "@/store/image.store";
 import { cn } from "@/utils/cn.util";
 import CustomButton from "../components/common/customButton"
 import CustomBlackButton from "../components/common/customBlackButton"
-import { toast } from "sonner";
+// import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import {
   ChevronDown,
@@ -128,11 +128,12 @@ const ApplyMokupDesignPage = () => {
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">
-      <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-lg:flex-col max-md:items-center max-md:justify-start max-md:py-6 max-sm:mt-30 mt-12">
-       {/* Left Side - Product Options Sidebar */}
-<Box className="flex mt-20 flex-col items-center justify-center gap-4 xl:gap-6 2xl:gap-8 flex-shrink-0">
-  <Box
-    className="relative mb-10 w-[310.9px] xl:w-[380px] 2xl:w-[450px] h-[410px] xl:h-[490px] 2xl:h-[590px] overflow-hidden rounded-[10px] xl:rounded-[12px] 2xl:rounded-[14px]"
+      <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-lg:flex-col max-md:items-center max-md:justify-start max-md:py-6 max-sm:mt-30 mt-30">
+   
+   {/* Left Side - Product Options Sidebar */}
+<Box className="flex flex-col items-center ml-18 justify-start gap-1 flex-shrink-0"> 
+ <Box
+    className="relative mb-2 w-[310.9px] xl:w-[380px] 2xl:w-[450px] h-[410px] xl:h-[490px] 2xl:h-[590px] overflow-hidden rounded-[10px] xl:rounded-[12px] 2xl:rounded-[14px]"
     style={{ fontFamily: "Outfit, sans-serif" }}
   >
     {/* Background Frame - Set to 100% to ensure it scales perfectly */}
@@ -253,94 +254,47 @@ const ApplyMokupDesignPage = () => {
             </Box>
             
   </Box>
+
+  {/* 2. BOTTOM SECTION: Design Card & Checkout (Reduced gaps) */}
   {selectedImage && (
-  <Box className="flex flex-col gap-4  items-center">
-    
-    {/* Main Design Card with background image */}
-    <Box 
-      className="w-[330px] h-[225px] bg-no-repeat bg-contain relative"
-      style={{ backgroundImage: "url('/general/applybg.png')" }}
-    >
-      {/* 
-          Inner Content Wrapper 
-          Adjust 'top' and 'left' values below to match the exact 
-          hollow "tray" area in your applybg.png 
-      */}
-     <div className="flex flex-col gap-6 items-center w-full max-w-[460px] relative">
-  
-  {/* The Glassmorphism Tray Section */}
-  <div className="relative w-full h-[215px] bg-no-repeat bg-contain" style={{ backgroundImage: "url('/general/applybg.png')" }}>
-    
-    <div className="absolute bg-[#130E29]/50 backdrop-blur-xl 
-                    border border-white/10 
-                    rounded-[30px] p-4 
-                    shadow-[inset_0_4px_12px_rgba(0,0,0,0.6)]
-                    top-[32%] left-[10px] right-[10px] flex items-center justify-between">
+    <Box className="flex flex-col gap-1 items-center w-full max-w-[350px] mx-auto">
       
-      {/* Thumbnail Preview */}
-      <div className="w-[85px] h-[85px] rounded-2xl overflow-hidden border border-white/10 shadow-md">
-        <img 
-          src={selectedImage} 
-          alt="My Design" 
-          className="w-full h-full object-cover" 
-        />
+      {/* Design "Tray" Card */}
+      <div 
+        className="relative w-[330px] h-[210px] bg-no-repeat bg-contain" 
+        style={{ backgroundImage: "url('/general/applybg.png')" }}
+      >
+        <div className="absolute bg-[#130E29]/50 backdrop-blur-xl border border-white/10 rounded-[30px] p-4 top-[33.7%] left-[10px] right-[10px] flex items-center justify-between">
+          <div className="w-[85px] h-[85px] rounded-2xl overflow-hidden border border-white/10">
+            <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
+          </div>
+          <CustomButton
+            title={isApplied ? "Applied" : "Apply"}
+            onClick={() => setIsApplied(true)}
+            wrapperClassName={cn("w-[140px] h-[52px] rounded-[18px]", isApplied && "bg-none shadow-none")}
+          />
+        </div>
       </div>
 
-      {/* Apply Button using CustomButton component */}
-      <CustomButton
-        title={isApplied ? "Applied" : "Apply"}
-        onClick={() => {
-          setIsApplied(true);
-          toast.success("Design applied to object!");
-        }}
-        // Small adjustments to fit inside the tray
-        wrapperClassName={cn(
-          "w-[140px] h-[52px] rounded-[18px]",
-          isApplied && "bg-none   shadow-none" 
-        )}
-        className={cn(
-          "text-[18px] rounded-[16px]",
-          isApplied && " shadow-none"
-        )}
-      />
-    </div>
-  </div>
+      {/* Checkout Button (Almost no gap from tray card) */}
+      <Box className="w-full items-center text-center px-2">
+        <CustomButton
+          title="Continue to Checkout"
+          onClick={() => navigate("/checkout")}
+          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>}
+          wrapperClassName="w-[96%] h-[60px] rounded-[25px]"
+          className="text-[18px]"
+        />
+      </Box>
 
-  {/* Continue to Checkout Button using CustomButton component */}
-  <CustomButton
-    title="Continue to Checkout"
-    onClick={() => navigate("/checkout")}
-    icon={
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M5 12h14m-7-7 7 7-7 7"/>
-      </svg>
-    }
-    // Matching the size of the original Figma design
-    wrapperClassName="w-full h-[68px] rounded-[28px]"
-    className="text-[20px] rounded-[26px] tracking-wide"
-  />
-
-  {/* Optional Remove Button */}
-  
-</div>
+      {/* {isApplied && (
+        <button onClick={() => setIsApplied(false)} className="mt-2 text-white/40 text-xs underline">
+          Remove design from object
+        </button>
+      )} */}
     </Box>
-
-     
-
-    {/* Optional: Remove Button */}
-    {isApplied && (
-      <button 
-        onClick={() => setIsApplied(false)}
-        className="text-white/40 text-xs hover:text-white underline transition-colors"
-      >
-        Remove design from object
-      </button>
-    )}
-  </Box>
-)}
-
-</Box>
-        {/* Center - Product Mockup with Image Overlay */}
+  )}
+</Box>        {/* Center - Product Mockup with Image Overlay */}
         <Box className="flex-1 flex items-center justify-center min-w-0 max-md:w-full max-md:flex-1 max-md:mt-4">
           <Stack className="w-full max-w-[650px] xl:max-w-[800px] 2xl:max-w-[950px] items-center justify-center">
             <Center
@@ -504,10 +458,11 @@ const ApplyMokupDesignPage = () => {
         </Box>
 
      {/* right side start */}
-<Box className="flex flex-col items-center justify-center gap-4 mr-10 xl:gap-5 flex-shrink-0 bg-transparent">
+<Box className="flex flex-col items-center justify-center gap-4 mr-18 xl:gap-8 flex-shrink-0 bg-transparent">
 {/* TOP SECTION: Select Colors (Collapsible) */}
 <Box 
-  className="relative w-[260px] xl:w-[290px] 2xl:w-[320px] p-4 rounded-[20px] border border-white/10 overflow-hidden bg-cover bg-center shadow-2xl transition-all duration-300"
+  className="relative
+   w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 rounded-[20px] border border-white/10 overflow-hidden bg-cover bg-center shadow-2xl transition-all duration-300"
   style={{ backgroundImage: "url('/general/specialbg.png')" }}
 >
   {/* Header - Clicking this toggles the collapse */}
@@ -564,17 +519,17 @@ const ApplyMokupDesignPage = () => {
 
   {/* MIDDLE SECTION: Scale */}
   <Box 
-    className="relative w-[260px] xl:w-[290px] 2xl:w-[320px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
+    className="relative gap-12 w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
     style={{ backgroundImage: "url('/general/bgofbg.png')" }}
   >
-    <Flex className="items-center gap-3 mb-4">
+    <Flex className="items-center  gap-3 mb-4">
        <Box className="p-2 bg-[#4A0E64] rounded-lg border border-white/10">
           <Search className="w-4 h-4 text-white" />
        </Box>
        <span className="text-white/80 text-base font-medium">Scale</span>
     </Flex>
 
-    <Flex className="items-center justify-between">
+    <Flex className="items-center mt-10 justify-between">
       <button 
         onClick={handleZoomOut}
         className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all"
@@ -595,7 +550,7 @@ const ApplyMokupDesignPage = () => {
 
   {/* BOTTOM SECTION: Rotation */}
   <Box 
-    className="relative w-[260px] xl:w-[290px] 2xl:w-[320px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
+    className="relative w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
     style={{ backgroundImage: "url('/general/bgofbg.png')" }}
   >
     <Flex className="items-center gap-3 mb-4">
@@ -605,7 +560,7 @@ const ApplyMokupDesignPage = () => {
        <span className="text-white/80 text-base font-medium">Rotation</span>
     </Flex>
 
-    <Flex className="items-center justify-between">
+    <Flex className="items-center mt-10 justify-between">
       <button className="w-12 h-10 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] transition-all">
         <Undo2 className="w-5 h-5 text-white" />
       </button>
