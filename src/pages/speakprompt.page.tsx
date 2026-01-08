@@ -392,7 +392,7 @@ const SpeakPrompt = () => {
       </div>
       {isListening && (
         <div className="flex items-center gap-1.5 h-8">
-          {[40, 90, 60, 30, 80].map((h, i) => (
+          {[40, 90, 60, 30, 80,40,60,90,20,60,100,20,40, 90, 60, 30, 80,40,60,90,20,60,100,20].map((h, i) => (
             <div key={i} className="w-[3px] bg-[#F70353] rounded-full animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
           ))}
         </div>
