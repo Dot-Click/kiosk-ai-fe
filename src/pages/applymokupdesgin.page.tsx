@@ -17,7 +17,6 @@ import {
   Redo2,
   Undo2,
   Search,
-  RotateCcw,
   Plus,
   RotateCw,
 } from "lucide-react";
