@@ -320,85 +320,54 @@ const [isApplied, setIsApplied] = useState(false);
                     onMouseUp={handleMouseUp}
                     onMouseLeave={handleMouseUp}
                   >
-                    {/* Product Base Image with Color Overlay - Flippable */}
-                    <Box
-                      className="relative w-full h-full flex items-center justify-center"
-                      style={{
-                        transform: `scaleX(${cupFlip === "right" ? -1 : 1})`,
-                        transformStyle: "preserve-3d",
-                        transition: "transform 0.3s ease",
-                      }}
-                    >
-                      <img
-                        src={currentProduct.image}
-                        alt={currentProduct.label}
-                        className="w-full h-full object-contain"
-                        style={{
-                          filter:
-                            selectedColor.value === "#FFFFFF"
-                              ? "brightness(1.1)"
-                              : selectedColor.value === "#000000"
-                              ? "brightness(0.7)"
-                              : `hue-rotate(${getHueRotation(
-                                  selectedColor.value
-                                )}) saturate(1.2)`,
-                        }}
-                      />
-                      {/* Color Overlay - using mask like before */}
-                      {selectedColor.value !== "none" && (
-                        <Box
-                          className="absolute inset-0"
-                          style={{
-                            backgroundColor: selectedColor.value,
-                            mixBlendMode: "multiply",
-                            opacity: 0.7,
-                            pointerEvents: "none",
-                            // Mask to cup shape - only tints the product, not background
-                            maskImage: `url(${currentProduct.image})`,
-                            maskSize: "contain",
-                            maskRepeat: "no-repeat",
-                            maskPosition: "center",
-                            WebkitMaskImage: `url(${currentProduct.image})`,
-                            WebkitMaskSize: "contain",
-                            WebkitMaskRepeat: "no-repeat",
-                            WebkitMaskPosition: "center",
-                          }}
-                        />
-                      )}
-                    </Box>
-
-                    {/* User's Image Overlay - Full Cup Wrap with Flip Sync */}
-                   {/* User's Image Overlay - ONLY SHOWS IF APPLIED */}
-{selectedImage && isApplied && ( // Updated this condition
-  <Box
-    className="absolute inset-0 flex items-center justify-center"
+                    {/* Product Base Image with Color Overlay - Now includes Rotation */}
+<Box
+  className="relative w-full h-full flex items-center justify-center"
+  style={{
+    // Added rotation here
+    transform: `scaleX(${cupFlip === "right" ? -1 : 1}) rotate(${rotation}deg)`,
+    transformStyle: "preserve-3d",
+    transition: "transform 0.3s ease",
+  }}
+>
+  <img
+    src={currentProduct.image}
+    alt={currentProduct.label}
+    className="w-full h-full object-contain"
     style={{
-                          // Mask to cup shape - only show on cup
-                          maskSize: "contain",
-                          maskRepeat: "no-repeat",
-                          maskPosition: "center", 
-                           maskImage: `url(${currentProduct.image})`,
-                          WebkitMaskImage: `url(${currentProduct.image})`,
-                          WebkitMaskSize: "contain",
-                          WebkitMaskRepeat: "no-repeat",
-                          WebkitMaskPosition: "center",
-                          // Clip to exclude rim/inside area - allow full wrap
-                          clipPath:
-                            selectedProduct === "cup"
-                              ? "inset(13% 0% 6% 0%)"
-                              : "none",
-                          overflow: "hidden",
-                          // 3D perspective for cylindrical effect
-                          perspective:
-                            selectedProduct === "cup" ? "600px" : "none",
-                          perspectiveOrigin: "50% 50%",
-                          // Sync with cup flip
-                          transform: `scaleX(${cupFlip === "right" ? -1 : 1})`,
-                          transformStyle: "preserve-3d",
-                          transition: "transform 0.3s ease",
-                        }}
-                      >
-                      {/* Container - Full width for wrapping around cup */}
+      filter:
+        selectedColor.value === "#FFFFFF"
+          ? "brightness(1.1)"
+          : selectedColor.value === "#000000"
+          ? "brightness(0.7)"
+          : `hue-rotate(${getHueRotation(
+              selectedColor.value
+            )}) saturate(1.2)`,
+    }}
+  />
+  {/* Color Overlay */}
+  {selectedColor.value !== "none" && (
+    <Box
+      className="absolute inset-0"
+      style={{
+        backgroundColor: selectedColor.value,
+        mixBlendMode: "multiply",
+        opacity: 0.7,
+        pointerEvents: "none",
+        maskImage: `url(${currentProduct.image})`,
+        maskSize: "contain",
+        maskRepeat: "no-repeat",
+        maskPosition: "center",
+        WebkitMaskImage: `url(${currentProduct.image})`,
+        WebkitMaskSize: "contain",
+        WebkitMaskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+      }}
+    />
+  )}
+</Box>
+                    {/* User's Image Overlay - Full Cup Wrap with Flip Sync */}
+                  {/* User's Image Overlay - Rotation REMOVED from here */}
 <Box
   className={cn(
     "relative",
@@ -411,11 +380,10 @@ const [isApplied, setIsApplied] = useState(false);
     top: selectedProduct === "cup" ? "13%" : "0%",
     left: selectedProduct === "cup" ? "0%" : "0%",
     
-    // THE FIX IS HERE: Added rotate(${rotation}deg)
+    // REMOVED rotate(${rotation}deg) from the line below
     transform: `
       translate(${imagePosition.x}px, ${imagePosition.y}px) 
       scale(${zoomScale / 100})
-      rotate(${rotation}deg)
     `,
     
     transformOrigin: "center center",
@@ -426,7 +394,6 @@ const [isApplied, setIsApplied] = useState(false);
   }}
   onMouseDown={handleMouseDown}
 >
-  {/* Image with cylindrical wrap */}
   <img
     src={selectedImage}
     alt="design-overlay"
@@ -442,8 +409,6 @@ const [isApplied, setIsApplied] = useState(false);
     draggable={false}
   />
 </Box>
-                      </Box>
-                    )}
                   </Box>
                 );
               })()}
