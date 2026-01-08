@@ -37,7 +37,7 @@ const DesignDescriptionInput = ({
     >
       {/* 1. Main Card Background - Union */}
       <Box
-        className="absolute inset-0 rounded-[10px] bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 rounded-[10px]  backdrop-blur-sm"
       />
 
       {/* 2. Drop Effect SVG Overlay */}

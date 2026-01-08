@@ -19,6 +19,7 @@ import {
   Search,
   RotateCcw,
   Plus,
+  RotateCw,
 } from "lucide-react";
 
 const productOptions = [
@@ -88,16 +89,12 @@ const ApplyMokupDesignPage = () => {
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-const [selectedColor, setSelectedColor] = useState(colorOptions[0]);
-const [zoomScale, setZoomScale] = useState(100);
-const [rotation, setRotation] = useState(0);
-const [isColorsOpen, setIsColorsOpen] = useState(true);
-const [isApplied, setIsApplied] = useState(false);
-
-
-
-// const handleRotateRight = () => setRotation((prev) => prev + 15);
-// const handleRotateLeft = () => setRotation((prev) => prev - 15);
+  const [selectedColor, setSelectedColor] = useState(colorOptions[0]);
+  const [zoomScale, setZoomScale] = useState(100);
+  const [rotation, setRotation] = useState(0); // Design rotation
+  const [objectRotation, setObjectRotation] = useState(0); // New: Object rotation
+  const [isColorsOpen, setIsColorsOpen] = useState(true);
+  const [isApplied, setIsApplied] = useState(false);
 
   const handleZoomIn = () => {
     setZoomScale((prev) => Math.min(prev + 10, 200));
@@ -128,6 +125,20 @@ const [isApplied, setIsApplied] = useState(false);
     setIsDragging(false);
   };
 
+  // New: Rotate object functions
+  const rotateObjectLeft = () => {
+    setObjectRotation((prev) => {
+      const newRotation = prev - 15;
+      return newRotation < 0 ? 360 + newRotation : newRotation;
+    });
+  };
+
+  const rotateObjectRight = () => {
+    setObjectRotation((prev) => {
+      const newRotation = prev + 15;
+      return newRotation >= 360 ? newRotation - 360 : newRotation;
+    });
+  };
 
   const navigate = useNavigate();
 
@@ -320,95 +331,135 @@ const [isApplied, setIsApplied] = useState(false);
                     onMouseUp={handleMouseUp}
                     onMouseLeave={handleMouseUp}
                   >
-                    {/* Product Base Image with Color Overlay - Now includes Rotation */}
-<Box
-  className="relative w-full h-full flex items-center justify-center"
-  style={{
-    // Added rotation here
-    transform: `scaleX(${cupFlip === "right" ? -1 : 1}) rotate(${rotation}deg)`,
-    transformStyle: "preserve-3d",
-    transition: "transform 0.3s ease",
-  }}
->
-  <img
-    src={currentProduct.image}
-    alt={currentProduct.label}
-    className="w-full h-full object-contain"
-    style={{
-      filter:
-        selectedColor.value === "#FFFFFF"
-          ? "brightness(1.1)"
-          : selectedColor.value === "#000000"
-          ? "brightness(0.7)"
-          : `hue-rotate(${getHueRotation(
-              selectedColor.value
-            )}) saturate(1.2)`,
-    }}
-  />
-  {/* Color Overlay */}
-  {selectedColor.value !== "none" && (
-    <Box
-      className="absolute inset-0"
-      style={{
-        backgroundColor: selectedColor.value,
-        mixBlendMode: "multiply",
-        opacity: 0.7,
-        pointerEvents: "none",
-        maskImage: `url(${currentProduct.image})`,
-        maskSize: "contain",
-        maskRepeat: "no-repeat",
-        maskPosition: "center",
-        WebkitMaskImage: `url(${currentProduct.image})`,
-        WebkitMaskSize: "contain",
-        WebkitMaskRepeat: "no-repeat",
-        WebkitMaskPosition: "center",
-      }}
-    />
-  )}
-</Box>
-                    {/* User's Image Overlay - Full Cup Wrap with Flip Sync */}
-                  {/* User's Image Overlay - Rotation REMOVED from here */}
-<Box
-  className={cn(
-    "relative",
-    isDragging ? "cursor-grabbing" : "cursor-grab"
-  )}
-  style={{
-    width: selectedProduct === "cup" ? "100%" : "100%",
-    height: selectedProduct === "cup" ? "82%" : "100%",
-    position: "absolute",
-    top: selectedProduct === "cup" ? "13%" : "0%",
-    left: selectedProduct === "cup" ? "0%" : "0%",
-    
-    // REMOVED rotate(${rotation}deg) from the line below
-    transform: `
-      translate(${imagePosition.x}px, ${imagePosition.y}px) 
-      scale(${zoomScale / 100})
-    `,
-    
-    transformOrigin: "center center",
-    transformStyle: "preserve-3d",
-    pointerEvents: "auto",
-    userSelect: "none",
-    transition: isDragging ? "none" : "transform 0.1s ease",
-  }}
-  onMouseDown={handleMouseDown}
->
-  <img
-    src={selectedImage}
-    alt="design-overlay"
-    className="w-full h-full"
-    style={{
-      objectFit: "cover",
-      filter: "drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.4))",
-      transform: selectedProduct === "cup"
-          ? `perspective(400px) rotateY(0deg) scaleX(1) scaleY(1.05)`
-          : "none",
-      willChange: "transform",
-    }}
-    draggable={false}
-  />
-</Box>
+                    {/* Product Base Image with Color Overlay - Flippable and Rotatable */}
+                    <Box
+                      className="relative w-full h-full flex items-center justify-center"
+                      style={{
+                        transform: `
+                          scaleX(${cupFlip === "right" ? -1 : 1})
+                          rotate(${objectRotation}deg)
+                        `,
+                        transformStyle: "preserve-3d",
+                        transition: "transform 0.3s ease",
+                      }}
+                    >
+                      <img
+                        src={currentProduct.image}
+                        alt={currentProduct.label}
+                        className="w-full h-full object-contain"
+                        style={{
+                          filter:
+                            selectedColor.value === "#FFFFFF"
+                              ? "brightness(1.1)"
+                              : selectedColor.value === "#000000"
+                              ? "brightness(0.7)"
+                              : `hue-rotate(${getHueRotation(
+                                  selectedColor.value
+                                )}) saturate(1.2)`,
+                        }}
+                      />
+                      {/* Color Overlay - using mask like before */}
+                      {selectedColor.value !== "none" && (
+                        <Box
+                          className="absolute inset-0"
+                          style={{
+                            backgroundColor: selectedColor.value,
+                            mixBlendMode: "multiply",
+                            opacity: 0.7,
+                            pointerEvents: "none",
+                            // Mask to cup shape - only tints the product, not background
+                            maskImage: `url(${currentProduct.image})`,
+                            maskSize: "contain",
+                            maskRepeat: "no-repeat",
+                            maskPosition: "center",
+                            WebkitMaskImage: `url(${currentProduct.image})`,
+                            WebkitMaskSize: "contain",
+                            WebkitMaskRepeat: "no-repeat",
+                            WebkitMaskPosition: "center",
+                          }}
+                        />
+                      )}
+                    </Box>
+
+                    {/* User's Image Overlay - ONLY SHOWS IF APPLIED */}
+                    {selectedImage && isApplied && (
+                      <Box
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{
+                          // Mask to cup shape - only show on cup
+                          maskSize: "contain",
+                          maskRepeat: "no-repeat",
+                          maskPosition: "center", 
+                          maskImage: `url(${currentProduct.image})`,
+                          WebkitMaskImage: `url(${currentProduct.image})`,
+                          WebkitMaskSize: "contain",
+                          WebkitMaskRepeat: "no-repeat",
+                          WebkitMaskPosition: "center",
+                          // Clip to exclude rim/inside area - allow full wrap
+                          clipPath:
+                            selectedProduct === "cup"
+                              ? "inset(13% 0% 6% 0%)"
+                              : "none",
+                          overflow: "hidden",
+                          // 3D perspective for cylindrical effect
+                          perspective:
+                            selectedProduct === "cup" ? "600px" : "none",
+                          perspectiveOrigin: "50% 50%",
+                          // Sync with cup flip
+                          transform: `
+                            scaleX(${cupFlip === "right" ? -1 : 1})
+                            rotate(${objectRotation}deg)
+                          `,
+                          transformStyle: "preserve-3d",
+                          transition: "transform 0.3s ease",
+                        }}
+                      >
+                        {/* Container - Full width for wrapping around cup */}
+                        <Box
+                          className={cn(
+                            "relative",
+                            isDragging ? "cursor-grabbing" : "cursor-grab"
+                          )}
+                          style={{
+                            width: selectedProduct === "cup" ? "100%" : "100%",
+                            height: selectedProduct === "cup" ? "82%" : "100%",
+                            position: "absolute",
+                            top: selectedProduct === "cup" ? "13%" : "0%",
+                            left: selectedProduct === "cup" ? "0%" : "0%",
+                            
+                            // Transform includes design rotation and object rotation
+                            transform: `
+                              translate(${imagePosition.x}px, ${imagePosition.y}px) 
+                              scale(${zoomScale / 100})
+                              rotate(${rotation}deg)
+                            `,
+                            
+                            transformOrigin: "center center",
+                            transformStyle: "preserve-3d",
+                            pointerEvents: "auto",
+                            userSelect: "none",
+                            transition: isDragging ? "none" : "transform 0.1s ease",
+                          }}
+                          onMouseDown={handleMouseDown}
+                        >
+                          {/* Image with cylindrical wrap */}
+                          <img
+                            src={selectedImage}
+                            alt="design-overlay"
+                            className="w-full h-full"
+                            style={{
+                              objectFit: "cover",
+                              filter: "drop-shadow(0px 2px 8px rgba(0, 0, 0, 0.4))",
+                              transform: selectedProduct === "cup"
+                                  ? `perspective(400px) rotateY(0deg) scaleX(1) scaleY(1.05)`
+                                  : "none",
+                              willChange: "transform",
+                            }}
+                            draggable={false}
+                          />
+                        </Box>
+                      </Box>
+                    )}
                   </Box>
                 );
               })()}
@@ -513,8 +564,8 @@ const [isApplied, setIsApplied] = useState(false);
     </Flex>
   </Box>
 
-  {/* 3. ROTATION SECTION */}
-  <Box 
+  {/* 3. DESIGN ROTATION SECTION */}
+  {/* <Box 
     className="relative w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
     style={{ backgroundImage: "url('/general/bgofbg.png')" }}
   >
@@ -522,7 +573,7 @@ const [isApplied, setIsApplied] = useState(false);
        <Box className="p-3 bg-[#401F45] rounded-lg border border-white/10">
           <RotateCcw className="w-6 h-6 text-[#F70353]" />
        </Box>
-       <span className="text-white/80 text-lg font-normal">Rotation</span>
+       <span className="text-white/80 text-lg font-normal">Design Rotation</span>
     </Flex>
 
     <Flex className="items-center mt-10 justify-between px-2">
@@ -539,6 +590,39 @@ const [isApplied, setIsApplied] = useState(false);
       
       <button 
         onClick={() => setRotation((prev) => prev + 15)}
+        className="w-14 h-12 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] active:scale-95 transition-all"
+      >
+        <Redo2 className="w-6 h-6 text-white" />
+      </button>
+    </Flex>
+  </Box> */}
+
+  {/* 4. OBJECT ROTATION SECTION - NEW */}
+  <Box 
+    className="relative w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
+    style={{ backgroundImage: "url('/general/bgofbg.png')" }}
+  >
+    <Flex className="items-center gap-3 mb-4">
+       <Box className="p-3 bg-[#2D1B45] rounded-lg border border-white/10">
+          <RotateCw className="w-6 h-6 text-[#00BED5]" />
+       </Box>
+       <span className="text-white/80 text-lg font-normal">Object Rotation</span>
+    </Flex>
+
+    <Flex className="items-center mt-10 justify-between px-2">
+      <button 
+        onClick={rotateObjectLeft}
+        className="w-14 h-12 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] active:scale-95 transition-all"
+      >
+        <Undo2 className="w-6 h-6 text-white" />
+      </button>
+      
+      <span className="text-white text-xl font-semibold min-w-[60px] text-center">
+        {objectRotation}°
+      </span>
+      
+      <button 
+        onClick={rotateObjectRight}
         className="w-14 h-12 flex items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] active:scale-95 transition-all"
       >
         <Redo2 className="w-6 h-6 text-white" />
@@ -565,6 +649,7 @@ const [isApplied, setIsApplied] = useState(false);
       onClick={() => {
   setIsApplied(false);
   setRotation(0); 
+  setObjectRotation(0); // Also reset object rotation
   setZoomScale(100); 
   setImagePosition({ x: 0, y: 0 }); 
 }}
