@@ -23,6 +23,7 @@ const SpeakPrompt = () => {
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
 
   const recognitionRef = useRef<any>(null);
+  const accumulatedTranscript = useRef("");
 
   // Update button disabled state when transcript changes
   useEffect(() => {
@@ -52,7 +53,7 @@ const SpeakPrompt = () => {
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.continuous = true;
+      recognition.continuous = false; // Changed to false - stops after user stops speaking
       recognition.interimResults = true;
       recognition.lang = "en-US";
       recognition.maxAlternatives = 1;
@@ -64,27 +65,37 @@ const SpeakPrompt = () => {
       };
       
       recognition.onresult = (event: any) => {
-        let finalTranscript = '';
+        console.log("Speech recognition result received");
+        
         let interimTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcriptPart = event.results[i][0].transcript;
+        let finalTranscript = '';
+        
+        for (let i = 0; i < event.results.length; i++) {
+          const result = event.results[i];
+          const transcriptPart = result[0].transcript;
           
-          if (event.results[i].isFinal) {
+          if (result.isFinal) {
+            // This is a final result - user stopped speaking
             finalTranscript += transcriptPart;
           } else {
+            // This is an interim result - user is still speaking
             interimTranscript += transcriptPart;
           }
         }
 
-        // Update transcript with both final and interim results
-        const newTranscript = finalTranscript || interimTranscript;
-        if (newTranscript) {
-          setTranscript(prev => {
-            // Combine previous final transcript with new interim/final
-            const base = finalTranscript ? '' : prev.replace(/\s+$/, '');
-            return (base + ' ' + newTranscript).trim();
-          });
+        // Update the accumulated transcript
+        if (finalTranscript) {
+          // User finished speaking, add to accumulated transcript
+          accumulatedTranscript.current = (accumulatedTranscript.current + ' ' + finalTranscript).trim();
+          setTranscript(accumulatedTranscript.current);
+          console.log("Final transcript added:", finalTranscript);
+        } else if (interimTranscript) {
+          // User is still speaking, show interim results
+          const currentDisplay = accumulatedTranscript.current 
+            ? accumulatedTranscript.current + ' ' + interimTranscript
+            : interimTranscript;
+          setTranscript(currentDisplay);
+          console.log("Interim transcript:", interimTranscript);
         }
       };
 
@@ -109,8 +120,22 @@ const SpeakPrompt = () => {
       };
       
       recognition.onend = () => {
+        console.log("Speech recognition ended");
         setIsListening(false);
-        if (!isGenerated && !permissionDenied) {
+        accumulatedTranscript.current = transcript; // Save current transcript
+        
+        // Only restart if user is still supposed to be listening
+        if (isListening && !permissionDenied) {
+          setTimeout(() => {
+            if (recognitionRef.current && isListening) {
+              try {
+                recognitionRef.current.start();
+              } catch (error) {
+                console.error("Error restarting recognition:", error);
+              }
+            }
+          }, 100);
+        } else if (!isGenerated && !permissionDenied) {
           toast.info("Stopped listening");
         }
       };
@@ -187,8 +212,27 @@ const SpeakPrompt = () => {
         return;
       }
 
+      // Clear previous recognition
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        // Ignore if already stopped
+      }
+
+      // Reset accumulated transcript when starting fresh
+      accumulatedTranscript.current = transcript;
+
       // Try to start recognition
-      recognitionRef.current.start();
+      setTimeout(() => {
+        try {
+          recognitionRef.current.start();
+        } catch (error) {
+          console.error("Error starting recognition:", error);
+          setIsListening(false);
+          toast.error("Failed to start voice recognition");
+        }
+      }, 200);
+      
       setIsListening(true);
       toast.info("Microphone activated. Start speaking...");
     } catch (error: any) {
@@ -215,6 +259,8 @@ const SpeakPrompt = () => {
       try {
         recognitionRef.current.stop();
         setIsListening(false);
+        // Save the current transcript
+        accumulatedTranscript.current = transcript;
         if (!permissionDenied) {
           toast.info("Stopped listening");
         }
@@ -274,6 +320,7 @@ const SpeakPrompt = () => {
 
   const handleReset = () => {
     setTranscript("");
+    accumulatedTranscript.current = "";
     setIsGenerated(false);
     setImages([]);
     setIsButtonDisabled(true);
@@ -284,9 +331,29 @@ const SpeakPrompt = () => {
 
   const handleManualType = (text: string) => {
     setTranscript(text);
+    accumulatedTranscript.current = text;
     // If user starts typing while listening, stop listening
     if (isListening) {
       stopListening();
+    }
+  };
+
+  // Clear speech recognition history
+  const clearSpeechHistory = () => {
+    setTranscript("");
+    accumulatedTranscript.current = "";
+    // Reset the recognition to avoid old results
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+        setTimeout(() => {
+          if (isListening && recognitionRef.current) {
+            recognitionRef.current.start();
+          }
+        }, 100);
+      } catch (e) {
+        // Ignore errors
+      }
     }
   };
 
@@ -357,13 +424,13 @@ const SpeakPrompt = () => {
           </div>
           <span className="text-white font-bold text-[11px] tracking-widest uppercase">Back</span>
         </button>
-        <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold uppercase tracking-tight mt-12 lg:mt-0 px-4">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase tracking-tight mt-12 lg:mt-0 px-4">
           How would you like to create <span className="text-[#F70353]">YOUR DESIGN?</span>
         </h1>
       </header>
 
       {/* MAIN CONTENT AREA - Responsive layout */}
-      <main className="flex-1 flex flex-col lg:flex-row items-center justify-between px-4 sm:px-6 lg:px-20 py-6 sm:py-10 gap-6 sm:gap-10">
+      <main className="flex-1 flex flex-col xl:flex-row items-center justify-between px-4 sm:px-6 lg:px-20 py-6 sm:py-10 gap-6 sm:gap-10">
         
         {/* LEFT PANEL - Transcription + Manual Typing + Buttons */}
         <div className="w-full lg:w-[350px] flex flex-col gap-4 sm:gap-6 z-30 order-2 lg:order-1">
@@ -375,13 +442,13 @@ const SpeakPrompt = () => {
               <div className="flex items-center gap-2">
                 {isListening && (
                   <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    <span className="text-[10px] text-green-400 font-bold">LIVE</span>
+                    {/* <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> */}
+                    {/* <span className="text-[10px] text-green-400 font-bold">LIVE</span> */}
                   </div>
                 )}
                 {transcript && (
                   <button 
-                    onClick={() => setTranscript("")}
+                    onClick={clearSpeechHistory}
                     className="text-xs text-white/50 hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10"
                     title="Clear text"
                   >
@@ -406,6 +473,24 @@ const SpeakPrompt = () => {
               isListening={isListening}
               onMicClick={toggleListening}
             />
+
+            {/* Speech status indicator */}
+            {isListening && (
+              <div className="mt-3 flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3].map((i) => (
+                    <div 
+                      key={i} 
+                      className="w-1 h-1 bg-green-500 rounded-full animate-pulse"
+                      style={{ animationDelay: `${i * 0.2}s` }}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs text-green-400">
+                  Listening... Speak clearly
+                </span>
+              </div>
+            )}
 
             {/* Permission denied warning */}
             {permissionDenied && (
@@ -529,14 +614,14 @@ const SpeakPrompt = () => {
                     Click the <span className="text-[#F70353] font-bold">microphone</span> and speak naturally.
                     Your words will appear in the left panel instantly.
                   </p>
-                  {!permissionDenied && (
+                  {/* {!permissionDenied && (
                     <div className="p-4 bg-white/5 rounded-xl hidden sm:block">
                       <p className="text-sm text-white/60 mb-2">Example phrases:</p>
                       <p className="text-white/80 text-sm">• "A modern logo for a tech startup"</p>
                       <p className="text-white/80 text-sm">• "Website header with blue gradient"</p>
                       <p className="text-white/80 text-sm">• "Business card design with geometric shapes"</p>
                     </div>
-                  )}
+                  )} */}
                   <p className="text-white/70 text-sm sm:text-base">
                     Or simply <span className="text-blue-400 font-bold">type</span> in the left panel.
                   </p>
