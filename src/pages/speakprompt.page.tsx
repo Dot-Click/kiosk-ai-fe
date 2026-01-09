@@ -1,7 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { cn } from "@/utils/cn.util";
 import { useNavigate } from "react-router";
+import { Flex } from "../components/ui/flex";
+import { Stack } from "../components/ui/stack";
+import { BiArrowBack } from "react-icons/bi";
+import { Center } from "../components/ui/center";
+import { useImageStore } from "@/store/image.store";
+import { useState, useEffect, useRef } from "react";
 import { Box } from "@/components/ui/box";
-import { ArrowLeft, Mic, MicOff, RotateCcw } from "lucide-react";
+import { Mic, MicOff, RotateCcw } from "lucide-react";
 import { BsStars } from "react-icons/bs";
 import { toast } from "sonner";
 
@@ -10,6 +16,122 @@ import DesignDescriptionInput from "@/components/designdescriptionreadbleandedit
 import CustomButton from "@/components/common/customButton";
 import CustomBlackButton from "@/components/common/customBlackButton";
 
+
+const NavbarWrapper = ({
+  children,
+  className,
+  onClick,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+}) => (
+  <Box className={cn("bg-transparent absolute cursor-pointer", className)} onClick={onClick}>
+    {children}
+  </Box>
+);
+
+const GoBackButton = ({
+  onClick,
+  className,
+}: {
+  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  className?: string;
+}) => (
+  <Box
+    onClick={onClick}
+    className={cn(
+      "flex items-center cursor-pointer hover:scale-105 transition-all duration-300 relative",
+      "w-[100px] h-[45px] xl:w-[120px] xl:h-[55px] 2xl:w-[140px] 2xl:h-[65px] rounded-[12px] xl:rounded-[14px] 2xl:rounded-[16px] p-[1px]",
+      "shadow-[0px_4px_32px_0px_rgba(21,2,8,0.87)]",
+      className
+    )}
+    style={{
+      background: "conic-gradient(from 90deg at 50% 50%, rgba(240, 196, 211, 1) 0%, rgba(255, 185, 208, 0.08) 25%, rgba(240, 196, 211, 1) 60%)",
+      backdropFilter: "blur(32px)",
+    }}
+  >
+    <Center className="gap-2 xl:gap-3 2xl:gap-4 w-full h-full rounded-[12px] xl:rounded-[14px] 2xl:rounded-[16px] flex items-center bg-black px-2 py-2 xl:px-3 xl:py-3 2xl:px-4 2xl:py-4">
+      <Center className="rounded-md gap-0 xl:rounded-lg 2xl:rounded-xl" style={{ padding: "8.89px", background: "linear-gradient(180deg, rgba(247, 3, 83, 1) 0%, rgba(247, 3, 83, 0.55) 100%)" }}>
+        <BiArrowBack className="size-4 xl:size-5 2xl:size-6 text-white" />
+      </Center>
+      <Flex className="text-white font-normal uppercase text-base xl:text-lg 2xl:text-xl" style={{ fontFamily: "Outfit, sans-serif", fontSize: "16px", lineHeight: "1.26em", letterSpacing: "0.03em" }}>
+        Back
+      </Flex>
+    </Center>
+  </Box>
+);
+
+const DescribeDesignNavbar = () => {
+  const navigate = useNavigate();
+  return (
+    <>
+      <Box className="absolute items-center  gap-2 text-red-400 font-bold top-8 xl:top-10 2xl:top-12 left-26 max-lg:left-10 max-md:left-10 max-sm:left-2 xl:left-32 2xl:left-40 z-50">
+        <GoBackButton onClick={() => navigate(-1)} />
+      </Box>
+      <NavbarWrapper className="flex items-center gap-2 justify-center text-white font-bold w-full">
+        <Stack className="z-20 justify-center items-center mt-8 xl:mt-10 2xl:mt-12 p-0 gap-0 xl:gap-1 2xl:gap-2 max-sm:mt-18">
+          <Flex className="gap-0 font-bold flex-col items-center justify-center text-center">
+            <Flex className="gap-0">
+              <h1 className="bg-clip-text text-transparent tracking-wide sm:text-[0.75rem] text-base lg:text-[1.75rem] xl:text-[1.30rem] 2xl:text-[1.60rem] p-0 m-0" style={{ backgroundImage: "linear-gradient(5deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 0%, #E5E5E1 40%, #E5E5E5 100%)" }}>
+                Describe your
+              </h1>
+              <Box className="relative inline-flex items-center justify-center ml-2 xl:ml-3 2xl:ml-4">
+                <Box className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[100px] rounded-full" style={{ background: "radial-gradient(circle, rgba(247, 3, 83, 0.4) 0%, rgba(247, 3, 83, 0.2) 40%, transparent 70%)", filter: "blur(20px)" }} />
+                <h1 className="text-[#F70353] sm:text-[1.10rem] text-xl lg:text-[2.15rem] xl:text-[1.50rem] 2xl:text-[1.80rem] p-0 relative z-10">Design</h1>
+              </Box>
+            </Flex>
+            <p className="text-white/80 text-[12px] xl:text-[14px] 2xl:text-[16px] font-extralight tracking-widest text-center" style={{ letterSpacing: "1.6px", userSelect: "none" }}>
+              Be as creative as you want! The AI will generate artwork based on your description.
+            </p>
+          </Flex>
+        </Stack>
+      </NavbarWrapper>
+    </>
+  );
+};
+
+// 1. Move this OUTSIDE the SpeakPrompt function (above it)
+const MicVisual = ({ size = "large", isListening, isLoading, permissionDenied, isSpeechSupported, toggleListening }: any) => (
+  <div className={`flex flex-col items-center justify-center gap-6 w-full animate-in fade-in zoom-in duration-500`}>
+    <div className={`relative ${size === "large" ? "scale-125 lg:scale-150" : "scale-100"} flex items-center justify-center`}>
+      {isListening && (
+        <div className="absolute w-[130px] h-[130px] border border-[#F70353]/40 rounded-full animate-ping" />
+      )}
+      <div className="absolute w-[110px] h-[110px] bg-[#F70353] blur-[45px] opacity-25 rounded-full" />
+      <button 
+        onClick={toggleListening}
+        disabled={isLoading || permissionDenied || !isSpeechSupported}
+        className={`relative p-5 rounded-full shadow-lg border border-red-400/30 flex items-center justify-center transition-all ${
+          permissionDenied 
+            ? 'bg-gray-600 cursor-not-allowed opacity-50'
+            : !isSpeechSupported
+              ? 'bg-gray-600 cursor-not-allowed opacity-50'
+              : isListening 
+                ? 'bg-red-600 animate-pulse' 
+                : isLoading
+                  ? 'bg-gray-600 cursor-not-allowed'
+                  : 'bg-red-500/20 backdrop-blur-md hover:bg-red-500/30'
+        }`}
+      >
+        {permissionDenied || !isSpeechSupported ? (
+          <MicOff className="w-7 h-7 text-gray-400" />
+        ) : isListening ? (
+          <MicOff className="w-7 h-7 text-white" />
+        ) : (
+          <Mic className="w-7 h-7 text-white" />
+        )}
+      </button>
+    </div>
+    {isListening && (
+      <div className="flex items-center gap-1.5 h-8">
+        {[40, 90, 60, 30, 80,40,60,90,20,60,100,20,40, 90, 60, 30, 80,40,60,90,20,60,100,20].map((h, i) => (
+          <div key={i} className="w-[3px] bg-[#F70353] rounded-full animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
+        ))}
+      </div>
+    )}
+  </div>
+);
 const SpeakPrompt = () => {
   const navigate = useNavigate();
   const [numberOfPages, setNumberOfPages] = useState(4);
@@ -21,6 +143,7 @@ const SpeakPrompt = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
+  const { setGeneratedImages, selectImageByUrl, selectedImage } = useImageStore();
 
   const recognitionRef = useRef<any>(null);
   const accumulatedTranscript = useRef("");
@@ -303,20 +426,33 @@ const SpeakPrompt = () => {
         `https://images.unsplash.com/photo-1575936123452-b67c3203c357?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
         `https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop&q=80&t=${Date.now()}`
       ];
-
-      // Take only the number of variations selected
-      const selectedImages = mockImages.slice(0, numberOfPages);
-      
-      setImages(selectedImages);
+  
       setIsGenerated(true);
       setIsLoading(false);
-      
+      const selectedImages = mockImages.slice(0, numberOfPages);
+      setImages(selectedImages);
+      setGeneratedImages(selectedImages, transcript); // <--- ADD THIS LINE
       // Update toast
       toast.dismiss(loadingToast);
       toast.success(`Successfully generated ${selectedImages.length} design variations!`);
       
     }, 1000);
   };
+
+
+  const handleProceed = () => {
+  if (images.length > 0) {
+    // If user hasn't manually clicked one, default to the first image
+    if (!selectedImage) {
+      selectImageByUrl(images[0]);
+    }
+    // Navigate to mockup file
+    navigate("/select-methods/capture-photo/describe-design/apply-mokup-design");
+  } else {
+    toast.error("Please generate images first");
+  }
+};
+
 
   const handleReset = () => {
     setTranscript("");
@@ -357,84 +493,70 @@ const SpeakPrompt = () => {
     }
   };
 
-  // --- UI Components ---
-  const MicVisual = ({ size = "large" }: { size?: "small" | "large" }) => (
-    <div className={`flex flex-col items-center justify-center gap-6 w-full animate-in fade-in zoom-in duration-500`}>
-      <div className={`relative ${size === "large" ? "scale-125 lg:scale-150" : "scale-100"} flex items-center justify-center`}>
-        {isListening && (
-          <div className="absolute w-[130px] h-[130px] border border-[#F70353]/40 rounded-full animate-ping" />
-        )}
-        <div className="absolute w-[110px] h-[110px] bg-[#F70353] blur-[45px] opacity-25 rounded-full" />
-        <button 
-          onClick={toggleListening}
-          disabled={isLoading || permissionDenied || !isSpeechSupported}
-          className={`relative p-5 rounded-full shadow-lg border border-red-400/30 flex items-center justify-center transition-all ${
-            permissionDenied 
-              ? 'bg-gray-600 cursor-not-allowed opacity-50'
-              : !isSpeechSupported
-                ? 'bg-gray-600 cursor-not-allowed opacity-50'
-                : isListening 
-                  ? 'bg-red-600 animate-pulse' 
-                  : isLoading
-                    ? 'bg-gray-600 cursor-not-allowed'
-                    : 'bg-red-500/20 backdrop-blur-md hover:bg-red-500/30'
-          }`}
-          title={permissionDenied ? "Microphone permission denied. Click to allow." : !isSpeechSupported ? "Voice not supported" : ""}
-        >
-          {permissionDenied || !isSpeechSupported ? (
-            <MicOff className="w-7 h-7 text-gray-400" />
-          ) : isListening ? (
-            <MicOff className="w-7 h-7 text-white" />
-          ) : (
-            <Mic className="w-7 h-7 text-white" />
-          )}
-        </button>
-      </div>
-      {isListening && (
-        <div className="flex items-center gap-1.5 h-8">
-          {[40, 90, 60, 30, 80,40,60,90,20,60,100,20,40, 90, 60, 30, 80,40,60,90,20,60,100,20].map((h, i) => (
-            <div key={i} className="w-[3px] bg-[#F70353] rounded-full animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
-          ))}
-        </div>
-      )}
-      {permissionDenied && (
-        <div className="text-center text-xs text-red-400 bg-red-400/10 px-3 py-1 rounded-full">
-          Microphone permission needed
-        </div>
-      )}
-      {!isSpeechSupported && (
-        <div className="text-center text-xs text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">
-          Voice not supported in this browser
-        </div>
-      )}
-    </div>
-  );
+  // // --- UI Components ---
+  // const MicVisual = ({ size = "large" }: { size?: "small" | "large" }) => (
+  //   <div className={`flex flex-col items-center justify-center gap-6 w-full animate-in fade-in zoom-in duration-500`}>
+  //     <div className={`relative ${size === "large" ? "scale-125 lg:scale-150" : "scale-100"} flex items-center justify-center`}>
+  //       {isListening && (
+  //         <div className="absolute w-[130px] h-[130px] border border-[#F70353]/40 rounded-full animate-ping" />
+  //       )}
+  //       <div className="absolute w-[110px] h-[110px] bg-[#F70353] blur-[45px] opacity-25 rounded-full" />
+  //       <button 
+  //         onClick={toggleListening}
+  //         disabled={isLoading || permissionDenied || !isSpeechSupported}
+  //         className={`relative p-5 rounded-full shadow-lg border border-red-400/30 flex items-center justify-center transition-all ${
+  //           permissionDenied 
+  //             ? 'bg-gray-600 cursor-not-allowed opacity-50'
+  //             : !isSpeechSupported
+  //               ? 'bg-gray-600 cursor-not-allowed opacity-50'
+  //               : isListening 
+  //                 ? 'bg-red-600 animate-pulse' 
+  //                 : isLoading
+  //                   ? 'bg-gray-600 cursor-not-allowed'
+  //                   : 'bg-red-500/20 backdrop-blur-md hover:bg-red-500/30'
+  //         }`}
+  //         title={permissionDenied ? "Microphone permission denied. Click to allow." : !isSpeechSupported ? "Voice not supported" : ""}
+  //       >
+  //         {permissionDenied || !isSpeechSupported ? (
+  //           <MicOff className="w-7 h-7 text-gray-400" />
+  //         ) : isListening ? (
+  //           <MicOff className="w-7 h-7 text-white" />
+  //         ) : (
+  //           <Mic className="w-7 h-7 text-white" />
+  //         )}
+  //       </button>
+  //     </div>
+  //     {isListening && (
+  //       <div className="flex items-center gap-1.5 h-8">
+  //         {[40, 90, 60, 30, 80,40,60,90,20,60,100,20,40, 90, 60, 30, 80,40,60,90,20,60,100,20].map((h, i) => (
+  //           <div key={i} className="w-[3px] bg-[#F70353] rounded-full animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
+  //         ))}
+  //       </div>
+  //     )}
+  //     {permissionDenied && (
+  //       <div className="text-center text-xs text-red-400 bg-red-400/10 px-3 py-1 rounded-full">
+  //         Microphone permission needed
+  //       </div>
+  //     )}
+  //     {!isSpeechSupported && (
+  //       <div className="text-center text-xs text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">
+  //         Voice not supported in this browser
+  //       </div>
+  //     )}
+  //   </div>
+  // );
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/fdsfdahf.PNG')] bg-cover bg-center bg-no-repeat text-white relative flex flex-col overflow-x-hidden">
       
-      {/* HEADER */}
-      <header className="w-full pt-10 px-4 sm:px-6 lg:px-10 z-50 text-center relative">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="lg:absolute left-4 lg:left-10 top-10 flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/20 p-2 pr-5 rounded-xl transition-all hover:scale-105"
-        >
-          <div className="bg-gradient-to-b from-[#F70353] to-[#A30237] p-2 rounded-[10px]">
-            <ArrowLeft className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-white font-bold text-[11px] tracking-widest uppercase">Back</span>
-        </button>
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold uppercase tracking-tight mt-12 lg:mt-0 px-4">
-          How would you like to create <span className="text-[#F70353]">YOUR DESIGN?</span>
-        </h1>
-      </header>
+      <DescribeDesignNavbar />
 
       {/* MAIN CONTENT AREA - Responsive layout */}
-      <main className="flex-1 flex flex-col xl:flex-row items-center justify-between px-4 sm:px-6 lg:px-20 py-6 sm:py-10 gap-6 sm:gap-10">
+      <main className="flex-1 mt-32 flex flex-col lg:flex-row items-start justify-between px-4 sm:px-6 lg:px-20 py-6 sm:py-10 gap-6 sm:gap-10">
         
         {/* LEFT PANEL - Transcription + Manual Typing + Buttons */}
         <div className="w-full lg:w-[350px] flex flex-col gap-4 sm:gap-6 z-30 order-2 lg:order-1">
-          <div className="bg-black/30 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
+          <div className="  backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <label className="text-[10px] uppercase text-white/40 tracking-[0.2em] font-bold">
                 {isListening ? "Voice Input (Live)" : "Text Input"}
@@ -520,7 +642,7 @@ const SpeakPrompt = () => {
               <input 
                 type="range" 
                 min="1" 
-                max="10" 
+                max="4" 
                 value={numberOfPages} 
                 onChange={(e) => setNumberOfPages(Number(e.target.value))} 
                 className="w-full h-1.5 bg-white/10 rounded-lg accent-[#F70353]" 
@@ -553,23 +675,17 @@ const SpeakPrompt = () => {
                 <>
                   <CustomButton 
                     wrapperClassName="w-full h-[55px] rounded-2xl bg-indigo-600 hover:bg-indigo-700" 
-                    title="Start New Design" 
+                    title="Try New Design" 
                     icon={<RotateCcw className="size-5" />} 
                     onClick={handleReset}
                     disabled={isLoading}
                   />
-                  <CustomBlackButton 
-                    wrapperClassName="w-full h-[55px] rounded-2xl border border-white/10" 
-                    title="Proceed With Selected Design" 
-                    onClick={() => {
-                      if (images.length > 0) {
-                        navigate("/next-step", { state: { images, description: transcript } });
-                      } else {
-                        toast.error("No designs generated yet");
-                      }
-                    }}
-                    disabled={images.length === 0 || isLoading}
-                  />
+                <CustomBlackButton 
+  wrapperClassName="w-full h-[55px] rounded-2xl border border-white/10" 
+  title="Proceed With Selected Design" 
+  onClick={handleProceed} // <--- CHANGE THIS
+  disabled={images.length === 0 || isLoading}
+/>
                 </>
               )}
             </div>
@@ -606,7 +722,15 @@ const SpeakPrompt = () => {
             </div>
           ) : !isGenerated ? (
             <div className="flex flex-col items-center gap-6 sm:gap-8 px-4">
-              <MicVisual size="large" />
+              {/* Replace the old <MicVisual size="large" /> with this: */}
+<MicVisual 
+  size="large"
+  isListening={isListening}
+  isLoading={isLoading}
+  permissionDenied={permissionDenied}
+  isSpeechSupported={isSpeechSupported}
+  toggleListening={toggleListening}
+/>
               <div className="text-center max-w-md">
                 <h3 className="text-xl sm:text-2xl font-bold mb-4">Describe Your Design</h3>
                 <div className="space-y-4">
@@ -631,12 +755,12 @@ const SpeakPrompt = () => {
           ) : (
             <div className="w-full px-4 sm:px-0">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
-                <div>
+                {/* <div>
                   <h2 className="text-xl sm:text-2xl font-bold">Your Generated Designs</h2>
                   <p className="text-white/60 mt-1 text-sm">
                     Based on: "{transcript.substring(0, 60)}{transcript.length > 60 ? '...' : ''}"
                   </p>
-                </div>
+                </div> */}
                 <div className="flex gap-2">
                   <span className="bg-[#F70353] px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
                     {images.length} variations
@@ -650,26 +774,29 @@ const SpeakPrompt = () => {
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 animate-in zoom-in-95 duration-700">
-                {images.map((url, i) => (
-                  <div key={i} className="group relative">
-                    <div className="aspect-square rounded-xl sm:rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:border-[#F70353]/50">
-                      <img 
-                        src={url} 
-                        alt={`Design variation ${i + 1}`} 
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-                    <div className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-black/80 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
-                      #{i + 1}
-                    </div>
-                    <div className="absolute bottom-3 sm:bottom-4 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button className="bg-black/90 backdrop-blur-md px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium hover:bg-black transition-colors">
-                        Select This
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              {images.map((url, i) => (
+  <div 
+    key={i} 
+    className="group relative"
+    onClick={() => selectImageByUrl(url)} // <--- ADD THIS
+  >
+    <div className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 ${
+      selectedImage === url ? 'border-[#F70353] scale-[1.02]' : 'border-white/10' 
+    }`}>
+      <img 
+        src={url} 
+        alt={`Design variation ${i + 1}`} 
+        className="w-full h-full object-cover"
+      />
+    </div>
+    {/* Optional: Add a "Selected" badge */}
+    {selectedImage === url && (
+      <div className="absolute top-2 left-2 bg-[#F70353] text-[10px] px-2 py-1 rounded-md font-bold">
+        SELECTED
+      </div>
+    )}
+  </div>
+))}
               </div>
             </div>
           )}
@@ -681,7 +808,15 @@ const SpeakPrompt = () => {
             <>
               <div className="p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5 w-full">
                 <p className="text-center text-xs sm:text-sm uppercase tracking-widest text-white/30 mb-4">Modify Design</p>
-                <MicVisual size="small" />
+               {/* Replace the old <MicVisual size="small" /> with this: */}
+<MicVisual 
+  size="small"
+  isListening={isListening}
+  isLoading={isLoading}
+  permissionDenied={permissionDenied}
+  isSpeechSupported={isSpeechSupported}
+  toggleListening={toggleListening}
+/>
                 <p className="text-center text-xs sm:text-sm text-white/60 mt-4">
                   Speak to modify or create new variations
                 </p>
@@ -747,23 +882,23 @@ const SpeakPrompt = () => {
               <h4 className="font-bold mb-4 text-center text-sm sm:text-base">Voice Commands Examples</h4>
               <div className="space-y-3">
                 <div className="p-3 bg-white/5 rounded-lg">
-                  <p className="text-xs sm:text-sm text-white/60 mb-1">For logos:</p>
-                  <p className="text-white/90 text-xs sm:text-sm">"Create a modern tech logo"</p>
+                  <p className="text-xs sm:text-sm text-white/60 mb-1">For Images:</p>
+                  <p className="text-white/90 text-xs sm:text-sm">"Create a Ghibli art"</p>
                 </div>
                 <div className="p-3 bg-white/5 rounded-lg">
                   <p className="text-xs sm:text-sm text-white/60 mb-1">For websites:</p>
-                  <p className="text-white/90 text-xs sm:text-sm">"Design a website header"</p>
+                  <p className="text-white/90 text-xs sm:text-sm">"Design a photo like spider man"</p>
                 </div>
                 <div className="p-3 bg-white/5 rounded-lg">
                   <p className="text-xs sm:text-sm text-white/60 mb-1">For colors:</p>
                   <p className="text-white/90 text-xs sm:text-sm">"Make it blue and white"</p>
                 </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-white/10">
+              {/* <div className="mt-6 pt-6 border-t border-white/10">
                 <p className="text-xs text-white/40 text-center">
                   You can also just type in the left panel if voice doesn't work
                 </p>
-              </div>
+              </div> */}
             </div>
           )}
         </div>

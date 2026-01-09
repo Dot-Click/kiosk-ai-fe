@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Box } from "@/components/ui/box";
 import { Center } from "@/components/ui/center";
 import { Stack } from "@/components/ui/stack";
@@ -140,6 +140,13 @@ const ApplyMokupDesignPage = () => {
   };
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+  return () => {
+    // Optional: Clear selected image when leaving page
+    // useImageStore.getState().clearSelectedImage();
+  };
+}, []);
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">

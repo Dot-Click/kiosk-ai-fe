@@ -262,7 +262,7 @@ const ApplyMokupDesignNavbar = () => {
 
   const handleGoBack = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate("/select-methods/capture-photo/describe-design");
+    navigate(-1);
   };
 
   return (
