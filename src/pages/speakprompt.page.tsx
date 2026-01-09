@@ -1,3 +1,943 @@
+// import { cn } from "@/utils/cn.util";
+// import { useNavigate } from "react-router";
+// import { Flex } from "../components/ui/flex";
+// import { Stack } from "../components/ui/stack";
+// import { BiArrowBack } from "react-icons/bi";
+// import { Center } from "../components/ui/center";
+// import { useImageStore } from "@/store/image.store";
+// import { useState, useEffect, useRef } from "react";
+// import { Box } from "@/components/ui/box";
+// import { Mic, MicOff, RotateCcw } from "lucide-react";
+// import { BsStars } from "react-icons/bs";
+// import { toast } from "sonner";
+
+// // Custom Components
+// import DesignDescriptionInput from "@/components/designdescriptionreadbleandeditable/designdescriptionreadbleandeditable";
+// import CustomButton from "@/components/common/customButton";
+// import CustomBlackButton from "@/components/common/customBlackButton";
+
+
+// const NavbarWrapper = ({
+//   children,
+//   className,
+//   onClick,
+// }: {
+//   children: React.ReactNode;
+//   className?: string;
+//   onClick?: () => void;
+// }) => (
+//   <Box className={cn("bg-transparent absolute cursor-pointer", className)} onClick={onClick}>
+//     {children}
+//   </Box>
+// );
+
+// const GoBackButton = ({
+//   onClick,
+//   className,
+// }: {
+//   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+//   className?: string;
+// }) => (
+//   <Box
+//     onClick={onClick}
+//     className={cn(
+//       "flex items-center cursor-pointer hover:scale-105 transition-all duration-300 relative",
+//       "w-[100px] h-[45px] xl:w-[120px] xl:h-[55px] 2xl:w-[140px] 2xl:h-[65px] rounded-[12px] xl:rounded-[14px] 2xl:rounded-[16px] p-[1px]",
+//       "shadow-[0px_4px_32px_0px_rgba(21,2,8,0.87)]",
+//       className
+//     )}
+//     style={{
+//       background: "conic-gradient(from 90deg at 50% 50%, rgba(240, 196, 211, 1) 0%, rgba(255, 185, 208, 0.08) 25%, rgba(240, 196, 211, 1) 60%)",
+//       backdropFilter: "blur(32px)",
+//     }}
+//   >
+//     <Center className="gap-2 xl:gap-3 2xl:gap-4 w-full h-full rounded-[12px] xl:rounded-[14px] 2xl:rounded-[16px] flex items-center bg-black px-2 py-2 xl:px-3 xl:py-3 2xl:px-4 2xl:py-4">
+//       <Center className="rounded-md gap-0 xl:rounded-lg 2xl:rounded-xl" style={{ padding: "8.89px", background: "linear-gradient(180deg, rgba(247, 3, 83, 1) 0%, rgba(247, 3, 83, 0.55) 100%)" }}>
+//         <BiArrowBack className="size-4 xl:size-5 2xl:size-6 text-white" />
+//       </Center>
+//       <Flex className="text-white font-normal uppercase text-base xl:text-lg 2xl:text-xl" style={{ fontFamily: "Outfit, sans-serif", fontSize: "16px", lineHeight: "1.26em", letterSpacing: "0.03em" }}>
+//         Back
+//       </Flex>
+//     </Center>
+//   </Box>
+// );
+
+// const DescribeDesignNavbar = () => {
+//   const navigate = useNavigate();
+//   return (
+//     <>
+//       <Box className="absolute items-center  gap-2 text-red-400 font-bold top-8 xl:top-10 2xl:top-12 left-26 max-lg:left-10 max-md:left-10 max-sm:left-2 xl:left-32 2xl:left-40 z-50">
+//         <GoBackButton onClick={() => navigate(-1)} />
+//       </Box>
+//       <NavbarWrapper className="flex items-center gap-2 justify-center text-white font-bold w-full">
+//         <Stack className="z-20 justify-center items-center mt-8 xl:mt-10 2xl:mt-12 p-0 gap-0 xl:gap-1 2xl:gap-2 max-sm:mt-18">
+//           <Flex className="gap-0 font-bold flex-col items-center justify-center text-center">
+//             <Flex className="gap-0">
+//               <h1 className="bg-clip-text text-transparent tracking-wide sm:text-[0.75rem] text-base lg:text-[1.75rem] xl:text-[1.30rem] 2xl:text-[1.60rem] p-0 m-0" style={{ backgroundImage: "linear-gradient(5deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 0%, #E5E5E1 40%, #E5E5E5 100%)" }}>
+//                 Describe your
+//               </h1>
+//               <Box className="relative inline-flex items-center justify-center ml-2 xl:ml-3 2xl:ml-4">
+//                 <Box className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[100px] rounded-full" style={{ background: "radial-gradient(circle, rgba(247, 3, 83, 0.4) 0%, rgba(247, 3, 83, 0.2) 40%, transparent 70%)", filter: "blur(20px)" }} />
+//                 <h1 className="text-[#F70353] sm:text-[1.10rem] text-xl lg:text-[2.15rem] xl:text-[1.50rem] 2xl:text-[1.80rem] p-0 relative z-10">Design</h1>
+//               </Box>
+//             </Flex>
+//             <p className="text-white/80 text-[12px] xl:text-[14px] 2xl:text-[16px] font-extralight tracking-widest text-center" style={{ letterSpacing: "1.6px", userSelect: "none" }}>
+//               Be as creative as you want! The AI will generate artwork based on your description.
+//             </p>
+//           </Flex>
+//         </Stack>
+//       </NavbarWrapper>
+//     </>
+//   );
+// };
+
+// // 1. Move this OUTSIDE the SpeakPrompt function (above it)
+// const MicVisual = ({ size = "large", isListening, isLoading, permissionDenied, isSpeechSupported, toggleListening }: any) => (
+//   <div className={`flex flex-col items-center justify-center gap-6 w-full animate-in fade-in zoom-in duration-500`}>
+//     <div className={`relative ${size === "large" ? "scale-125 lg:scale-150" : "scale-100"} flex items-center justify-center`}>
+//       {isListening && (
+//         <div className="absolute w-[130px] h-[130px] border border-[#F70353]/40 rounded-full animate-ping" />
+//       )}
+//       <div className="absolute w-[110px] h-[110px] bg-[#F70353] blur-[45px] opacity-25 rounded-full" />
+//       <button 
+//         onClick={toggleListening}
+//         disabled={isLoading || permissionDenied || !isSpeechSupported}
+//         className={`relative p-5 rounded-full shadow-lg border border-red-400/30 flex items-center justify-center transition-all ${
+//           permissionDenied 
+//             ? 'bg-gray-600 cursor-not-allowed opacity-50'
+//             : !isSpeechSupported
+//               ? 'bg-gray-600 cursor-not-allowed opacity-50'
+//               : isListening 
+//                 ? 'bg-red-600 animate-pulse' 
+//                 : isLoading
+//                   ? 'bg-gray-600 cursor-not-allowed'
+//                   : 'bg-red-500/20 backdrop-blur-md hover:bg-red-500/30'
+//         }`}
+//       >
+//         {permissionDenied || !isSpeechSupported ? (
+//           <MicOff className="w-7 h-7 text-gray-400" />
+//         ) : isListening ? (
+//           <MicOff className="w-7 h-7 text-white" />
+//         ) : (
+//           <Mic className="w-7 h-7 text-white" />
+//         )}
+//       </button>
+//     </div>
+//     {isListening && (
+//       <div className="flex items-center gap-1.5 h-8">
+//         {[40, 90, 60, 30, 80,40,60,90,20,60,100,20,40, 90, 60, 30, 80,40,60,90,20,60,100,20].map((h, i) => (
+//           <div key={i} className="w-[3px] bg-[#F70353] rounded-full animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
+//         ))}
+//       </div>
+//     )}
+//   </div>
+// );
+// const SpeakPrompt = () => {
+//   const navigate = useNavigate();
+//   const [numberOfPages, setNumberOfPages] = useState(4);
+//   const [transcript, setTranscript] = useState("");
+//   const [isListening, setIsListening] = useState(false);
+//   const [isGenerated, setIsGenerated] = useState(false);
+//   const [images, setImages] = useState<string[]>([]);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+//   const [permissionDenied, setPermissionDenied] = useState(false);
+//   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
+//   const { setGeneratedImages, selectImageByUrl, selectedImage } = useImageStore();
+
+//   const recognitionRef = useRef<any>(null);
+//   const accumulatedTranscript = useRef("");
+
+//   // Update button disabled state when transcript changes
+//   useEffect(() => {
+//     setIsButtonDisabled(!transcript.trim());
+//   }, [transcript]);
+
+//   // Check browser support on mount
+//   useEffect(() => {
+//     const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+//     setIsSpeechSupported(hasSpeechRecognition);
+    
+//     if (!hasSpeechRecognition) {
+//       toast.error("Your browser doesn't support voice recognition. Please use Chrome, Edge or Safari.");
+//     }
+//   }, []);
+
+//   // --- Voice Recognition Logic ---
+//   useEffect(() => {
+//     if (!isSpeechSupported) return;
+
+//     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+//     if (!SpeechRecognition) {
+//       setIsSpeechSupported(false);
+//       return;
+//     }
+
+//     try {
+//       const recognition = new SpeechRecognition();
+//       recognition.continuous = false; // Changed to false - stops after user stops speaking
+//       recognition.interimResults = true;
+//       recognition.lang = "en-US";
+//       recognition.maxAlternatives = 1;
+
+//       recognition.onstart = () => {
+//         setIsListening(true);
+//         setPermissionDenied(false);
+//         toast.info("Listening... Speak now");
+//       };
+      
+//       recognition.onresult = (event: any) => {
+//         console.log("Speech recognition result received");
+        
+//         let interimTranscript = '';
+//         let finalTranscript = '';
+        
+//         for (let i = 0; i < event.results.length; i++) {
+//           const result = event.results[i];
+//           const transcriptPart = result[0].transcript;
+          
+//           if (result.isFinal) {
+//             // This is a final result - user stopped speaking
+//             finalTranscript += transcriptPart;
+//           } else {
+//             // This is an interim result - user is still speaking
+//             interimTranscript += transcriptPart;
+//           }
+//         }
+
+//         // Update the accumulated transcript
+//         if (finalTranscript) {
+//           // User finished speaking, add to accumulated transcript
+//           accumulatedTranscript.current = (accumulatedTranscript.current + ' ' + finalTranscript).trim();
+//           setTranscript(accumulatedTranscript.current);
+//           console.log("Final transcript added:", finalTranscript);
+//         } else if (interimTranscript) {
+//           // User is still speaking, show interim results
+//           const currentDisplay = accumulatedTranscript.current 
+//             ? accumulatedTranscript.current + ' ' + interimTranscript
+//             : interimTranscript;
+//           setTranscript(currentDisplay);
+//           console.log("Interim transcript:", interimTranscript);
+//         }
+//       };
+
+//       recognition.onerror = (event: any) => {
+//         console.error("Speech recognition error:", event.error);
+//         setIsListening(false);
+        
+//         if (event.error === 'not-allowed' || event.error === 'audio-capture') {
+//           setPermissionDenied(true);
+//           toast.error("Microphone access denied. Please allow microphone access in browser settings.", {
+//             duration: 5000,
+//             action: {
+//               label: "Retry",
+//               onClick: () => requestMicrophonePermission()
+//             }
+//           });
+//         } else if (event.error === 'network') {
+//           toast.error("Network error occurred. Please check your connection.");
+//         } else if (event.error !== 'aborted') {
+//           toast.error(`Voice recognition error: ${event.error}`);
+//         }
+//       };
+      
+//       recognition.onend = () => {
+//         console.log("Speech recognition ended");
+//         setIsListening(false);
+//         accumulatedTranscript.current = transcript; // Save current transcript
+        
+//         // Only restart if user is still supposed to be listening
+//         if (isListening && !permissionDenied) {
+//           setTimeout(() => {
+//             if (recognitionRef.current && isListening) {
+//               try {
+//                 recognitionRef.current.start();
+//               } catch (error) {
+//                 console.error("Error restarting recognition:", error);
+//               }
+//             }
+//           }, 100);
+//         } else if (!isGenerated && !permissionDenied) {
+//           toast.info("Stopped listening");
+//         }
+//       };
+
+//       recognitionRef.current = recognition;
+//     } catch (error: any) {
+//       console.error("Failed to initialize speech recognition:", error);
+//       toast.error("Failed to initialize voice recognition");
+//     }
+
+//     // Cleanup
+//     return () => {
+//       if (recognitionRef.current) {
+//         try {
+//           recognitionRef.current.stop();
+//         } catch (e) {
+//           // Ignore errors during cleanup
+//         }
+//       }
+//     };
+//   }, [isSpeechSupported]);
+
+//   const requestMicrophonePermission = () => {
+//     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+//       toast.error("Microphone access is not supported in this browser.");
+//       return;
+//     }
+
+//     navigator.mediaDevices.getUserMedia({ audio: true })
+//       .then(() => {
+//         setPermissionDenied(false);
+//         toast.success("Microphone permission granted!");
+//         // Restart recognition after permission is granted
+//         if (recognitionRef.current) {
+//           startListening();
+//         }
+//       })
+//       .catch((error: any) => {
+//         console.error("Microphone permission error:", error);
+//         setPermissionDenied(true);
+//         if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+//           toast.error("Microphone permission denied. Please allow access in browser settings.");
+//         } else {
+//           toast.error("Failed to access microphone. Please check your settings.");
+//         }
+//       });
+//   };
+
+//   const startListening = () => {
+//     if (!isSpeechSupported) {
+//       toast.error("Voice recognition is not supported in your browser.");
+//       return;
+//     }
+
+//     if (permissionDenied) {
+//       toast.error("Microphone access was previously denied. Please allow access and try again.", {
+//         action: {
+//           label: "Allow",
+//           onClick: () => requestMicrophonePermission()
+//         }
+//       });
+//       return;
+//     }
+
+//     if (!recognitionRef.current) {
+//       toast.error("Voice recognition not available");
+//       return;
+//     }
+
+//     try {
+//       // First check if we have permission
+//       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+//         toast.error("Microphone access is not supported in this browser.");
+//         return;
+//       }
+
+//       // Clear previous recognition
+//       try {
+//         recognitionRef.current.stop();
+//       } catch (e) {
+//         // Ignore if already stopped
+//       }
+
+//       // Reset accumulated transcript when starting fresh
+//       accumulatedTranscript.current = transcript;
+
+//       // Try to start recognition
+//       setTimeout(() => {
+//         try {
+//           recognitionRef.current.start();
+//         } catch (error) {
+//           console.error("Error starting recognition:", error);
+//           setIsListening(false);
+//           toast.error("Failed to start voice recognition");
+//         }
+//       }, 200);
+      
+//       setIsListening(true);
+//       toast.info("Microphone activated. Start speaking...");
+//     } catch (error: any) {
+//       console.error("Error starting voice recognition:", error);
+//       setIsListening(false);
+      
+//       // If permission error, show specific message
+//       if (error.toString().includes('Permission') || error.toString().includes('NotAllowed')) {
+//         setPermissionDenied(true);
+//         toast.error("Microphone access denied. Please allow microphone access.", {
+//           action: {
+//             label: "Allow",
+//             onClick: () => requestMicrophonePermission()
+//           }
+//         });
+//       } else {
+//         toast.error("Cannot access microphone. Please check permissions.");
+//       }
+//     }
+//   };
+
+//   const stopListening = () => {
+//     if (recognitionRef.current && isListening) {
+//       try {
+//         recognitionRef.current.stop();
+//         setIsListening(false);
+//         // Save the current transcript
+//         accumulatedTranscript.current = transcript;
+//         if (!permissionDenied) {
+//           toast.info("Stopped listening");
+//         }
+//       } catch (error: any) {
+//         console.error("Error stopping voice recognition:", error);
+//       }
+//     }
+//   };
+
+//   const toggleListening = () => {
+//     if (isListening) {
+//       stopListening();
+//     } else {
+//       startListening();
+//     }
+//   };
+
+//   const handleGenerate = () => {
+//     if (!transcript.trim()) {
+//       toast.error("Please speak or type your design description first!");
+//       return;
+//     }
+
+//     // Stop listening if active
+//     if (isListening) {
+//       stopListening();
+//     }
+
+//     // Show loading
+//     setIsLoading(true);
+//     setIsButtonDisabled(true);
+//     const loadingToast = toast.loading("Generating your designs...");
+
+//     // Simulate API call with timeout
+//     setTimeout(() => {
+//       // Generate mock images based on transcript
+//       const mockImages = [
+//         `https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
+//         `https://images.unsplash.com/photo-1508921912186-1d1a45ebb3c1?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
+//         `https://images.unsplash.com/photo-1575936123452-b67c3203c357?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
+//         `https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop&q=80&t=${Date.now()}`
+//       ];
+  
+//       setIsGenerated(true);
+//       setIsLoading(false);
+//       const selectedImages = mockImages.slice(0, numberOfPages);
+//       setImages(selectedImages);
+//       setGeneratedImages(selectedImages, transcript); // <--- ADD THIS LINE
+//       // Update toast
+//       toast.dismiss(loadingToast);
+//       toast.success(`Successfully generated ${selectedImages.length} design variations!`);
+      
+//     }, 1000);
+//   };
+
+
+//   const handleProceed = () => {
+//   if (images.length > 0) {
+//     // If user hasn't manually clicked one, default to the first image
+//     if (!selectedImage) {
+//       selectImageByUrl(images[0]);
+//     }
+//     // Navigate to mockup file
+//     navigate("/select-methods/capture-photo/describe-design/apply-mokup-design");
+//   } else {
+//     toast.error("Please generate images first");
+//   }
+// };
+
+
+//   const handleReset = () => {
+//     setTranscript("");
+//     accumulatedTranscript.current = "";
+//     setIsGenerated(false);
+//     setImages([]);
+//     setIsButtonDisabled(true);
+//     stopListening();
+    
+//     toast.info("Ready for new design description");
+//   };
+
+//   const handleManualType = (text: string) => {
+//     setTranscript(text);
+//     accumulatedTranscript.current = text;
+//     // If user starts typing while listening, stop listening
+//     if (isListening) {
+//       stopListening();
+//     }
+//   };
+
+//   // Clear speech recognition history
+//   const clearSpeechHistory = () => {
+//     setTranscript("");
+//     accumulatedTranscript.current = "";
+//     // Reset the recognition to avoid old results
+//     if (recognitionRef.current) {
+//       try {
+//         recognitionRef.current.stop();
+//         setTimeout(() => {
+//           if (isListening && recognitionRef.current) {
+//             recognitionRef.current.start();
+//           }
+//         }, 100);
+//       } catch (e) {
+//         // Ignore errors
+//       }
+//     }
+//   };
+
+//   // // --- UI Components ---
+//   // const MicVisual = ({ size = "large" }: { size?: "small" | "large" }) => (
+//   //   <div className={`flex flex-col items-center justify-center gap-6 w-full animate-in fade-in zoom-in duration-500`}>
+//   //     <div className={`relative ${size === "large" ? "scale-125 lg:scale-150" : "scale-100"} flex items-center justify-center`}>
+//   //       {isListening && (
+//   //         <div className="absolute w-[130px] h-[130px] border border-[#F70353]/40 rounded-full animate-ping" />
+//   //       )}
+//   //       <div className="absolute w-[110px] h-[110px] bg-[#F70353] blur-[45px] opacity-25 rounded-full" />
+//   //       <button 
+//   //         onClick={toggleListening}
+//   //         disabled={isLoading || permissionDenied || !isSpeechSupported}
+//   //         className={`relative p-5 rounded-full shadow-lg border border-red-400/30 flex items-center justify-center transition-all ${
+//   //           permissionDenied 
+//   //             ? 'bg-gray-600 cursor-not-allowed opacity-50'
+//   //             : !isSpeechSupported
+//   //               ? 'bg-gray-600 cursor-not-allowed opacity-50'
+//   //               : isListening 
+//   //                 ? 'bg-red-600 animate-pulse' 
+//   //                 : isLoading
+//   //                   ? 'bg-gray-600 cursor-not-allowed'
+//   //                   : 'bg-red-500/20 backdrop-blur-md hover:bg-red-500/30'
+//   //         }`}
+//   //         title={permissionDenied ? "Microphone permission denied. Click to allow." : !isSpeechSupported ? "Voice not supported" : ""}
+//   //       >
+//   //         {permissionDenied || !isSpeechSupported ? (
+//   //           <MicOff className="w-7 h-7 text-gray-400" />
+//   //         ) : isListening ? (
+//   //           <MicOff className="w-7 h-7 text-white" />
+//   //         ) : (
+//   //           <Mic className="w-7 h-7 text-white" />
+//   //         )}
+//   //       </button>
+//   //     </div>
+//   //     {isListening && (
+//   //       <div className="flex items-center gap-1.5 h-8">
+//   //         {[40, 90, 60, 30, 80,40,60,90,20,60,100,20,40, 90, 60, 30, 80,40,60,90,20,60,100,20].map((h, i) => (
+//   //           <div key={i} className="w-[3px] bg-[#F70353] rounded-full animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
+//   //         ))}
+//   //       </div>
+//   //     )}
+//   //     {permissionDenied && (
+//   //       <div className="text-center text-xs text-red-400 bg-red-400/10 px-3 py-1 rounded-full">
+//   //         Microphone permission needed
+//   //       </div>
+//   //     )}
+//   //     {!isSpeechSupported && (
+//   //       <div className="text-center text-xs text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">
+//   //         Voice not supported in this browser
+//   //       </div>
+//   //     )}
+//   //   </div>
+//   // );
+
+//   return (
+//     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/fdsfdahf.PNG')] bg-cover bg-center bg-no-repeat text-white relative flex flex-col overflow-x-hidden">
+      
+//       <DescribeDesignNavbar />
+
+//       {/* MAIN CONTENT AREA - Responsive layout */}
+//       <main className="flex-1 mt-32 flex flex-col xl:flex-row items-start justify-between px-4 sm:px-6 lg:px-20 py-6 sm:py-10 gap-6 sm:gap-10">
+        
+//         {/* LEFT PANEL - Transcription + Manual Typing + Buttons */}
+//         <div className="w-full xl:w-[350px] flex flex-col gap-4 sm:gap-6 z-30 order-2 lg:order-1">
+//           <div className="  backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
+//             <div className="flex items-center justify-between mb-4">
+//               <label className="text-[10px] uppercase text-white/40 tracking-[0.2em] font-bold">
+//                 {isListening ? "Voice Input (Live)" : "Text Input"}
+//               </label>
+//               <div className="flex items-center gap-2">
+//                 {isListening && (
+//                   <div className="flex items-center gap-1">
+//                     {/* <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> */}
+//                     {/* <span className="text-[10px] text-green-400 font-bold">LIVE</span> */}
+//                   </div>
+//                 )}
+//                 {transcript && (
+//                   <button 
+//                     onClick={clearSpeechHistory}
+//                     className="text-xs text-white/50 hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10"
+//                     title="Clear text"
+//                   >
+//                     Clear
+//                   </button>
+//                 )}
+//               </div>
+//             </div>
+            
+//             {/* Use the fixed DesignDescriptionInput component */}
+//             <DesignDescriptionInput 
+//               value={transcript}
+//               onChange={handleManualType}
+//               placeholder={
+//                 permissionDenied 
+//                   ? "Microphone access denied. Click allow to use voice." 
+//                   : isListening 
+//                     ? "Speaking... Your words appear here..." 
+//                     : "Click microphone to speak OR type here..."
+//               }
+//               disabled={isLoading}
+//               isListening={isListening}
+//               onMicClick={toggleListening}
+//             />
+
+//             {/* Speech status indicator */}
+//             {isListening && (
+//               <div className="mt-3 flex items-center gap-2">
+//                 <div className="flex items-center gap-1">
+//                   {[1, 2, 3].map((i) => (
+//                     <div 
+//                       key={i} 
+//                       className="w-1 h-1 bg-green-500 rounded-full animate-pulse"
+//                       style={{ animationDelay: `${i * 0.2}s` }}
+//                     />
+//                   ))}
+//                 </div>
+//                 <span className="text-xs text-green-400">
+//                   Listening... Speak clearly
+//                 </span>
+//               </div>
+//             )}
+
+//             {/* Permission denied warning */}
+//             {permissionDenied && (
+//               <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+//                 <div className="flex items-center gap-2 mb-1">
+//                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+//                   <span className="text-xs font-bold text-red-400">Microphone Access Required</span>
+//                 </div>
+//                 <p className="text-xs text-red-300/80">
+//                   Please allow microphone access to use voice input. Click the microphone button and allow permission when prompted.
+//                 </p>
+//                 <button 
+//                   onClick={requestMicrophonePermission}
+//                   className="mt-2 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors"
+//                 >
+//                   Allow Microphone
+//                 </button>
+//               </div>
+//             )}
+
+//             {/* Variations Slider */}
+//             <div className="flex flex-col gap-4 mt-6 sm:mt-8">
+//               <div className="flex justify-between items-center text-xs">
+//                 <span className="text-white/60">Number of Variations</span>
+//                 <span className="bg-[#F70353] px-3 py-0.5 rounded-full text-xs font-bold">{numberOfPages}</span>
+//               </div>
+//               <input 
+//                 type="range" 
+//                 min="1" 
+//                 max="4" 
+//                 value={numberOfPages} 
+//                 onChange={(e) => setNumberOfPages(Number(e.target.value))} 
+//                 className="w-full h-1.5 bg-white/10 rounded-lg accent-[#F70353]" 
+//                 disabled={isLoading}
+//               />
+//             </div>
+
+//             {/* Action Buttons */}
+//             <div className="flex flex-col gap-3 mt-6 sm:mt-8">
+//               {!isGenerated ? (
+//                 <>
+//                   <CustomButton 
+//                     wrapperClassName={`w-full h-[55px] rounded-2xl ${
+//                       isButtonDisabled || isLoading 
+//                         ? 'opacity-50 cursor-not-allowed' 
+//                         : ''
+//                     }`}
+//                     title={isLoading ? "Generating..." : "Generate Designs"}
+//                     icon={<BsStars className="size-5" />}
+//                     onClick={handleGenerate}
+//                     disabled={isButtonDisabled || isLoading}
+//                   />
+//                   <div className="text-center text-xs text-white/40 mt-2">
+//                     {isButtonDisabled 
+//                       ? "← Speak or type description first" 
+//                       : `Ready to generate ${numberOfPages} variations`}
+//                   </div>
+//                 </>
+//               ) : (
+//                 <>
+//                   <CustomButton 
+//                     wrapperClassName="w-full h-[55px] rounded-2xl bg-indigo-600 hover:bg-indigo-700" 
+//                     title="Try New Design" 
+//                     icon={<RotateCcw className="size-5" />} 
+//                     onClick={handleReset}
+//                     disabled={isLoading}
+//                   />
+//                 <CustomBlackButton 
+//   wrapperClassName="w-full h-[55px] rounded-2xl border border-white/10" 
+//   title="Proceed With Selected Design" 
+//   onClick={handleProceed} // <--- CHANGE THIS
+//   disabled={images.length === 0 || isLoading}
+// />
+//                 </>
+//               )}
+//             </div>
+//           </div>
+          
+//           {/* Instructions - Hidden on mobile when generated */}
+//           {!isGenerated && (
+//             <div className="text-xs text-white/50 bg-black/20 p-4 rounded-xl hidden sm:block">
+//               <p className="font-bold mb-2">How to use:</p>
+//               <p>1. Click microphone and speak your design idea</p>
+//               <p>2. OR type directly in the text box</p>
+//               <p>3. Text appears automatically as you speak/type</p>
+//               <p>4. Click "Generate" to create designs</p>
+//             </div>
+//           )}
+//         </div>
+// {/* CENTER COLUMN - Main Content */}
+// <div className="flex-1 flex flex-col items-center justify-center z-20 min-h-[400px] sm:min-h-[500px] order-1 lg:order-2 w-full">
+//   {isLoading ? (
+//     <div className="flex flex-col items-center justify-center gap-4 sm:gap-6">
+//       <div className="relative">
+//         <div className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-[#F70353]/20 border-t-[#F70353] rounded-full animate-spin"></div>
+//         <BsStars className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 sm:w-12 sm:h-12 text-[#F70353] animate-pulse" />
+//       </div>
+//       <div className="text-center px-4">
+//         <h3 className="text-xl sm:text-2xl font-bold mb-2 tracking-tight">Generating Your Designs</h3>
+//         <p className="text-white/70 text-sm sm:text-base">Creating {numberOfPages} variations...</p>
+//         <div className="mt-4 w-48 sm:w-64 h-1.5 bg-white/10 rounded-full overflow-hidden">
+//           <div className="h-full bg-gradient-to-r from-[#F70353] to-purple-500 animate-pulse w-full"></div>
+//         </div>
+//       </div>
+//     </div>
+//   ) : !isGenerated ? (
+//     <div className="flex flex-col items-center gap-6 sm:gap-8 px-4 w-full max-w-lg mx-auto">
+//       <MicVisual 
+//         size="large"
+//         isListening={isListening}
+//         isLoading={isLoading}
+//         permissionDenied={permissionDenied}
+//         isSpeechSupported={isSpeechSupported}
+//         toggleListening={toggleListening}
+//       />
+//       <div className="text-center">
+//         <h3 className="text-2xl sm:text-3xl font-bold mb-4 tracking-tight uppercase">Describe Your Design</h3>
+//         <div className="space-y-4">
+//           <p className="text-white/70 text-sm sm:text-base leading-relaxed">
+//             Click the <span className="text-[#F70353] font-bold">microphone</span> and speak naturally.
+//             Your words will appear in the left panel instantly.
+//           </p>
+//           <p className="text-white/40 text-xs sm:text-sm font-light">
+//             Or type manually in the text box on the left
+//           </p>
+//         </div>
+//       </div>
+//     </div>
+//   ) : (
+//     /* --- FULLY RESPONSIVE IMAGE GRID --- */
+//     <div className="w-full px-4 sm:px-0 flex flex-col items-center">
+//       {/* Top Meta Info Bar */}
+//       <div className="w-full max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] flex justify-between items-center mb-6 gap-3">
+//         <span className="bg-[#F70353]/10 border border-[#F70353]/20 text-[#F70353] px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest">
+//           {images.length} Design Variations
+//         </span>
+//         <button 
+//           onClick={handleReset}
+//           className="px-4 py-1.5 rounded-lg border border-white/10 text-xs font-medium hover:bg-white/5 hover:border-white/20 transition-all text-white/50 hover:text-white"
+//         >
+//           Clear All
+//         </button>
+//       </div>
+
+//       {/* The Responsive Grid: Always 2 columns to prevent images from being "too big" on mobile */}
+//       <div className="grid grid-cols-2 gap-3 sm:gap-6 w-full max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] mx-auto animate-in fade-in zoom-in-95 duration-500">
+//         {images.map((url, i) => {
+//           const isSelected = selectedImage === url;
+//           return (
+//             <div 
+//               key={i} 
+//               className="group relative cursor-pointer"
+//               onClick={() => selectImageByUrl(url)}
+//             >
+//               {/* Image Container with Dynamic Scale and Ring Glow */}
+//               <div className={`aspect-square rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 relative ${
+//                 isSelected 
+//                   ? 'border-[#F70353] scale-[1.03] z-10 shadow-[0_0_25px_rgba(247,3,83,0.3)]' 
+//                   : 'border-white/10 hover:border-white/30 hover:scale-[1.01]' 
+//               }`}>
+//                 <img 
+//                   src={url} 
+//                   alt={`Design variation ${i + 1}`} 
+//                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+//                 />
+                
+//                 {/* Overlay on hover */}
+//                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+//               </div>
+
+//               {/* Selected badge with responsive positioning and size */}
+//               {isSelected && (
+//                 <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-20 bg-[#F70353] text-white text-[8px] sm:text-[10px] px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded sm:rounded-md font-bold uppercase tracking-wider shadow-lg animate-in zoom-in duration-200">
+//                   Selected
+//                 </div>
+//               )}
+
+//               {/* Variation number */}
+//               <div className="absolute bottom-2 right-2 z-20 text-white/40 text-[9px] font-mono group-hover:text-white/80 transition-colors">
+//                 VAR_{i + 1}
+//               </div>
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   )}
+// </div>
+//         {/* RIGHT COLUMN - Side Panel */}
+//         <div className="w-full xl:w-[350px] flex flex-col items-center justify-center z-30 order-3 gap-4 sm:gap-6 mt-4 sm:mt-0">
+//           {isGenerated ? (
+//             <>
+//               <div className="p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5 w-full">
+//                 <p className="text-center text-xs sm:text-sm uppercase tracking-widest text-white/30 mb-4">Modify Design</p>
+//                {/* Replace the old <MicVisual size="small" /> with this: */}
+// <MicVisual 
+//   size="small"
+//   isListening={isListening}
+//   isLoading={isLoading}
+//   permissionDenied={permissionDenied}
+//   isSpeechSupported={isSpeechSupported}
+//   toggleListening={toggleListening}
+// />
+//                 <p className="text-center text-xs sm:text-sm text-white/60 mt-4">
+//                   Speak to modify or create new variations
+//                 </p>
+                
+//                 <div className="mt-4 sm:mt-6 space-y-2">
+//                   <button 
+//                     onClick={() => setTranscript(transcript + " Make it more colorful.")}
+//                     className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs sm:text-sm text-left"
+//                   >
+//                     "Add more color"
+//                   </button>
+//                   <button 
+//                     onClick={() => setTranscript(transcript + " Make it minimal and clean.")}
+//                     className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs sm:text-sm text-left"
+//                   >
+//                     "Make it minimalist"
+//                   </button>
+//                   <button 
+//                     onClick={startListening}
+//                     disabled={isListening || isLoading || permissionDenied || !isSpeechSupported}
+//                     className={`w-full p-3 rounded-lg transition-colors text-xs sm:text-sm ${
+//                       isListening || isLoading || permissionDenied || !isSpeechSupported
+//                         ? 'bg-gray-700/50 cursor-not-allowed text-gray-400'
+//                         : 'bg-blue-500/20 hover:bg-blue-500/30'
+//                     }`}
+//                   >
+//                     {isListening ? 'Listening...' : 'Start Speaking Again'}
+//                   </button>
+//                 </div>
+//               </div>
+              
+//               <div className="w-full p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5">
+//                 <h4 className="font-bold mb-3 text-center text-sm">Quick Actions</h4>
+//                 <div className="space-y-2">
+//                   <button 
+//                     onClick={() => {
+//                       if (transcript) {
+//                         handleGenerate();
+//                       } else {
+//                         toast.error("Please add a description first");
+//                       }
+//                     }}
+//                     disabled={isLoading}
+//                     className={`w-full p-3 rounded-lg text-xs sm:text-sm transition-colors ${
+//                       isLoading
+//                         ? 'bg-gray-700/50 cursor-not-allowed text-gray-400'
+//                         : 'bg-green-500/20 hover:bg-green-500/30'
+//                     }`}
+//                   >
+//                     {isLoading ? 'Generating...' : 'Regenerate Designs'}
+//                   </button>
+//                   <button 
+//                     onClick={handleReset}
+//                     className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs sm:text-sm"
+//                   >
+//                     Start Over Completely
+//                   </button>
+//                 </div>
+//               </div>
+//             </>
+//           ) : (
+//             <div className="w-full p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5">
+//               <h4 className="font-bold mb-4 text-center text-sm sm:text-base">Voice Commands Examples</h4>
+//               <div className="space-y-3">
+//                 <div className="p-3 bg-white/5 rounded-lg">
+//                   <p className="text-xs sm:text-sm text-white/60 mb-1">For Images:</p>
+//                   <p className="text-white/90 text-xs sm:text-sm">"Create a Ghibli art"</p>
+//                 </div>
+//                 <div className="p-3 bg-white/5 rounded-lg">
+//                   <p className="text-xs sm:text-sm text-white/60 mb-1">For websites:</p>
+//                   <p className="text-white/90 text-xs sm:text-sm">"Design a photo like spider man"</p>
+//                 </div>
+//                 <div className="p-3 bg-white/5 rounded-lg">
+//                   <p className="text-xs sm:text-sm text-white/60 mb-1">For colors:</p>
+//                   <p className="text-white/90 text-xs sm:text-sm">"Make it blue and white"</p>
+//                 </div>
+//               </div>
+//               {/* <div className="mt-6 pt-6 border-t border-white/10">
+//                 <p className="text-xs text-white/40 text-center">
+//                   You can also just type in the left panel if voice doesn't work
+//                 </p>
+//               </div> */}
+//             </div>
+//           )}
+//         </div>
+//       </main>
+
+//       {/* Mobile Instructions Bottom Sheet */}
+//       {!isGenerated && (
+//         <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg border-t border-white/10 p-4 z-40 sm:hidden">
+//           <div className="text-xs text-white/80">
+//             <p className="font-bold mb-1">How to use:</p>
+//             <div className="grid grid-cols-2 gap-2">
+//               <div className="flex items-center gap-1">
+//                 <div className="w-1.5 h-1.5 bg-[#F70353] rounded-full"></div>
+//                 <span>Click mic to speak</span>
+//               </div>
+//               <div className="flex items-center gap-1">
+//                 <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+//                 <span>Type in text box</span>
+//               </div>
+//               <div className="flex items-center gap-1 col-span-2">
+//                 <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+//                 <span>Click Generate when ready</span>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Decorative background elements */}
+//       <div className="fixed -bottom-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#F70353]/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+//       <div className="fixed top-1/2 -right-20 w-[400px] h-[400px] bg-blue-500/5 blur-[100px] rounded-full pointer-events-none -z-10" />
+//     </Box>
+//   );
+// };
+
+// export default SpeakPrompt;
+
+
+
+
 import { cn } from "@/utils/cn.util";
 import { useNavigate } from "react-router";
 import { Flex } from "../components/ui/flex";
@@ -16,7 +956,6 @@ import DesignDescriptionInput from "@/components/designdescriptionreadbleandedit
 import CustomButton from "@/components/common/customButton";
 import CustomBlackButton from "@/components/common/customBlackButton";
 
-
 const NavbarWrapper = ({
   children,
   className,
@@ -26,7 +965,10 @@ const NavbarWrapper = ({
   className?: string;
   onClick?: () => void;
 }) => (
-  <Box className={cn("bg-transparent absolute cursor-pointer", className)} onClick={onClick}>
+  <Box
+    className={cn("bg-transparent absolute cursor-pointer", className)}
+    onClick={onClick}
+  >
     {children}
   </Box>
 );
@@ -47,15 +989,31 @@ const GoBackButton = ({
       className
     )}
     style={{
-      background: "conic-gradient(from 90deg at 50% 50%, rgba(240, 196, 211, 1) 0%, rgba(255, 185, 208, 0.08) 25%, rgba(240, 196, 211, 1) 60%)",
+      background:
+        "conic-gradient(from 90deg at 50% 50%, rgba(240, 196, 211, 1) 0%, rgba(255, 185, 208, 0.08) 25%, rgba(240, 196, 211, 1) 60%)",
       backdropFilter: "blur(32px)",
     }}
   >
     <Center className="gap-2 xl:gap-3 2xl:gap-4 w-full h-full rounded-[12px] xl:rounded-[14px] 2xl:rounded-[16px] flex items-center bg-black px-2 py-2 xl:px-3 xl:py-3 2xl:px-4 2xl:py-4">
-      <Center className="rounded-md gap-0 xl:rounded-lg 2xl:rounded-xl" style={{ padding: "8.89px", background: "linear-gradient(180deg, rgba(247, 3, 83, 1) 0%, rgba(247, 3, 83, 0.55) 100%)" }}>
+      <Center
+        className="rounded-md gap-0 xl:rounded-lg 2xl:rounded-xl"
+        style={{
+          padding: "8.89px",
+          background:
+            "linear-gradient(180deg, rgba(247, 3, 83, 1) 0%, rgba(247, 3, 83, 0.55) 100%)",
+        }}
+      >
         <BiArrowBack className="size-4 xl:size-5 2xl:size-6 text-white" />
       </Center>
-      <Flex className="text-white font-normal uppercase text-base xl:text-lg 2xl:text-xl" style={{ fontFamily: "Outfit, sans-serif", fontSize: "16px", lineHeight: "1.26em", letterSpacing: "0.03em" }}>
+      <Flex
+        className="text-white font-normal uppercase text-base xl:text-lg 2xl:text-xl"
+        style={{
+          fontFamily: "Outfit, sans-serif",
+          fontSize: "16px",
+          lineHeight: "1.26em",
+          letterSpacing: "0.03em",
+        }}
+      >
         Back
       </Flex>
     </Center>
@@ -73,16 +1031,35 @@ const DescribeDesignNavbar = () => {
         <Stack className="z-20 justify-center items-center mt-8 xl:mt-10 2xl:mt-12 p-0 gap-0 xl:gap-1 2xl:gap-2 max-sm:mt-18">
           <Flex className="gap-0 font-bold flex-col items-center justify-center text-center">
             <Flex className="gap-0">
-              <h1 className="bg-clip-text text-transparent tracking-wide sm:text-[0.75rem] text-base lg:text-[1.75rem] xl:text-[1.30rem] 2xl:text-[1.60rem] p-0 m-0" style={{ backgroundImage: "linear-gradient(5deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 0%, #E5E5E1 40%, #E5E5E5 100%)" }}>
+              <h1
+                className="bg-clip-text text-transparent tracking-wide sm:text-[0.75rem] text-base lg:text-[1.75rem] xl:text-[1.30rem] 2xl:text-[1.60rem] p-0 m-0"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(5deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 0%, #E5E5E1 40%, #E5E5E5 100%)",
+                }}
+              >
                 Describe your
               </h1>
               <Box className="relative inline-flex items-center justify-center ml-2 xl:ml-3 2xl:ml-4">
-                <Box className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[100px] rounded-full" style={{ background: "radial-gradient(circle, rgba(247, 3, 83, 0.4) 0%, rgba(247, 3, 83, 0.2) 40%, transparent 70%)", filter: "blur(20px)" }} />
-                <h1 className="text-[#F70353] sm:text-[1.10rem] text-xl lg:text-[2.15rem] xl:text-[1.50rem] 2xl:text-[1.80rem] p-0 relative z-10">Design</h1>
+                <Box
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100px] h-[100px] rounded-full"
+                  style={{
+                    background:
+                      "radial-gradient(circle, rgba(247, 3, 83, 0.4) 0%, rgba(247, 3, 83, 0.2) 40%, transparent 70%)",
+                    filter: "blur(20px)",
+                  }}
+                />
+                <h1 className="text-[#F70353] sm:text-[1.10rem] text-xl lg:text-[2.15rem] xl:text-[1.50rem] 2xl:text-[1.80rem] p-0 relative z-10">
+                  Design
+                </h1>
               </Box>
             </Flex>
-            <p className="text-white/80 text-[12px] xl:text-[14px] 2xl:text-[16px] font-extralight tracking-widest text-center" style={{ letterSpacing: "1.6px", userSelect: "none" }}>
-              Be as creative as you want! The AI will generate artwork based on your description.
+            <p
+              className="text-white/80 text-[12px] xl:text-[14px] 2xl:text-[16px] font-extralight tracking-widest text-center"
+              style={{ letterSpacing: "1.6px", userSelect: "none" }}
+            >
+              Be as creative as you want! The AI will generate artwork based on
+              your description.
             </p>
           </Flex>
         </Stack>
@@ -92,26 +1069,39 @@ const DescribeDesignNavbar = () => {
 };
 
 // 1. Move this OUTSIDE the SpeakPrompt function (above it)
-const MicVisual = ({ size = "large", isListening, isLoading, permissionDenied, isSpeechSupported, toggleListening }: any) => (
-  <div className={`flex flex-col items-center justify-center gap-6 w-full animate-in fade-in zoom-in duration-500`}>
-    <div className={`relative ${size === "large" ? "scale-125 lg:scale-150" : "scale-100"} flex items-center justify-center`}>
+const MicVisual = ({
+  size = "large",
+  isListening,
+  isLoading,
+  permissionDenied,
+  isSpeechSupported,
+  toggleListening,
+}: any) => (
+  <div
+    className={`flex flex-col items-center justify-center gap-6 w-full animate-in fade-in zoom-in duration-500`}
+  >
+    <div
+      className={`relative ${
+        size === "large" ? "scale-125 lg:scale-150" : "scale-100"
+      } flex items-center justify-center`}
+    >
       {isListening && (
         <div className="absolute w-[130px] h-[130px] border border-[#F70353]/40 rounded-full animate-ping" />
       )}
       <div className="absolute w-[110px] h-[110px] bg-[#F70353] blur-[45px] opacity-25 rounded-full" />
-      <button 
+      <button
         onClick={toggleListening}
         disabled={isLoading || permissionDenied || !isSpeechSupported}
         className={`relative p-5 rounded-full shadow-lg border border-red-400/30 flex items-center justify-center transition-all ${
-          permissionDenied 
-            ? 'bg-gray-600 cursor-not-allowed opacity-50'
+          permissionDenied
+            ? "bg-gray-600 cursor-not-allowed opacity-50"
             : !isSpeechSupported
-              ? 'bg-gray-600 cursor-not-allowed opacity-50'
-              : isListening 
-                ? 'bg-red-600 animate-pulse' 
-                : isLoading
-                  ? 'bg-gray-600 cursor-not-allowed'
-                  : 'bg-red-500/20 backdrop-blur-md hover:bg-red-500/30'
+            ? "bg-gray-600 cursor-not-allowed opacity-50"
+            : isListening
+            ? "bg-red-600 animate-pulse"
+            : isLoading
+            ? "bg-gray-600 cursor-not-allowed"
+            : "bg-red-500/20 backdrop-blur-md hover:bg-red-500/30"
         }`}
       >
         {permissionDenied || !isSpeechSupported ? (
@@ -125,13 +1115,24 @@ const MicVisual = ({ size = "large", isListening, isLoading, permissionDenied, i
     </div>
     {isListening && (
       <div className="flex items-center gap-1.5 h-8">
-        {[40, 90, 60, 30, 80,40,60,90,20,60,100,20,40, 90, 60, 30, 80,40,60,90,20,60,100,20].map((h, i) => (
-          <div key={i} className="w-[3px] bg-[#F70353] rounded-full animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
+        {[
+          40, 90, 60, 30, 80, 40, 60, 90, 20, 60, 100, 20, 40, 90, 60, 30, 80,
+          40, 60, 90, 20, 60, 100, 20,
+        ].map((h, i) => (
+          <div
+            key={i}
+            className="w-[3px] bg-[#F70353] rounded-full animate-pulse"
+            style={{
+              height: `${h}%`,
+              animationDelay: `${i * 0.1}s`,
+            }}
+          />
         ))}
       </div>
     )}
   </div>
 );
+
 const SpeakPrompt = () => {
   const navigate = useNavigate();
   const [numberOfPages, setNumberOfPages] = useState(4);
@@ -143,7 +1144,8 @@ const SpeakPrompt = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
-  const { setGeneratedImages, selectImageByUrl, selectedImage } = useImageStore();
+  const { setGeneratedImages, selectImageByUrl, selectedImage } =
+    useImageStore();
 
   const recognitionRef = useRef<any>(null);
   const accumulatedTranscript = useRef("");
@@ -155,11 +1157,14 @@ const SpeakPrompt = () => {
 
   // Check browser support on mount
   useEffect(() => {
-    const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+    const hasSpeechRecognition =
+      "webkitSpeechRecognition" in window || "SpeechRecognition" in window;
     setIsSpeechSupported(hasSpeechRecognition);
-    
+
     if (!hasSpeechRecognition) {
-      toast.error("Your browser doesn't support voice recognition. Please use Chrome, Edge or Safari.");
+      toast.error(
+        "Your browser doesn't support voice recognition. Please use Chrome, Edge or Safari."
+      );
     }
   }, []);
 
@@ -167,8 +1172,10 @@ const SpeakPrompt = () => {
   useEffect(() => {
     if (!isSpeechSupported) return;
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
     if (!SpeechRecognition) {
       setIsSpeechSupported(false);
       return;
@@ -186,17 +1193,17 @@ const SpeakPrompt = () => {
         setPermissionDenied(false);
         toast.info("Listening... Speak now");
       };
-      
+
       recognition.onresult = (event: any) => {
         console.log("Speech recognition result received");
-        
-        let interimTranscript = '';
-        let finalTranscript = '';
-        
+
+        let interimTranscript = "";
+        let finalTranscript = "";
+
         for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
           const transcriptPart = result[0].transcript;
-          
+
           if (result.isFinal) {
             // This is a final result - user stopped speaking
             finalTranscript += transcriptPart;
@@ -209,13 +1216,17 @@ const SpeakPrompt = () => {
         // Update the accumulated transcript
         if (finalTranscript) {
           // User finished speaking, add to accumulated transcript
-          accumulatedTranscript.current = (accumulatedTranscript.current + ' ' + finalTranscript).trim();
+          accumulatedTranscript.current = (
+            accumulatedTranscript.current +
+            " " +
+            finalTranscript
+          ).trim();
           setTranscript(accumulatedTranscript.current);
           console.log("Final transcript added:", finalTranscript);
         } else if (interimTranscript) {
           // User is still speaking, show interim results
-          const currentDisplay = accumulatedTranscript.current 
-            ? accumulatedTranscript.current + ' ' + interimTranscript
+          const currentDisplay = accumulatedTranscript.current
+            ? accumulatedTranscript.current + " " + interimTranscript
             : interimTranscript;
           setTranscript(currentDisplay);
           console.log("Interim transcript:", interimTranscript);
@@ -225,28 +1236,31 @@ const SpeakPrompt = () => {
       recognition.onerror = (event: any) => {
         console.error("Speech recognition error:", event.error);
         setIsListening(false);
-        
-        if (event.error === 'not-allowed' || event.error === 'audio-capture') {
+
+        if (event.error === "not-allowed" || event.error === "audio-capture") {
           setPermissionDenied(true);
-          toast.error("Microphone access denied. Please allow microphone access in browser settings.", {
-            duration: 5000,
-            action: {
-              label: "Retry",
-              onClick: () => requestMicrophonePermission()
+          toast.error(
+            "Microphone access denied. Please allow microphone access in browser settings.",
+            {
+              duration: 5000,
+              action: {
+                label: "Retry",
+                onClick: () => requestMicrophonePermission(),
+              },
             }
-          });
-        } else if (event.error === 'network') {
+          );
+        } else if (event.error === "network") {
           toast.error("Network error occurred. Please check your connection.");
-        } else if (event.error !== 'aborted') {
+        } else if (event.error !== "aborted") {
           toast.error(`Voice recognition error: ${event.error}`);
         }
       };
-      
+
       recognition.onend = () => {
         console.log("Speech recognition ended");
         setIsListening(false);
         accumulatedTranscript.current = transcript; // Save current transcript
-        
+
         // Only restart if user is still supposed to be listening
         if (isListening && !permissionDenied) {
           setTimeout(() => {
@@ -287,7 +1301,8 @@ const SpeakPrompt = () => {
       return;
     }
 
-    navigator.mediaDevices.getUserMedia({ audio: true })
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
       .then(() => {
         setPermissionDenied(false);
         toast.success("Microphone permission granted!");
@@ -299,8 +1314,13 @@ const SpeakPrompt = () => {
       .catch((error: any) => {
         console.error("Microphone permission error:", error);
         setPermissionDenied(true);
-        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-          toast.error("Microphone permission denied. Please allow access in browser settings.");
+        if (
+          error.name === "NotAllowedError" ||
+          error.name === "PermissionDeniedError"
+        ) {
+          toast.error(
+            "Microphone permission denied. Please allow access in browser settings."
+          );
         } else {
           toast.error("Failed to access microphone. Please check your settings.");
         }
@@ -314,12 +1334,15 @@ const SpeakPrompt = () => {
     }
 
     if (permissionDenied) {
-      toast.error("Microphone access was previously denied. Please allow access and try again.", {
-        action: {
-          label: "Allow",
-          onClick: () => requestMicrophonePermission()
+      toast.error(
+        "Microphone access was previously denied. Please allow access and try again.",
+        {
+          action: {
+            label: "Allow",
+            onClick: () => requestMicrophonePermission(),
+          },
         }
-      });
+      );
       return;
     }
 
@@ -355,21 +1378,24 @@ const SpeakPrompt = () => {
           toast.error("Failed to start voice recognition");
         }
       }, 200);
-      
+
       setIsListening(true);
       toast.info("Microphone activated. Start speaking...");
     } catch (error: any) {
       console.error("Error starting voice recognition:", error);
       setIsListening(false);
-      
+
       // If permission error, show specific message
-      if (error.toString().includes('Permission') || error.toString().includes('NotAllowed')) {
+      if (
+        error.toString().includes("Permission") ||
+        error.toString().includes("NotAllowed")
+      ) {
         setPermissionDenied(true);
         toast.error("Microphone access denied. Please allow microphone access.", {
           action: {
             label: "Allow",
-            onClick: () => requestMicrophonePermission()
-          }
+            onClick: () => requestMicrophonePermission(),
+          },
         });
       } else {
         toast.error("Cannot access microphone. Please check permissions.");
@@ -424,9 +1450,9 @@ const SpeakPrompt = () => {
         `https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
         `https://images.unsplash.com/photo-1508921912186-1d1a45ebb3c1?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
         `https://images.unsplash.com/photo-1575936123452-b67c3203c357?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
-        `https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop&q=80&t=${Date.now()}`
+        `https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
       ];
-  
+
       setIsGenerated(true);
       setIsLoading(false);
       const selectedImages = mockImages.slice(0, numberOfPages);
@@ -434,25 +1460,26 @@ const SpeakPrompt = () => {
       setGeneratedImages(selectedImages, transcript); // <--- ADD THIS LINE
       // Update toast
       toast.dismiss(loadingToast);
-      toast.success(`Successfully generated ${selectedImages.length} design variations!`);
-      
+      toast.success(
+        `Successfully generated ${selectedImages.length} design variations!`
+      );
     }, 1000);
   };
 
-
   const handleProceed = () => {
-  if (images.length > 0) {
-    // If user hasn't manually clicked one, default to the first image
-    if (!selectedImage) {
-      selectImageByUrl(images[0]);
+    if (images.length > 0) {
+      // If user hasn't manually clicked one, default to the first image
+      if (!selectedImage) {
+        selectImageByUrl(images[0]);
+      }
+      // Navigate to mockup file
+      navigate(
+        "/select-methods/capture-photo/describe-design/apply-mokup-design"
+      );
+    } else {
+      toast.error("Please generate images first");
     }
-    // Navigate to mockup file
-    navigate("/select-methods/capture-photo/describe-design/apply-mokup-design");
-  } else {
-    toast.error("Please generate images first");
-  }
-};
-
+  };
 
   const handleReset = () => {
     setTranscript("");
@@ -461,7 +1488,7 @@ const SpeakPrompt = () => {
     setImages([]);
     setIsButtonDisabled(true);
     stopListening();
-    
+
     toast.info("Ready for new design description");
   };
 
@@ -493,69 +1520,14 @@ const SpeakPrompt = () => {
     }
   };
 
-  // // --- UI Components ---
-  // const MicVisual = ({ size = "large" }: { size?: "small" | "large" }) => (
-  //   <div className={`flex flex-col items-center justify-center gap-6 w-full animate-in fade-in zoom-in duration-500`}>
-  //     <div className={`relative ${size === "large" ? "scale-125 lg:scale-150" : "scale-100"} flex items-center justify-center`}>
-  //       {isListening && (
-  //         <div className="absolute w-[130px] h-[130px] border border-[#F70353]/40 rounded-full animate-ping" />
-  //       )}
-  //       <div className="absolute w-[110px] h-[110px] bg-[#F70353] blur-[45px] opacity-25 rounded-full" />
-  //       <button 
-  //         onClick={toggleListening}
-  //         disabled={isLoading || permissionDenied || !isSpeechSupported}
-  //         className={`relative p-5 rounded-full shadow-lg border border-red-400/30 flex items-center justify-center transition-all ${
-  //           permissionDenied 
-  //             ? 'bg-gray-600 cursor-not-allowed opacity-50'
-  //             : !isSpeechSupported
-  //               ? 'bg-gray-600 cursor-not-allowed opacity-50'
-  //               : isListening 
-  //                 ? 'bg-red-600 animate-pulse' 
-  //                 : isLoading
-  //                   ? 'bg-gray-600 cursor-not-allowed'
-  //                   : 'bg-red-500/20 backdrop-blur-md hover:bg-red-500/30'
-  //         }`}
-  //         title={permissionDenied ? "Microphone permission denied. Click to allow." : !isSpeechSupported ? "Voice not supported" : ""}
-  //       >
-  //         {permissionDenied || !isSpeechSupported ? (
-  //           <MicOff className="w-7 h-7 text-gray-400" />
-  //         ) : isListening ? (
-  //           <MicOff className="w-7 h-7 text-white" />
-  //         ) : (
-  //           <Mic className="w-7 h-7 text-white" />
-  //         )}
-  //       </button>
-  //     </div>
-  //     {isListening && (
-  //       <div className="flex items-center gap-1.5 h-8">
-  //         {[40, 90, 60, 30, 80,40,60,90,20,60,100,20,40, 90, 60, 30, 80,40,60,90,20,60,100,20].map((h, i) => (
-  //           <div key={i} className="w-[3px] bg-[#F70353] rounded-full animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
-  //         ))}
-  //       </div>
-  //     )}
-  //     {permissionDenied && (
-  //       <div className="text-center text-xs text-red-400 bg-red-400/10 px-3 py-1 rounded-full">
-  //         Microphone permission needed
-  //       </div>
-  //     )}
-  //     {!isSpeechSupported && (
-  //       <div className="text-center text-xs text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">
-  //         Voice not supported in this browser
-  //       </div>
-  //     )}
-  //   </div>
-  // );
-
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/fdsfdahf.PNG')] bg-cover bg-center bg-no-repeat text-white relative flex flex-col overflow-x-hidden">
-      
       <DescribeDesignNavbar />
 
       {/* MAIN CONTENT AREA - Responsive layout */}
-      <main className="flex-1 mt-32 flex flex-col lg:flex-row items-start justify-between px-4 sm:px-6 lg:px-20 py-6 sm:py-10 gap-6 sm:gap-10">
-        
+      <main className="flex-1 mt-32 flex flex-col xl:flex-row items-start justify-between px-4 sm:px-6 lg:px-20 py-6 sm:py-10 gap-6 sm:gap-10">
         {/* LEFT PANEL - Transcription + Manual Typing + Buttons */}
-        <div className="w-full lg:w-[350px] flex flex-col gap-4 sm:gap-6 z-30 order-2 lg:order-1">
+        <div className="w-full xl:w-[350px] flex flex-col gap-4 sm:gap-6 z-30 order-2 lg:order-1">
           <div className="  backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <label className="text-[10px] uppercase text-white/40 tracking-[0.2em] font-bold">
@@ -569,7 +1541,7 @@ const SpeakPrompt = () => {
                   </div>
                 )}
                 {transcript && (
-                  <button 
+                  <button
                     onClick={clearSpeechHistory}
                     className="text-xs text-white/50 hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10"
                     title="Clear text"
@@ -579,17 +1551,17 @@ const SpeakPrompt = () => {
                 )}
               </div>
             </div>
-            
+
             {/* Use the fixed DesignDescriptionInput component */}
-            <DesignDescriptionInput 
+            <DesignDescriptionInput
               value={transcript}
               onChange={handleManualType}
               placeholder={
-                permissionDenied 
-                  ? "Microphone access denied. Click allow to use voice." 
-                  : isListening 
-                    ? "Speaking... Your words appear here..." 
-                    : "Click microphone to speak OR type here..."
+                permissionDenied
+                  ? "Microphone access denied. Click allow to use voice."
+                  : isListening
+                  ? "Speaking... Your words appear here..."
+                  : "Click microphone to speak OR type here..."
               }
               disabled={isLoading}
               isListening={isListening}
@@ -601,8 +1573,8 @@ const SpeakPrompt = () => {
               <div className="mt-3 flex items-center gap-2">
                 <div className="flex items-center gap-1">
                   {[1, 2, 3].map((i) => (
-                    <div 
-                      key={i} 
+                    <div
+                      key={i}
                       className="w-1 h-1 bg-green-500 rounded-full animate-pulse"
                       style={{ animationDelay: `${i * 0.2}s` }}
                     />
@@ -619,12 +1591,15 @@ const SpeakPrompt = () => {
               <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-xs font-bold text-red-400">Microphone Access Required</span>
+                  <span className="text-xs font-bold text-red-400">
+                    Microphone Access Required
+                  </span>
                 </div>
                 <p className="text-xs text-red-300/80">
-                  Please allow microphone access to use voice input. Click the microphone button and allow permission when prompted.
+                  Please allow microphone access to use voice input. Click the
+                  microphone button and allow permission when prompted.
                 </p>
-                <button 
+                <button
                   onClick={requestMicrophonePermission}
                   className="mt-2 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors"
                 >
@@ -637,15 +1612,17 @@ const SpeakPrompt = () => {
             <div className="flex flex-col gap-4 mt-6 sm:mt-8">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-white/60">Number of Variations</span>
-                <span className="bg-[#F70353] px-3 py-0.5 rounded-full text-xs font-bold">{numberOfPages}</span>
+                <span className="bg-[#F70353] px-3 py-0.5 rounded-full text-xs font-bold">
+                  {numberOfPages}
+                </span>
               </div>
-              <input 
-                type="range" 
-                min="1" 
-                max="4" 
-                value={numberOfPages} 
-                onChange={(e) => setNumberOfPages(Number(e.target.value))} 
-                className="w-full h-1.5 bg-white/10 rounded-lg accent-[#F70353]" 
+              <input
+                type="range"
+                min="1"
+                max="4"
+                value={numberOfPages}
+                onChange={(e) => setNumberOfPages(Number(e.target.value))}
+                className="w-full h-1.5 bg-white/10 rounded-lg accent-[#F70353]"
                 disabled={isLoading}
               />
             </div>
@@ -654,11 +1631,11 @@ const SpeakPrompt = () => {
             <div className="flex flex-col gap-3 mt-6 sm:mt-8">
               {!isGenerated ? (
                 <>
-                  <CustomButton 
+                  <CustomButton
                     wrapperClassName={`w-full h-[55px] rounded-2xl ${
-                      isButtonDisabled || isLoading 
-                        ? 'opacity-50 cursor-not-allowed' 
-                        : ''
+                      isButtonDisabled || isLoading
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
                     }`}
                     title={isLoading ? "Generating..." : "Generate Designs"}
                     icon={<BsStars className="size-5" />}
@@ -666,31 +1643,31 @@ const SpeakPrompt = () => {
                     disabled={isButtonDisabled || isLoading}
                   />
                   <div className="text-center text-xs text-white/40 mt-2">
-                    {isButtonDisabled 
-                      ? "← Speak or type description first" 
+                    {isButtonDisabled
+                      ? "← Speak or type description first"
                       : `Ready to generate ${numberOfPages} variations`}
                   </div>
                 </>
               ) : (
                 <>
-                  <CustomButton 
-                    wrapperClassName="w-full h-[55px] rounded-2xl bg-indigo-600 hover:bg-indigo-700" 
-                    title="Try New Design" 
-                    icon={<RotateCcw className="size-5" />} 
+                  <CustomButton
+                    wrapperClassName="w-full h-[55px] rounded-2xl bg-indigo-600 hover:bg-indigo-700"
+                    title="Try New Design"
+                    icon={<RotateCcw className="size-5" />}
                     onClick={handleReset}
                     disabled={isLoading}
                   />
-                <CustomBlackButton 
-  wrapperClassName="w-full h-[55px] rounded-2xl border border-white/10" 
-  title="Proceed With Selected Design" 
-  onClick={handleProceed} // <--- CHANGE THIS
-  disabled={images.length === 0 || isLoading}
-/>
+                  <CustomBlackButton
+                    wrapperClassName="w-full h-[55px] rounded-2xl border border-white/10"
+                    title="Proceed With Selected Design"
+                    onClick={handleProceed} // <--- CHANGE THIS
+                    disabled={images.length === 0 || isLoading}
+                  />
                 </>
               )}
             </div>
           </div>
-          
+
           {/* Instructions - Hidden on mobile when generated */}
           {!isGenerated && (
             <div className="text-xs text-white/50 bg-black/20 p-4 rounded-xl hidden sm:block">
@@ -712,146 +1689,173 @@ const SpeakPrompt = () => {
                 <BsStars className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 sm:w-12 sm:h-12 text-[#F70353] animate-pulse" />
               </div>
               <div className="text-center px-4">
-                <h3 className="text-xl sm:text-2xl font-bold mb-2">Generating Your Designs</h3>
-                <p className="text-white/70 text-sm sm:text-base">Creating {numberOfPages} variations based on:</p>
-                <p className="text-[#F70353] font-medium mt-2 max-w-md text-sm sm:text-base">"{transcript.substring(0, 80)}{transcript.length > 80 ? '...' : ''}"</p>
-                <div className="mt-4 w-48 sm:w-64 h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[#F70353] to-purple-500 animate-pulse"></div>
+                <h3 className="text-xl sm:text-2xl font-bold mb-2 tracking-tight">
+                  Generating Your Designs
+                </h3>
+                <p className="text-white/70 text-sm sm:text-base">
+                  Creating {numberOfPages} variations...
+                </p>
+                <div className="mt-4 w-48 sm:w-64 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-[#F70353] to-purple-500 animate-pulse w-full"></div>
                 </div>
               </div>
             </div>
           ) : !isGenerated ? (
-            <div className="flex flex-col items-center gap-6 sm:gap-8 px-4">
-              {/* Replace the old <MicVisual size="large" /> with this: */}
-<MicVisual 
-  size="large"
-  isListening={isListening}
-  isLoading={isLoading}
-  permissionDenied={permissionDenied}
-  isSpeechSupported={isSpeechSupported}
-  toggleListening={toggleListening}
-/>
-              <div className="text-center max-w-md">
-                <h3 className="text-xl sm:text-2xl font-bold mb-4">Describe Your Design</h3>
+            <div className="flex flex-col items-center gap-6 sm:gap-8 px-4 w-full max-w-lg mx-auto">
+              <MicVisual
+                size="large"
+                isListening={isListening}
+                isLoading={isLoading}
+                permissionDenied={permissionDenied}
+                isSpeechSupported={isSpeechSupported}
+                toggleListening={toggleListening}
+              />
+              <div className="text-center">
+                <h3 className="text-2xl sm:text-3xl font-bold mb-4 tracking-tight uppercase">
+                  Describe Your Design
+                </h3>
                 <div className="space-y-4">
-                  <p className="text-white/70 text-sm sm:text-base">
-                    Click the <span className="text-[#F70353] font-bold">microphone</span> and speak naturally.
-                    Your words will appear in the left panel instantly.
+                  <p className="text-white/70 text-sm sm:text-base leading-relaxed">
+                    Click the{" "}
+                    <span className="text-[#F70353] font-bold">microphone</span>{" "}
+                    and speak naturally. Your words will appear in the left
+                    panel instantly.
                   </p>
-                  {/* {!permissionDenied && (
-                    <div className="p-4 bg-white/5 rounded-xl hidden sm:block">
-                      <p className="text-sm text-white/60 mb-2">Example phrases:</p>
-                      <p className="text-white/80 text-sm">• "A modern logo for a tech startup"</p>
-                      <p className="text-white/80 text-sm">• "Website header with blue gradient"</p>
-                      <p className="text-white/80 text-sm">• "Business card design with geometric shapes"</p>
-                    </div>
-                  )} */}
-                  <p className="text-white/70 text-sm sm:text-base">
-                    Or simply <span className="text-blue-400 font-bold">type</span> in the left panel.
-                  </p>
+                  {/* <p className="text-white/40 text-xs sm:text-sm font-light">
+                    Or type manually in the text box on the left
+                  </p> */}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="w-full px-4 sm:px-0">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
-                {/* <div>
-                  <h2 className="text-xl sm:text-2xl font-bold">Your Generated Designs</h2>
-                  <p className="text-white/60 mt-1 text-sm">
-                    Based on: "{transcript.substring(0, 60)}{transcript.length > 60 ? '...' : ''}"
-                  </p>
-                </div> */}
-                <div className="flex gap-2">
-                  <span className="bg-[#F70353] px-3 py-1 rounded-full text-xs sm:text-sm font-bold">
-                    {images.length} variations
-                  </span>
-                  <button 
-                    onClick={handleReset}
-                    className="px-3 sm:px-4 py-1 rounded-full border border-white/20 text-xs sm:text-sm hover:bg-white/10 transition-colors"
-                  >
-                    New Design
-                  </button>
-                </div>
+            /* --- FULLY RESPONSIVE IMAGE GRID --- */
+            <div className="w-full px-4 sm:px-0 flex flex-col items-center">
+              {/* Top Meta Info Bar */}
+              <div className="w-full max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] flex justify-between items-center mb-6 gap-3">
+                <span className="bg-[#F70353]/10 border border-[#F70353]/20 text-[#F70353] px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-widest">
+                  {images.length} Design Variations
+                </span>
+                <button
+                  onClick={handleReset}
+                  className="px-4 py-1.5 rounded-lg border border-white/10 text-xs font-medium hover:bg-white/5 hover:border-white/20 transition-all text-white/50 hover:text-white"
+                >
+                  Clear All
+                </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 animate-in zoom-in-95 duration-700">
-              {images.map((url, i) => (
-  <div 
-    key={i} 
-    className="group relative"
-    onClick={() => selectImageByUrl(url)} // <--- ADD THIS
-  >
-    <div className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 ${
-      selectedImage === url ? 'border-[#F70353] scale-[1.02]' : 'border-white/10' 
-    }`}>
-      <img 
-        src={url} 
-        alt={`Design variation ${i + 1}`} 
-        className="w-full h-full object-cover"
-      />
-    </div>
-    {/* Optional: Add a "Selected" badge */}
-    {selectedImage === url && (
-      <div className="absolute top-2 left-2 bg-[#F70353] text-[10px] px-2 py-1 rounded-md font-bold">
-        SELECTED
-      </div>
-    )}
-  </div>
-))}
+
+              {/* The Responsive Grid: Always 2 columns to prevent images from being "too big" on mobile */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 w-full max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] mx-auto animate-in fade-in zoom-in-95 duration-500">
+                {images.map((url, i) => {
+                  const isSelected = selectedImage === url;
+                  return (
+                    <div
+                      key={i}
+                      className="group relative cursor-pointer"
+                      onClick={() => selectImageByUrl(url)}
+                    >
+                      {/* Image Container with Dynamic Scale and Ring Glow */}
+                      <div
+                        className={`aspect-square rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 relative ${
+                          isSelected
+                            ? "border-[#F70353] scale-[1.03] z-10 shadow-[0_0_25px_rgba(247,3,83,0.3)]"
+                            : "border-white/10 hover:border-white/30 hover:scale-[1.01]"
+                        }`}
+                      >
+                        <img
+                          src={url}
+                          alt={`Design variation ${i + 1}`}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+
+                        {/* Overlay on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+
+                      {/* Selected badge with responsive positioning and size */}
+                      {isSelected && (
+                        <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-20 bg-[#F70353] text-white text-[8px] sm:text-[10px] px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded sm:rounded-md font-bold uppercase tracking-wider shadow-lg animate-in zoom-in duration-200">
+                          Selected
+                        </div>
+                      )}
+
+                      {/* Variation number */}
+                      <div className="absolute bottom-2 right-2 z-20 text-white/40 text-[9px] font-mono group-hover:text-white/80 transition-colors">
+                        VAR_{i + 1}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
         </div>
 
         {/* RIGHT COLUMN - Side Panel */}
-        <div className="w-full lg:w-[350px] flex flex-col items-center justify-center z-30 order-3 gap-4 sm:gap-6 mt-4 sm:mt-0">
+        <div className="w-full xl:w-[350px] flex flex-col items-center justify-center z-30 order-3 gap-4 sm:gap-6 mt-4 sm:mt-0">
           {isGenerated ? (
             <>
               <div className="p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5 w-full">
-                <p className="text-center text-xs sm:text-sm uppercase tracking-widest text-white/30 mb-4">Modify Design</p>
-               {/* Replace the old <MicVisual size="small" /> with this: */}
-<MicVisual 
-  size="small"
-  isListening={isListening}
-  isLoading={isLoading}
-  permissionDenied={permissionDenied}
-  isSpeechSupported={isSpeechSupported}
-  toggleListening={toggleListening}
-/>
+                <p className="text-center text-xs sm:text-sm uppercase tracking-widest text-white/30 mb-4">
+                  Modify Design
+                </p>
+                {/* Replace the old <MicVisual size="small" /> with this: */}
+                <MicVisual
+                  size="small"
+                  isListening={isListening}
+                  isLoading={isLoading}
+                  permissionDenied={permissionDenied}
+                  isSpeechSupported={isSpeechSupported}
+                  toggleListening={toggleListening}
+                />
                 <p className="text-center text-xs sm:text-sm text-white/60 mt-4">
                   Speak to modify or create new variations
                 </p>
-                
+
                 <div className="mt-4 sm:mt-6 space-y-2">
-                  <button 
-                    onClick={() => setTranscript(transcript + " Make it more colorful.")}
+                  <button
+                    onClick={() =>
+                      setTranscript(transcript + " Make it more colorful.")
+                    }
                     className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs sm:text-sm text-left"
                   >
                     "Add more color"
                   </button>
-                  <button 
-                    onClick={() => setTranscript(transcript + " Make it minimal and clean.")}
+                  <button
+                    onClick={() =>
+                      setTranscript(transcript + " Make it minimal and clean.")
+                    }
                     className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs sm:text-sm text-left"
                   >
                     "Make it minimalist"
                   </button>
-                  <button 
+                  <button
                     onClick={startListening}
-                    disabled={isListening || isLoading || permissionDenied || !isSpeechSupported}
+                    disabled={
+                      isListening ||
+                      isLoading ||
+                      permissionDenied ||
+                      !isSpeechSupported
+                    }
                     className={`w-full p-3 rounded-lg transition-colors text-xs sm:text-sm ${
-                      isListening || isLoading || permissionDenied || !isSpeechSupported
-                        ? 'bg-gray-700/50 cursor-not-allowed text-gray-400'
-                        : 'bg-blue-500/20 hover:bg-blue-500/30'
+                      isListening ||
+                      isLoading ||
+                      permissionDenied ||
+                      !isSpeechSupported
+                        ? "bg-gray-700/50 cursor-not-allowed text-gray-400"
+                        : "bg-blue-500/20 hover:bg-blue-500/30"
                     }`}
                   >
-                    {isListening ? 'Listening...' : 'Start Speaking Again'}
+                    {isListening ? "Listening..." : "Start Speaking Again"}
                   </button>
                 </div>
               </div>
-              
+
               <div className="w-full p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5">
-                <h4 className="font-bold mb-3 text-center text-sm">Quick Actions</h4>
+                <h4 className="font-bold mb-3 text-center text-sm">
+                  Quick Actions
+                </h4>
                 <div className="space-y-2">
-                  <button 
+                  <button
                     onClick={() => {
                       if (transcript) {
                         handleGenerate();
@@ -862,13 +1866,13 @@ const SpeakPrompt = () => {
                     disabled={isLoading}
                     className={`w-full p-3 rounded-lg text-xs sm:text-sm transition-colors ${
                       isLoading
-                        ? 'bg-gray-700/50 cursor-not-allowed text-gray-400'
-                        : 'bg-green-500/20 hover:bg-green-500/30'
+                        ? "bg-gray-700/50 cursor-not-allowed text-gray-400"
+                        : "bg-green-500/20 hover:bg-green-500/30"
                     }`}
                   >
-                    {isLoading ? 'Generating...' : 'Regenerate Designs'}
+                    {isLoading ? "Generating..." : "Regenerate Designs"}
                   </button>
-                  <button 
+                  <button
                     onClick={handleReset}
                     className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs sm:text-sm"
                   >
@@ -879,19 +1883,33 @@ const SpeakPrompt = () => {
             </>
           ) : (
             <div className="w-full p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5">
-              <h4 className="font-bold mb-4 text-center text-sm sm:text-base">Voice Commands Examples</h4>
+              <h4 className="font-bold mb-4 text-center text-sm sm:text-base">
+                Voice Commands Examples
+              </h4>
               <div className="space-y-3">
                 <div className="p-3 bg-white/5 rounded-lg">
-                  <p className="text-xs sm:text-sm text-white/60 mb-1">For Images:</p>
-                  <p className="text-white/90 text-xs sm:text-sm">"Create a Ghibli art"</p>
+                  <p className="text-xs sm:text-sm text-white/60 mb-1">
+                    For Images:
+                  </p>
+                  <p className="text-white/90 text-xs sm:text-sm">
+                    "Create a Ghibli art"
+                  </p>
                 </div>
                 <div className="p-3 bg-white/5 rounded-lg">
-                  <p className="text-xs sm:text-sm text-white/60 mb-1">For websites:</p>
-                  <p className="text-white/90 text-xs sm:text-sm">"Design a photo like spider man"</p>
+                  <p className="text-xs sm:text-sm text-white/60 mb-1">
+                    For websites:
+                  </p>
+                  <p className="text-white/90 text-xs sm:text-sm">
+                    "Design a photo like spider man"
+                  </p>
                 </div>
                 <div className="p-3 bg-white/5 rounded-lg">
-                  <p className="text-xs sm:text-sm text-white/60 mb-1">For colors:</p>
-                  <p className="text-white/90 text-xs sm:text-sm">"Make it blue and white"</p>
+                  <p className="text-xs sm:text-sm text-white/60 mb-1">
+                    For colors:
+                  </p>
+                  <p className="text-white/90 text-xs sm:text-sm">
+                    "Make it blue and white"
+                  </p>
                 </div>
               </div>
               {/* <div className="mt-6 pt-6 border-t border-white/10">

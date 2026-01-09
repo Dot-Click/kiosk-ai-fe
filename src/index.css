@@ -334,7 +334,11 @@ textarea::-webkit-scrollbar-thumb:hover {
   background: transparent;
 }
 
-
+/* @media (min-width: 1150px) {
+      .main-images-section {
+        flex-direction: row ;
+      }  
+    } */
 /* Add to your global CSS */
 .preserve-3d {
   transform-style: preserve-3d;
