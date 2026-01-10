@@ -7,28 +7,26 @@ import {
   Upload as UploadIcon,
   CheckCircle,
   Smartphone,
-  X,
-  Loader2
+  X
 } from "lucide-react";
 
 const MobileUploadPage = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<'ready' | 'uploading' | 'success'>('ready');
   const [connectionCode, setConnectionCode] = useState<string>('');
-  const [uploadId, setUploadId] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
+  const [fileSize, setFileSize] = useState<string>('');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Get parameters from URL
+  // Get connection code from URL
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
-      const id = urlParams.get('id');
-      
-      if (code) setConnectionCode(code);
-      if (id) setUploadId(id);
+      if (code) {
+        setConnectionCode(code);
+      }
     }
   }, []);
 
@@ -49,13 +47,14 @@ const MobileUploadPage = () => {
       return;
     }
     
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
       alert("Image too large! Please select an image under 10MB.");
       return;
     }
 
     // Set file info
     setFileName(file.name);
+    setFileSize(formatFileSize(file.size));
 
     // Preview image
     const reader = new FileReader();
@@ -66,64 +65,50 @@ const MobileUploadPage = () => {
     reader.readAsDataURL(file);
   };
 
-  // Upload image via API
-  const uploadImage = async () => {
-    if (!selectedImage || !connectionCode || !uploadId) {
+  // Format file size
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' bytes';
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    else return (bytes / 1048576).toFixed(1) + ' MB';
+  };
+
+  // Upload image to main page - INSTANT
+  const uploadImage = () => {
+    if (!selectedImage || !connectionCode) {
       alert("Please select an image first");
       return;
     }
 
     setUploadStatus('uploading');
 
-    try {
-      // Send to API endpoint
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uploadId: uploadId,
-          image: selectedImage,
-          code: connectionCode,
-          fileName: fileName,
-          timestamp: Date.now()
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setUploadStatus('success');
-        
-        // Also store in localStorage as fallback
-        localStorage.setItem(`upload_${uploadId}`, JSON.stringify({
-          code: connectionCode,
-          image: selectedImage,
-          fileName: fileName,
-          timestamp: Date.now()
-        }));
-        
-        // Show success
-        setTimeout(() => {
-          document.getElementById('success-message')?.classList.remove('hidden');
-        }, 500);
-        
-      } else {
-        throw new Error('Upload failed');
-      }
-      
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Upload failed. Please try again.');
-      setUploadStatus('ready');
-    }
+    // INSTANT UPLOAD - No delay
+    // Store image in localStorage (shared with main page)
+    const uploadData = {
+      code: connectionCode,
+      image: selectedImage,
+      fileName: fileName,
+      fileSize: fileSize,
+      timestamp: Date.now(),
+      status: 'uploaded'
+    };
+    
+    localStorage.setItem(`upload_${connectionCode}`, JSON.stringify(uploadData));
+    
+    // Show success immediately
+    setUploadStatus('success');
+    
+    // Auto-close after 2 seconds
+    setTimeout(() => {
+      // Close the page or show close message
+      document.getElementById('close-message')?.classList.remove('hidden');
+    }, 500);
   };
 
   // Remove selected image
   const removeImage = () => {
     setSelectedImage(null);
     setFileName('');
+    setFileSize('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -186,6 +171,10 @@ const MobileUploadPage = () => {
                     >
                       <X size={16} />
                     </button>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                      <p className="text-white text-sm truncate">{fileName}</p>
+                      <p className="text-white/70 text-xs">{fileSize}</p>
+                    </div>
                   </div>
                   
                   <div className="flex gap-2">
@@ -193,7 +182,7 @@ const MobileUploadPage = () => {
                       onClick={handleSelectImage}
                       className="flex-1 py-3 rounded-lg border border-white/20 bg-white/5 text-white text-sm active:scale-95"
                     >
-                      Change
+                      Change Image
                     </button>
                     
                     <button
@@ -207,13 +196,13 @@ const MobileUploadPage = () => {
                     >
                       {uploadStatus === 'uploading' ? (
                         <>
-                          <Loader2 className="size-4 animate-spin" />
+                          <div className="animate-spin rounded-full size-4 border-2 border-white border-t-transparent"></div>
                           Sending...
                         </>
                       ) : (
                         <>
                           <UploadIcon size={16} />
-                          Upload
+                          Upload Now
                         </>
                       )}
                     </button>
@@ -240,11 +229,11 @@ const MobileUploadPage = () => {
                 <div>
                   <p className="text-green-300 font-medium">✅ Upload Successful!</p>
                   <p className="text-green-300/70 text-sm mt-1">
-                    Image sent to Kiosk AI
+                    Image sent to Kiosk AI screen
                   </p>
-                  <div id="success-message" className="hidden mt-2 p-2 bg-green-500/20 rounded">
+                  <div id="close-message" className="hidden mt-2 p-2 bg-green-500/20 rounded">
                     <p className="text-green-300 text-xs">
-                      You can now close this page. Image will appear on the main screen.
+                      You can now close this page
                     </p>
                   </div>
                 </div>
@@ -252,13 +241,59 @@ const MobileUploadPage = () => {
             </div>
           )}
 
-          {/* Close Button */}
-          <button
-            onClick={() => window.close()}
-            className="text-white/60 hover:text-white text-sm py-2"
-          >
-            Close Page
-          </button>
+          {/* Instructions */}
+          <div className="w-full p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <h3 className="text-white font-medium mb-2 text-sm">How it works:</h3>
+            <ul className="text-white/70 text-xs space-y-1.5">
+              <li className="flex items-start gap-2">
+                <div className="bg-blue-500/20 text-blue-300 rounded-full size-4 flex items-center justify-center text-xs mt-0.5">1</div>
+                <span>Select image from your phone</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="bg-blue-500/20 text-blue-300 rounded-full size-4 flex items-center justify-center text-xs mt-0.5">2</div>
+                <span>Tap "Upload Now" button</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="bg-blue-500/20 text-blue-300 rounded-full size-4 flex items-center justify-center text-xs mt-0.5">3</div>
+                <span>Image appears instantly on Kiosk AI</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="bg-blue-500/20 text-blue-300 rounded-full size-4 flex items-center justify-center text-xs mt-0.5">4</div>
+                <span>Close this page when done</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 w-full">
+            {selectedImage && uploadStatus !== 'success' && (
+              <button
+                onClick={removeImage}
+                className="flex-1 py-2.5 rounded-lg border border-white/20 bg-white/5 text-white text-sm active:scale-95"
+              >
+                Cancel
+              </button>
+            )}
+            
+            {uploadStatus === 'success' && (
+              <button
+                onClick={() => window.close()}
+                className="flex-1 py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm active:scale-95"
+              >
+                Close Page
+              </button>
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="text-center">
+            <p className="text-white/50 text-xs">
+              Images are sent directly to the Kiosk AI screen
+            </p>
+            <p className="text-white/40 text-xs mt-1">
+              No data is stored on our servers
+            </p>
+          </div>
         </Stack>
       </Center>
     </Box>
