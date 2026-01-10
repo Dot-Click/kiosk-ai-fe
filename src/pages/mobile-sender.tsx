@@ -3,7 +3,7 @@ import CustomButton from "@/components/common/customButton";
 import { Box } from "@/components/ui/box";
 import { Center } from "@/components/ui/center";
 import { Stack } from "@/components/ui/stack";
-import { QrCode, Upload, Image as ImageIcon, ArrowRight, Copy } from "lucide-react";
+import { QrCode, Upload,ArrowRight, Copy } from "lucide-react";
 
 const ImageUploadPage = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
