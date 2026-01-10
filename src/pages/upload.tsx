@@ -4,17 +4,19 @@ import { Center } from "@/components/ui/center";
 import { Stack } from "@/components/ui/stack";
 import { 
   Camera, 
-  Image as ImageIcon, 
   Upload as UploadIcon,
   CheckCircle,
-  ArrowUp,
-  Smartphone
+  Smartphone,
+  X
 } from "lucide-react";
 
 const MobileUploadPage = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<'ready' | 'uploading' | 'success'>('ready');
   const [connectionCode, setConnectionCode] = useState<string>('');
+  const [fileName, setFileName] = useState<string>('');
+  const [fileSize, setFileSize] = useState<string>('');
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get connection code from URL
@@ -38,10 +40,21 @@ const MobileUploadPage = () => {
   // Handle file selection
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !file.type.startsWith('image/')) {
-      alert("Please select an image file");
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      alert("Please select an image file (JPG, PNG, etc.)");
       return;
     }
+    
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      alert("Image too large! Please select an image under 10MB.");
+      return;
+    }
+
+    // Set file info
+    setFileName(file.name);
+    setFileSize(formatFileSize(file.size));
 
     // Preview image
     const reader = new FileReader();
@@ -52,8 +65,15 @@ const MobileUploadPage = () => {
     reader.readAsDataURL(file);
   };
 
-  // Upload image to main page
-  const uploadImage = async () => {
+  // Format file size
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' bytes';
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    else return (bytes / 1048576).toFixed(1) + ' MB';
+  };
+
+  // Upload image to main page - INSTANT
+  const uploadImage = () => {
     if (!selectedImage || !connectionCode) {
       alert("Please select an image first");
       return;
@@ -61,33 +81,43 @@ const MobileUploadPage = () => {
 
     setUploadStatus('uploading');
 
-    // Simulate upload delay
+    // INSTANT UPLOAD - No delay
+    // Store image in localStorage (shared with main page)
+    const uploadData = {
+      code: connectionCode,
+      image: selectedImage,
+      fileName: fileName,
+      fileSize: fileSize,
+      timestamp: Date.now(),
+      status: 'uploaded'
+    };
+    
+    localStorage.setItem(`upload_${connectionCode}`, JSON.stringify(uploadData));
+    
+    // Show success immediately
+    setUploadStatus('success');
+    
+    // Auto-close after 2 seconds
     setTimeout(() => {
-      // Store image in localStorage (shared with main page)
-      const uploadData = {
-        code: connectionCode,
-        image: selectedImage,
-        fileName: "uploaded-image.jpg",
-        timestamp: Date.now(),
-        status: 'uploaded'
-      };
-      
-      localStorage.setItem(`upload_${connectionCode}`, JSON.stringify(uploadData));
-      
-      setUploadStatus('success');
-      
-      // Show success message
-      setTimeout(() => {
-        alert("✅ Image uploaded successfully! You can close this page.");
-        // Optionally redirect or show close instructions
-      }, 500);
-    }, 1500);
+      // Close the page or show close message
+      document.getElementById('close-message')?.classList.remove('hidden');
+    }, 500);
+  };
+
+  // Remove selected image
+  const removeImage = () => {
+    setSelectedImage(null);
+    setFileName('');
+    setFileSize('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] p-4">
       <Center className="h-full">
-        <Stack className="w-full max-w-sm items-center gap-6">
+        <Stack className="w-full max-w-sm items-center gap-5">
           
           {/* Header */}
           <Center className="flex-col gap-3">
@@ -100,50 +130,57 @@ const MobileUploadPage = () => {
             {connectionCode && (
               <div className="px-4 py-2 bg-white/10 rounded-full">
                 <p className="text-white/80 text-sm">
-                  Connection Code: <span className="font-mono font-bold">{connectionCode}</span>
+                  Code: <span className="font-mono font-bold">{connectionCode}</span>
                 </p>
               </div>
             )}
           </Center>
 
           {/* Upload Area */}
-          <Box className="w-full bg-white/5 rounded-xl p-6 border border-white/10">
-            <Stack className="gap-6">
+          <Box className="w-full bg-white/5 rounded-xl p-4 border border-white/10">
+            <Stack className="gap-4">
               
               {!selectedImage ? (
                 // Select Image Button
                 <button
                   onClick={handleSelectImage}
-                  className="flex flex-col items-center gap-4 p-8 rounded-xl border-2 border-dashed border-white/30 hover:border-white/50 transition-colors"
+                  className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-white/30 hover:border-white/50 transition-colors active:scale-95"
                 >
-                  <div className="p-4 rounded-full bg-white/10">
-                    <Camera className="size-10 text-white" />
+                  <div className="p-3 rounded-full bg-white/10">
+                    <Camera className="size-8 text-white" />
                   </div>
                   <div className="text-center">
                     <p className="text-white font-medium text-lg">Select Image</p>
                     <p className="text-white/60 text-sm mt-1">
-                      Choose from gallery or take a photo
+                      Tap to choose from gallery
                     </p>
                   </div>
                 </button>
               ) : (
                 // Image Preview
-                <div className="space-y-4">
-                  <div className="relative rounded-lg overflow-hidden">
+                <div className="space-y-3">
+                  <div className="relative rounded-lg overflow-hidden bg-black/20">
                     <img 
                       src={selectedImage} 
                       alt="Selected" 
                       className="w-full h-48 object-cover"
                     />
-                    <div className="absolute top-3 right-3 bg-black/60 rounded-full p-2">
-                      <ImageIcon className="size-5 text-white" />
+                    <button
+                      onClick={removeImage}
+                      className="absolute top-2 right-2 bg-red-500/90 text-white rounded-full p-1.5"
+                    >
+                      <X size={16} />
+                    </button>
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                      <p className="text-white text-sm truncate">{fileName}</p>
+                      <p className="text-white/70 text-xs">{fileSize}</p>
                     </div>
                   </div>
                   
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button
                       onClick={handleSelectImage}
-                      className="flex-1 py-3 rounded-lg border border-white/20 bg-white/5 text-white text-sm"
+                      className="flex-1 py-3 rounded-lg border border-white/20 bg-white/5 text-white text-sm active:scale-95"
                     >
                       Change Image
                     </button>
@@ -151,21 +188,21 @@ const MobileUploadPage = () => {
                     <button
                       onClick={uploadImage}
                       disabled={uploadStatus === 'uploading'}
-                      className={`flex-1 py-3 rounded-lg flex items-center justify-center gap-2 text-sm ${
+                      className={`flex-1 py-3 rounded-lg flex items-center justify-center gap-2 text-sm active:scale-95 ${
                         uploadStatus === 'uploading'
-                          ? 'bg-blue-500/50 text-white'
+                          ? 'bg-blue-500 text-white'
                           : 'bg-gradient-to-r from-green-500 to-blue-500 text-white'
                       }`}
                     >
                       {uploadStatus === 'uploading' ? (
                         <>
                           <div className="animate-spin rounded-full size-4 border-2 border-white border-t-transparent"></div>
-                          Uploading...
+                          Sending...
                         </>
                       ) : (
                         <>
                           <UploadIcon size={16} />
-                          Upload Image
+                          Upload Now
                         </>
                       )}
                     </button>
@@ -179,7 +216,6 @@ const MobileUploadPage = () => {
                 ref={fileInputRef}
                 className="hidden"
                 accept="image/*"
-                capture="environment"
                 onChange={handleFileSelect}
               />
             </Stack>
@@ -187,49 +223,77 @@ const MobileUploadPage = () => {
 
           {/* Upload Status */}
           {uploadStatus === 'success' && (
-            <div className="w-full p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+            <div className="w-full p-4 bg-green-500/10 border border-green-500/30 rounded-xl animate-in fade-in">
               <div className="flex items-center gap-3">
                 <CheckCircle className="size-6 text-green-500" />
                 <div>
-                  <p className="text-green-300 font-medium">Upload Successful!</p>
-                  <p className="text-green-300/70 text-sm">
-                    Image sent to Kiosk AI. You can close this page.
+                  <p className="text-green-300 font-medium">✅ Upload Successful!</p>
+                  <p className="text-green-300/70 text-sm mt-1">
+                    Image sent to Kiosk AI screen
                   </p>
+                  <div id="close-message" className="hidden mt-2 p-2 bg-green-500/20 rounded">
+                    <p className="text-green-300 text-xs">
+                      You can now close this page
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
           {/* Instructions */}
-          <div className="w-full p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+          <div className="w-full p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
             <h3 className="text-white font-medium mb-2 text-sm">How it works:</h3>
             <ul className="text-white/70 text-xs space-y-1.5">
               <li className="flex items-start gap-2">
-                <ArrowUp className="size-3 mt-0.5 text-blue-300" />
+                <div className="bg-blue-500/20 text-blue-300 rounded-full size-4 flex items-center justify-center text-xs mt-0.5">1</div>
                 <span>Select image from your phone</span>
               </li>
               <li className="flex items-start gap-2">
-                <ArrowUp className="size-3 mt-0.5 text-blue-300" />
-                <span>Click "Upload Image"</span>
+                <div className="bg-blue-500/20 text-blue-300 rounded-full size-4 flex items-center justify-center text-xs mt-0.5">2</div>
+                <span>Tap "Upload Now" button</span>
               </li>
               <li className="flex items-start gap-2">
-                <ArrowUp className="size-3 mt-0.5 text-blue-300" />
-                <span>Image appears on the Kiosk AI screen</span>
+                <div className="bg-blue-500/20 text-blue-300 rounded-full size-4 flex items-center justify-center text-xs mt-0.5">3</div>
+                <span>Image appears instantly on Kiosk AI</span>
               </li>
               <li className="flex items-start gap-2">
-                <ArrowUp className="size-3 mt-0.5 text-blue-300" />
+                <div className="bg-blue-500/20 text-blue-300 rounded-full size-4 flex items-center justify-center text-xs mt-0.5">4</div>
                 <span>Close this page when done</span>
               </li>
             </ul>
           </div>
 
-          {/* Close Button */}
-          <button
-            onClick={() => window.close()}
-            className="text-white/60 hover:text-white text-sm"
-          >
-            Close this page
-          </button>
+          {/* Action Buttons */}
+          <div className="flex gap-2 w-full">
+            {selectedImage && uploadStatus !== 'success' && (
+              <button
+                onClick={removeImage}
+                className="flex-1 py-2.5 rounded-lg border border-white/20 bg-white/5 text-white text-sm active:scale-95"
+              >
+                Cancel
+              </button>
+            )}
+            
+            {uploadStatus === 'success' && (
+              <button
+                onClick={() => window.close()}
+                className="flex-1 py-2.5 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm active:scale-95"
+              >
+                Close Page
+              </button>
+            )}
+          </div>
+
+          {/* Info */}
+          <div className="text-center">
+            <p className="text-white/50 text-xs">
+              Images are sent directly to the Kiosk AI screen
+            </p>
+            <p className="text-white/40 text-xs mt-1">
+              No data is stored on our servers
+            </p>
+          </div>
         </Stack>
       </Center>
     </Box>
