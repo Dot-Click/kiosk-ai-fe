@@ -79,6 +79,8 @@ const GoBackButton = ({
   );
 };
 
+export default GoBackButton;
+
 const Navbar = ({ handleNavigate }: { handleNavigate: () => void }) => {
   return (
     <NavbarWrapper

@@ -8,18 +8,20 @@ import {
   Minus, 
   Plus, 
   ChevronUp, 
-  ArrowLeft,
   Clock, 
   Truck, 
   CreditCard 
 } from "lucide-react";
 import CustomButton from "../components/common/customButton";
 
+// 1. IMPORT YOUR COMPONENT HERE
+import GoBackButton from "../components/horizontalnavbar/horizontalnavbar"; 
+
 const Checkout = () => {
   const navigate = useNavigate();
   const selectedImage = useImageStore((state) => state.selectedImage);
   const [quantity, setQuantity] = useState(1);
-  const [fulfillment, setFulfillment] = useState("express"); // "express" or "doorstep"
+  const [fulfillment, setFulfillment] = useState("express");
 
   return (
     <Box 
@@ -27,32 +29,19 @@ const Checkout = () => {
       style={{ fontFamily: "'Outfit', sans-serif" }}
     >
       
-     <Flex className="items-center justify-between mb-8 md:mb-16 max-w-[1400px] mx-auto">
-  <button 
-    onClick={() => navigate(-1)}
-    className="group flex items-center gap-3 bg-black border border-[#F0C4D3] p-2 pr-5 rounded-xl hover:scale-105 transition-all duration-300 shadow-xl"
-  >
-    {/* The Pink/Red Icon Box - Scaled Down */}
-    <div className="bg-gradient-to-b from-[#F70353] to-[#A30237] p-2 rounded-[10px] shadow-md">
-      <ArrowLeft className="w-4 h-4 text-white" strokeWidth={3} />
-    </div>
+      {/* 2. ADDED THE IMPORTED BUTTON HERE */}
+      <Flex className="items-center justify-between mb-8 md:mb-16 max-w-[1400px] mx-auto">
+        <GoBackButton onClick={() => navigate(-1)} />
 
-    {/* The Text - Scaled Down */}
-    <span className="text-white font-bold text-[11px] tracking-[0.15em]">
-      BACK
-    </span>
-  </button>
-
-  <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-    Check <span className="text-[#F70353] drop-shadow-[0_0_15px_rgba(247,3,83,0.5)]">Out</span>
-  </h1>
-  
-  <div className="w-[60px] md:w-[120px]" /> 
-</Flex>
-
-      {/* 2. MAIN CARDS LAYOUT */}
-      <Flex className="flex-col lg:flex-row justify-center gap-6 lg:gap-10 items-start max-w-[1400px] mx-auto">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+          Check <span className="text-[#F70353] drop-shadow-[0_0_15px_rgba(247,3,83,0.5)]">Out</span>
+        </h1>
         
+        {/* Spacer to keep title centered */}
+        <div className="hidden md:block w-[100px] xl:w-[120px] 2xl:w-[140px]" /> 
+      </Flex>
+
+      <Flex className="flex-col lg:flex-row justify-center gap-6 lg:gap-10 items-start max-w-[1400px] mx-auto">
         {/* LEFT SECTION: ORDER SUMMARY */}
         <Box 
           className="w-full lg:w-[520px] bg-no-repeat bg-cover md:bg-[length:100%_100%] p-6 md:p-10 flex flex-col shadow-2xl min-h-[500px]"
@@ -115,14 +104,13 @@ const Checkout = () => {
             Fulfillment Method
           </h2>
 
-          {/* 1. Express Printing */}
           <button 
             onClick={() => setFulfillment("express")}
             className={cn(
               "w-full text-left py-5 px-5 mb-4 flex items-center gap-5 border transition-all duration-300 rounded-2xl",
               fulfillment === "express" 
               ? "border-[#F70353] bg-[#F70353]/10 backdrop-blur-md" 
-        : "border-[#6B6B6B] bg-[#171717] hover:opacity-100"
+              : "border-[#6B6B6B] bg-[#171717] hover:opacity-100"
             )}
           >
             <div className={cn(
@@ -136,61 +124,44 @@ const Checkout = () => {
               <p className="text-white/50 text-[12px] mt-0.5">Ready for pick in 15-20 minutes</p>
             </div>
           </button>
-{/* 2. Doorstep Option + Accordion Form */}
-<Box className="mb-4 ">
-  <button 
-    onClick={() => setFulfillment("doorstep")}
-    className={cn(
-      "w-full text-left py-4 px-6 flex items-center gap-5 rounded-[22px] transition-all duration-300 border",
-      fulfillment === "doorstep" 
-                ? "border-[#F70353] bg-[#F70353]/10 backdrop-blur-md" 
-        : "border-[#6B6B6B] bg-[#171717] hover:opacity-100"
-    )}
-  >
-    <div className={cn(
-      "transition-all",
-      fulfillment === "doorstep" ? "text-[#B169F6] drop-shadow-[0_0_8px_rgba(177,105,246,0.6)]" : "text-white/30"
-    )}>
-      <Truck size={24} strokeWidth={2} />
-    </div>
-    <div className="flex-1">
-      <p className="text-white text-[17px] font-medium leading-tight">Doorstep Delivery</p>
-      <p className="text-white/40 text-[12px] mt-0.5">Delivered in 2-3 business days</p>
-    </div>
-  </button>
 
-  {/* Accordion Content - Styled exactly like the screenshot */}
-  <div className={cn(
-    "overflow-hidden transition-all duration-500 ease-in-out",
-    fulfillment === "doorstep" ? "max-h-[500px] mt-4 opacity-100" : "max-h-0 opacity-0"
-  )}>
-    <div className="space-y-3 px-1 pb-4">
-      <input 
-        type="text" 
-        placeholder="Street Address" 
-        className="w-full bg-[#252033]/60 border border-white/10 rounded-[22px] px-6 py-5 text-[15px] focus:outline-none focus:border-white/30 transition-all placeholder:text-white/30 font-light"
-      />
-      <input 
-        type="text" 
-        placeholder="Phone Number" 
-        className="w-full bg-[#252033]/60 border border-white/10 rounded-[22px] px-6 py-5 text-[15px] focus:outline-none focus:border-white/30 transition-all placeholder:text-white/30 font-light"
-      />
-      <Flex className="gap-3">
-        <input 
-          type="text" 
-          placeholder="City" 
-          className="flex-[1.5] bg-[#252033]/60 border border-white/10 rounded-[22px] px-6 py-5 text-[15px] focus:outline-none focus:border-white/30 transition-all placeholder:text-white/30 font-light"
-        />
-        <input 
-          type="text" 
-          placeholder="ZIP" 
-          className="flex-1 bg-[#252033]/60 border border-white/10 rounded-[22px] px-6 py-5 text-[15px] focus:outline-none focus:border-white/30 transition-all placeholder:text-white/30 font-light"
-        />
-      </Flex>
-    </div>
-  </div>
-</Box>
-          {/* 3. Recessed Payment Tray */}
+          <Box className="mb-4">
+            <button 
+              onClick={() => setFulfillment("doorstep")}
+              className={cn(
+                "w-full text-left py-4 px-6 flex items-center gap-5 rounded-[22px] transition-all duration-300 border",
+                fulfillment === "doorstep" 
+                ? "border-[#F70353] bg-[#F70353]/10 backdrop-blur-md" 
+                : "border-[#6B6B6B] bg-[#171717] hover:opacity-100"
+              )}
+            >
+              <div className={cn(
+                "transition-all",
+                fulfillment === "doorstep" ? "text-[#B169F6] drop-shadow-[0_0_8px_rgba(177,105,246,0.6)]" : "text-white/30"
+              )}>
+                <Truck size={24} strokeWidth={2} />
+              </div>
+              <div className="flex-1">
+                <p className="text-white text-[17px] font-medium leading-tight">Doorstep Delivery</p>
+                <p className="text-white/40 text-[12px] mt-0.5">Delivered in 2-3 business days</p>
+              </div>
+            </button>
+
+            <div className={cn(
+              "overflow-hidden transition-all duration-500 ease-in-out",
+              fulfillment === "doorstep" ? "max-h-[500px] mt-4 opacity-100" : "max-h-0 opacity-0"
+            )}>
+              <div className="space-y-3 px-1 pb-4">
+                <input type="text" placeholder="Street Address" className="w-full bg-[#252033]/60 border border-white/10 rounded-[22px] px-6 py-5 text-[15px] focus:outline-none focus:border-white/30 transition-all placeholder:text-white/30 font-light" />
+                <input type="text" placeholder="Phone Number" className="w-full bg-[#252033]/60 border border-white/10 rounded-[22px] px-6 py-5 text-[15px] focus:outline-none focus:border-white/30 transition-all placeholder:text-white/30 font-light" />
+                <Flex className="gap-3">
+                  <input type="text" placeholder="City" className="flex-[1.5] bg-[#252033]/60 border border-white/10 rounded-[22px] px-6 py-5 text-[15px] focus:outline-none focus:border-white/30 transition-all placeholder:text-white/30 font-light" />
+                  <input type="text" placeholder="ZIP" className="flex-1 bg-[#252033]/60 border border-white/10 rounded-[22px] px-6 py-5 text-[15px] focus:outline-none focus:border-white/30 transition-all placeholder:text-white/30 font-light" />
+                </Flex>
+              </div>
+            </div>
+          </Box>
+
           <Box 
             className="bg-no-repeat bg-cover md:bg-[length:100%_100%] rounded-[28px] p-5 border border-white/10 shadow-[inset_0_4px_20px_rgba(0,0,0,0.6)]"
             style={{ backgroundImage: "url('/general/checkout1.png')" }}
