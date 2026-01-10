@@ -349,21 +349,22 @@
 
 // export default ImageUploadPage;
 
-
 import { useState, useRef, useEffect } from "react";
 import CustomButton from "@/components/common/customButton";
 import { Box } from "@/components/ui/box";
 import { Center } from "@/components/ui/center";
 import { Stack } from "@/components/ui/stack";
-import { QrCode, Upload, Image as ImageIcon, ArrowRight, Copy, Smartphone } from "lucide-react";
+import { QrCode, Upload, Image as ImageIcon, ArrowRight, Copy, Smartphone, RefreshCw } from "lucide-react";
 
 const QRUploadPage = () => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const [connectionCode, setConnectionCode] = useState<string>("");
   const [receivedImage, setReceivedImage] = useState<string | null>(null);
   const [showNext, setShowNext] = useState<boolean>(false);
+  const [isChecking, setIsChecking] = useState<boolean>(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Generate QR code
   const generateQRCode = () => {
@@ -377,11 +378,67 @@ const QRUploadPage = () => {
     // Generate QR code image
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data=${encodeURIComponent(uploadUrl)}&color=2d2d6d&bgcolor=ffffff`;
     setQrCodeUrl(qrImageUrl);
+    
+    // Start checking for uploads
+    startCheckingForUploads(code);
   };
 
-  // Handle image received (simulated - in real app this would come from backend)
+  // Start checking for uploaded images
+  const startCheckingForUploads = (code: string) => {
+    // Clear any existing interval
+    if (checkIntervalRef.current) {
+      clearInterval(checkIntervalRef.current);
+    }
+    
+    setIsChecking(true);
+    
+    // Check immediately
+    checkForUpload(code);
+    
+    // Set up interval to check every 1 second
+    checkIntervalRef.current = setInterval(() => {
+      checkForUpload(code);
+    }, 1000);
+  };
+
+  // Check if image was uploaded
+  const checkForUpload = (code: string) => {
+    const data = localStorage.getItem(`upload_${code}`);
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.image && parsed.code === code) {
+          // Image found! Stop checking and show it
+          setReceivedImage(parsed.image);
+          setShowNext(true);
+          setIsChecking(false);
+          
+          // Clear the interval
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
+          }
+          
+          // Remove from localStorage after 5 seconds
+          setTimeout(() => {
+            localStorage.removeItem(`upload_${code}`);
+          }, 5000);
+        }
+      } catch (error) {
+        console.error("Error parsing upload data:", error);
+      }
+    }
+  };
+
+  // Manual check button
+  const manualCheck = () => {
+    if (connectionCode) {
+      checkForUpload(connectionCode);
+    }
+  };
+
+  // Handle image received (simulated - for testing without phone)
   const handleImageReceived = () => {
-    // For demo, use a file input. In production, images come from mobile upload
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -398,7 +455,7 @@ const QRUploadPage = () => {
       setReceivedImage(imageUrl);
       setShowNext(true);
       
-      // Store in localStorage so mobile page can access it
+      // Store in localStorage (simulates mobile upload)
       const uploadData = {
         code: connectionCode,
         image: imageUrl,
@@ -424,27 +481,35 @@ const QRUploadPage = () => {
     // window.location.href = `/process?image=${encodeURIComponent(receivedImage)}`;
   };
 
-  // Check if image was uploaded (polling simulation)
-  const checkForUpload = () => {
-    if (!connectionCode) return;
-    
-    const data = localStorage.getItem(`upload_${connectionCode}`);
-    if (data) {
-      const parsed = JSON.parse(data);
-      if (parsed.image) {
-        setReceivedImage(parsed.image);
-        setShowNext(true);
-      }
+  // Reset everything
+  const resetAll = () => {
+    // Clear interval
+    if (checkIntervalRef.current) {
+      clearInterval(checkIntervalRef.current);
+      checkIntervalRef.current = null;
     }
+    
+    // Clear localStorage for this code
+    if (connectionCode) {
+      localStorage.removeItem(`upload_${connectionCode}`);
+    }
+    
+    // Reset state
+    setQrCodeUrl("");
+    setConnectionCode("");
+    setReceivedImage(null);
+    setShowNext(false);
+    setIsChecking(false);
   };
 
-  // Auto-check for uploads every 2 seconds - FIXED: useEffect instead of useState
+  // Cleanup on component unmount
   useEffect(() => {
-    if (connectionCode) {
-      const interval = setInterval(checkForUpload, 2000);
-      return () => clearInterval(interval);
-    }
-  }, [connectionCode]);
+    return () => {
+      if (checkIntervalRef.current) {
+        clearInterval(checkIntervalRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/capture-bg.png')] bg-cover bg-no-repeat p-4">
@@ -498,19 +563,40 @@ const QRUploadPage = () => {
                 />
               </Center>
 
-              {/* Connection Code */}
+              {/* Connection Code & Status */}
               <Box className="bg-white/5 rounded-lg p-3 border border-white/10">
-                <p className="text-white/60 text-xs mb-1">Connection Code:</p>
-                <div className="flex items-center justify-between">
-                  <code className="text-white text-lg font-mono">{connectionCode}</code>
-                  <button
-                    onClick={copyCode}
-                    className="text-white/60 hover:text-white p-1"
-                    title="Copy code"
-                  >
-                    <Copy size={18} />
-                  </button>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="text-white/60 text-xs">Connection Code:</p>
+                    <code className="text-white text-lg font-mono">{connectionCode}</code>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={copyCode}
+                      className="text-white/60 hover:text-white p-1"
+                      title="Copy code"
+                    >
+                      <Copy size={18} />
+                    </button>
+                    <button
+                      onClick={manualCheck}
+                      className="text-white/60 hover:text-white p-1"
+                      title="Check for uploads"
+                    >
+                      <RefreshCw size={18} className={isChecking ? "animate-spin" : ""} />
+                    </button>
+                  </div>
                 </div>
+                
+                {/* Upload Status */}
+                {isChecking && !receivedImage && (
+                  <div className="mt-2 p-2 bg-blue-500/10 rounded">
+                    <p className="text-blue-300 text-xs flex items-center gap-1">
+                      <div className="size-2 rounded-full bg-blue-500 animate-pulse"></div>
+                      Checking for uploads...
+                    </p>
+                  </div>
+                )}
               </Box>
 
               {/* Instructions */}
@@ -532,6 +618,10 @@ const QRUploadPage = () => {
                   <li className="flex items-center gap-2">
                     <span className="bg-purple-500/20 text-purple-300 rounded-full size-5 flex items-center justify-center text-xs">4</span>
                     Select and upload image
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="bg-purple-500/20 text-purple-300 rounded-full size-5 flex items-center justify-center text-xs">5</span>
+                    Image appears here automatically
                   </li>
                 </ol>
               </Box>
@@ -574,7 +664,7 @@ const QRUploadPage = () => {
                   className="w-full h-40 object-cover"
                 />
                 <div className="p-3 bg-black/30">
-                  <p className="text-white text-sm">Ready for next step</p>
+                  <p className="text-white text-sm">Image uploaded from phone</p>
                 </div>
               </Box>
 
@@ -590,28 +680,48 @@ const QRUploadPage = () => {
             </Box>
           )}
 
-          {/* Status Message */}
+          {/* Status Message - Shows when waiting for upload */}
           {qrCodeUrl && !receivedImage && (
-            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <p className="text-blue-300 text-sm text-center">
-                ⏳ Waiting for image upload from phone...
-              </p>
+            <div className="w-full space-y-3">
+              <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <p className="text-blue-300 text-sm text-center">
+                  {isChecking ? "🔍 Checking for uploads..." : "⏳ Waiting for image upload..."}
+                </p>
+                <p className="text-blue-300/70 text-xs text-center mt-1">
+                  Make sure mobile user scans QR and uploads image
+                </p>
+              </div>
+              
+              <button
+                onClick={manualCheck}
+                className="w-full py-2 rounded-lg border border-white/20 bg-white/5 text-white text-sm hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+              >
+                <RefreshCw size={14} className={isChecking ? "animate-spin" : ""} />
+                Check Now for Upload
+              </button>
             </div>
           )}
 
-          {/* Back/Reset Button */}
-          {qrCodeUrl && !receivedImage && (
-            <button
-              onClick={() => {
-                setQrCodeUrl("");
-                setConnectionCode("");
-                setReceivedImage(null);
-              }}
-              className="text-white/60 hover:text-white text-sm"
-            >
-              ← Generate new QR code
-            </button>
-          )}
+          {/* Action Buttons */}
+          <div className="flex gap-2 w-full">
+            {qrCodeUrl && !receivedImage && (
+              <button
+                onClick={resetAll}
+                className="flex-1 py-2 rounded-lg border border-white/20 bg-white/5 text-white text-sm hover:bg-white/10 transition-colors"
+              >
+                Start Over
+              </button>
+            )}
+            
+            {receivedImage && (
+              <button
+                onClick={resetAll}
+                className="flex-1 py-2 rounded-lg border border-white/20 bg-white/5 text-white text-sm hover:bg-white/10 transition-colors"
+              >
+                Upload Another Image
+              </button>
+            )}
+          </div>
         </Stack>
       </Center>
     </Box>
