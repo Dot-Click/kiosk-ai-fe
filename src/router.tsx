@@ -9,7 +9,7 @@ import DescribeDesignPage from "./pages/describedesign.page";
 import ApplyMokupDesignPage from "./pages/applymokupdesgin.page";
 import Checkout from "./pages/checkout.page";
 import SpeakPrompt from "./pages/speakprompt.page";
-import MobileToWebTransfer from "./pages/bluetooth.page";
+import MobileToWebTransfer from "./pages/upload";
 
 export const Router = () => {
   return (
@@ -27,7 +27,7 @@ export const Router = () => {
             element={<DescribeDesignPage />}
           /> 
             <Route
-            path="/mobile-upload"
+            path="/upload"
             element={<MobileToWebTransfer />}
           /><Route
             path="/select-methods/speak-prompt"
