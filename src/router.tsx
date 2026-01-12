@@ -4,7 +4,8 @@ import { DashboardLayout } from "./layouts/dashboard.layout";
 import DashboardPage from "./pages/dashboard.page";
 import SelectMethodsPage from "./pages/selectmethods.page";
 import CapturePhotoPage from "./pages/capturephoto.page";
-import BluetoothPage from "./pages/bluetooth.page";
+import QrScanner from "./pages/qrscaner.page";
+import Bluetooth from "./pages/bluetooth.page";
 import DescribeDesignPage from "./pages/describedesign.page";
 import ApplyMokupDesignPage from "./pages/applymokupdesgin.page";
 import Checkout from "./pages/checkout.page";
@@ -41,7 +42,8 @@ export const Router = () => {
             path="/checkout"
             element={<Checkout />}
           />
-          <Route path="/select-methods/bluetooth" element={<BluetoothPage />} />
+          <Route path="/select-methods/qrscanner" element={<QrScanner />} />
+            <Route path="/select-methods/bluetooth" element={<Bluetooth />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

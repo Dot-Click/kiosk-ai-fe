@@ -136,6 +136,14 @@ const SelectMethodsPage = () => {
         navigate("/select-methods/speak-prompt");
       },
     },
+      {
+      title: "Via QR Scanner",
+      description: "Use your Camera",
+      imageSrc: "/general/qrscannerss.png",
+      onClick: () => {
+        navigate("/select-methods/qrscanner");
+      },
+    },
   ];
 
   return (
