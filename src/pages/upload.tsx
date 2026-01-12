@@ -318,7 +318,7 @@ import {
 } from "lucide-react";
 
 // Backend API Configuration
-const API_BASE_URL = "http://kiosk-ai-be-production.up.railway.app/api/v1";
+const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app/api/v1";
 
 const MobileUploadPage = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
