@@ -751,116 +751,31 @@ const QRUploadPage = () => {
   };
 
   // Check if image was uploaded
-  // const checkForUploadFromBackend = async (code: string) => {
-  //   try {
-  //     const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
+  const checkForUploadFromBackend = async (code: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
       
-  //     if (response.ok) {
-  //       const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
         
-  //       if (data.success && data.data && data.data.exists) {
-  //         // Image found
-  //         const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
-  //         setReceivedImage(imageUrl);
-  //         setShowNext(true);
-  //         setIsChecking(false);
+        if (data.success && data.data && data.data.exists) {
+          // Image found
+          const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
+          setReceivedImage(imageUrl);
+          setShowNext(true);
+          setIsChecking(false);
           
-  //         // Clear the interval
-  //         if (checkIntervalRef.current) {
-  //           clearInterval(checkIntervalRef.current);
-  //           checkIntervalRef.current = null;
-  //         }
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error("Error checking upload:", error);
-  //   }
-  // };
-
-  // Simplified and robust checkForUploadFromBackend function:
-const checkForUploadFromBackend = async (code: string) => {
-  try {
-    console.log(`🔄 Checking for upload (code: ${code})`);
-    
-    // 1. First check if image exists
-    const checkResponse = await fetch(`${API_BASE_URL}/upload/check/${code}`);
-    
-    if (!checkResponse.ok) {
-      console.log('❌ Check endpoint failed:', checkResponse.status);
-      return;
-    }
-    
-    const checkData = await checkResponse.json();
-    console.log('📊 Check response:', checkData);
-    
-    if (checkData.success && checkData.data?.exists) {
-      const imageUrl = checkData.data.imageUrl;
-      console.log('🖼️ Image URL from backend:', imageUrl);
-      
-      // 2. Try to fetch the image with multiple approaches
-      try {
-        // Approach 1: Direct fetch with no-cache
-        const imgResponse = await fetch(`${imageUrl}?t=${Date.now()}`, {
-          cache: 'no-cache',
-          headers: {
-            'Accept': 'image/*',
-          },
-        });
-        
-        console.log('📡 Image fetch status:', imgResponse.status);
-        
-        if (imgResponse.ok) {
-          // Check if it's actually an image
-          const contentType = imgResponse.headers.get('content-type');
-          console.log('📄 Content-Type:', contentType);
-          
-          if (contentType && contentType.startsWith('image/')) {
-            // Create blob URL
-            const blob = await imgResponse.blob();
-            console.log('📦 Blob size:', blob.size, 'bytes');
-            
-            if (blob.size > 100) { // At least 100 bytes
-              const objectUrl = URL.createObjectURL(blob);
-              
-              // Update state
-              setReceivedImage(objectUrl);
-              setShowNext(true);
-              setIsChecking(false);
-              
-              // Stop interval
-              if (checkIntervalRef.current) {
-                clearInterval(checkIntervalRef.current);
-                checkIntervalRef.current = null;
-              }
-              
-              console.log('✅ Image loaded successfully!');
-              return;
-            } else {
-              console.error('❌ Image too small (might be empty):', blob.size);
-            }
-          } else {
-            console.error('❌ Not an image response:', contentType);
-            // Maybe it's JSON? Try to parse
-            try {
-              const text = await imgResponse.text();
-              console.log('📝 Response text:', text.substring(0, 200));
-            } catch (e) {
-              console.error('❌ Could not read response:', e);
-            }
+          // Clear the interval
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
           }
-        } else {
-          console.error('❌ Failed to fetch image:', imgResponse.status);
         }
-      } catch (imgError) {
-        console.error('❌ Error fetching image:', imgError);
       }
-    } else {
-      console.log('⏳ Waiting for upload...');
+    } catch (error) {
+      console.error("Error checking upload:", error);
     }
-  } catch (error) {
-    console.error('❌ Error in checkForUploadFromBackend:', error);
-  }
-};
+  };
 
   // Manual check button
   const manualCheck = async () => {
