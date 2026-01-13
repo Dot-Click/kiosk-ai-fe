@@ -779,11 +779,74 @@ const QRUploadPage = () => {
 
   // Update checkForUploadFromBackend function:
 // Updated checkForUploadFromBackend function with better image validation:
+{/*
+  
+  
 const checkForUploadFromBackend = async (code: string) => {
   try {
     console.log(`🔍 Checking upload for code: ${code}`);
     
     const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
+    
+    console.log('📊 Check response status:', response.status);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('📦 Check response data:', data);
+      
+      if (data.success && data.data && data.data.exists) {
+        // Image found
+        const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
+        console.log('🖼️ Image URL:', imageUrl);
+        
+        // Test if image loads
+        const img = new Image();
+        img.onload = () => {
+          console.log('✅ Image loaded successfully');
+          setReceivedImage(imageUrl);
+          setShowNext(true);
+          setIsChecking(false);
+          
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
+          }
+        };
+        
+        img.onerror = () => {
+          console.error('❌ Failed to load image from:', imageUrl);
+          // Try with timestamp to avoid cache
+          const timestampedUrl = `${imageUrl}?t=${Date.now()}`;
+          setReceivedImage(timestampedUrl);
+          setShowNext(true);
+          setIsChecking(false);
+          
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
+          }
+        };
+        
+        img.src = imageUrl;
+      } else {
+        console.log('📭 No image found yet');
+      }
+    }
+  } catch (error) {
+    console.error("❌ Error checking upload:", error);
+  }
+};*/}
+// Updated checkForUploadFromBackend function:
+const checkForUploadFromBackend = async (code: string) => {
+  try {
+    console.log(`🔍 Checking upload for code: ${code}`);
+    
+    const response = await fetch(`${API_BASE_URL}/upload/check/${code}`, {
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    
     console.log('📊 Check response status:', response.status);
     
     if (response.ok) {
@@ -791,94 +854,89 @@ const checkForUploadFromBackend = async (code: string) => {
       console.log('📦 Check response data:', JSON.stringify(data));
       
       if (data.success && data.data && data.data.exists) {
-        // Create image URL with cache busting
-        const imageUrl = `${API_BASE_URL}/upload/image/${code}?t=${Date.now()}`;
-        console.log('🖼️ Image URL:', imageUrl);
+        // Use the imageUrl from the response
+        const imageUrl = data.data.imageUrl;
+        console.log('🖼️ Image URL from response:', imageUrl);
         
-        // First, verify the image actually exists and has content
-        const imageResponse = await fetch(imageUrl);
-        console.log('🖼️ Image fetch status:', imageResponse.status);
-        console.log('🖼️ Image content type:', imageResponse.headers.get('content-type'));
-        console.log('🖼️ Image size:', imageResponse.headers.get('content-length'), 'bytes');
+        // Add timestamp to avoid cache issues
+        const timestampedUrl = `${imageUrl}?t=${Date.now()}`;
         
-        if (imageResponse.ok) {
-          // Check if response actually contains an image
-          const contentType = imageResponse.headers.get('content-type');
-          if (!contentType || !contentType.startsWith('image/')) {
-            console.error('❌ Response is not an image:', contentType);
-            return;
-          }
-          
-          // Get image as blob to verify it has content
-          const blob = await imageResponse.blob();
-          console.log('📊 Blob size:', blob.size, 'bytes');
-          console.log('📊 Blob type:', blob.type);
-          
-          if (blob.size === 0) {
-            console.error('❌ Image blob is empty (0 bytes)');
-            return;
-          }
-          
-          // Create object URL for the blob
-          const objectUrl = URL.createObjectURL(blob);
-          console.log('✅ Created object URL:', objectUrl);
-          
-          // Test the image with HTMLImageElement
-          return new Promise((resolve) => {
-            const img = new Image();
-            
-            img.onload = () => {
-              console.log('✅ Image loaded successfully, dimensions:', img.width, 'x', img.height);
-              
-              // Check if image is not transparent/blank
-              if (img.width === 0 || img.height === 0) {
-                console.error('❌ Image has zero dimensions');
-                URL.revokeObjectURL(objectUrl);
-                resolve(false);
-                return;
-              }
-              
-              setReceivedImage(objectUrl);
-              setShowNext(true);
-              setIsChecking(false);
-              
-              if (checkIntervalRef.current) {
-                clearInterval(checkIntervalRef.current);
-                checkIntervalRef.current = null;
-              }
-              
-              resolve(true);
-            };
-            
-            img.onerror = (error) => {
-              console.error('❌ Failed to load image:', error);
-              URL.revokeObjectURL(objectUrl);
-              resolve(false);
-            };
-            
-            // Set timeout in case image never loads
-            setTimeout(() => {
-              if (!img.complete) {
-                console.error('❌ Image load timeout');
-                URL.revokeObjectURL(objectUrl);
-                resolve(false);
-              }
-            }, 5000);
-            
-            img.src = objectUrl;
+        // Test the image with a simple fetch
+        try {
+          const imgResponse = await fetch(timestampedUrl, {
+            mode: 'cors', // Try with CORS mode
+            cache: 'no-cache',
           });
           
-        } else {
-          console.error('❌ Failed to fetch image:', imageResponse.status);
+          if (imgResponse.ok) {
+            // Check content type
+            const contentType = imgResponse.headers.get('content-type');
+            console.log('✅ Image fetch successful, content type:', contentType);
+            
+            if (contentType && contentType.startsWith('image/')) {
+              // Get as blob first
+              const blob = await imgResponse.blob();
+              console.log('📊 Blob size:', blob.size, 'bytes');
+              
+              if (blob.size > 0) {
+                // Create object URL
+                const objectUrl = URL.createObjectURL(blob);
+                
+                // Set state
+                setReceivedImage(objectUrl);
+                setShowNext(true);
+                setIsChecking(false);
+                
+                // Clear interval
+                if (checkIntervalRef.current) {
+                  clearInterval(checkIntervalRef.current);
+                  checkIntervalRef.current = null;
+                }
+                
+                console.log('✅ Image set successfully with object URL');
+                return;
+              } else {
+                console.error('❌ Blob is empty');
+              }
+            } else {
+              console.error('❌ Not an image response:', contentType);
+            }
+          } else {
+            console.error('❌ Failed to fetch image:', imgResponse.status);
+          }
+        } catch (fetchError) {
+          console.error('❌ Error fetching image:', fetchError);
+          
+          // Try without timestamp as fallback
+          try {
+            const fallbackResponse = await fetch(imageUrl);
+            if (fallbackResponse.ok) {
+              const blob = await fallbackResponse.blob();
+              if (blob.size > 0) {
+                const objectUrl = URL.createObjectURL(blob);
+                setReceivedImage(objectUrl);
+                setShowNext(true);
+                setIsChecking(false);
+                
+                if (checkIntervalRef.current) {
+                  clearInterval(checkIntervalRef.current);
+                  checkIntervalRef.current = null;
+                }
+                console.log('✅ Image set using fallback method');
+              }
+            }
+          } catch (fallbackError) {
+            console.error('❌ Fallback also failed:', fallbackError);
+          }
         }
       } else {
-        console.log('📭 No image found yet or incomplete data');
+        console.log('📭 No image found yet');
       }
     } else {
       console.error('❌ Check endpoint error:', response.status);
     }
   } catch (error) {
-    console.error("❌ Error checking upload:", error);
+    console.error("❌ Error in checkForUploadFromBackend:", error);
   }
 };
   // Manual check button
@@ -1133,20 +1191,23 @@ const handleNext = () => {
                   }}
                 /> */}
                 {/* Update the image display section: */}
+{/* Update the image display section: */}
 <img 
   src={receivedImage} 
   alt="Uploaded" 
   loading="lazy"
-  className="w-full h-32 sm:h-40 object-contain bg-black"
+  className="w-full h-32 sm:h-40 object-contain bg-gradient-to-br from-purple-900/20 to-pink-900/20"
   onError={(e) => {
     console.error('🖼️ Image failed to load in DOM');
-    e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Processing';
+    // Use a simple data URL instead of external placeholder
+    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMyRDIkNkQiLz48dGV4dCB4PSIyMDAiIHk9IjE1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+VXBsb2FkZWQgSW1hZ2U8L3RleHQ+PC9zdmc+';
+    e.currentTarget.classList.add('p-4');
   }}
   onLoad={(e) => {
-    console.log('🖼️ Image loaded in DOM successfully');
-    console.log('🖼️ Image natural size:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
+    console.log('🖼️ Image loaded successfully in DOM');
+    console.log('🖼️ Natural dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
   }}
-/>``
+/>
                 <div className="p-3 bg-black/30">
                   <p className="text-white text-sm">Image uploaded from phone</p>
                   <p className="text-white/60 text-xs mt-1">
