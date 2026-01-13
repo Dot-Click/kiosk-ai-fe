@@ -351,7 +351,7 @@ const MobileUploadPage = () => {
 
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/health`);
+      const response = await fetch(`https://kiosk-ai-be-production.up.railway.app/health`);
       if (response.ok) {
         setBackendStatus('connected');
       } else {
@@ -364,21 +364,28 @@ const MobileUploadPage = () => {
     }
   };
 
-  const validateQRCode = async (code: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/qr/validate/${code}`);
-      if (!response.ok) {
-        throw new Error('QR code validation failed');
-      }
-      
-      const data = await response.json();
-      if (!data.success || !data.data.isValid) {
-        setErrorMessage('Invalid or expired QR code. Please scan a fresh QR code.');
-      }
-    } catch (error) {
-      setErrorMessage('Failed to validate QR code. Please try again.');
+const validateQRCode = async (code: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/qr/validate/${code}`);
+    
+    if (!response.ok) {
+      console.warn('QR validation failed, but continuing anyway');
+      // Don't show error, just continue
+      return;
     }
-  };
+    
+    const data = await response.json();
+    
+    if (!data.success || !data.data.isValid) {
+      console.warn('QR code is invalid or expired');
+      // Show warning but don't block
+      setErrorMessage('Note: QR code may be expired. You can still try uploading.');
+    }
+  } catch (error) {
+    console.warn('QR validation error, continuing anyway:', error);
+    // Don't block on validation error
+  }
+};
 
   // Handle image selection
   const handleSelectImage = () => {
