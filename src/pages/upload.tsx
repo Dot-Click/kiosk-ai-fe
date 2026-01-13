@@ -317,8 +317,10 @@ import {
   AlertCircle
 } from "lucide-react";
 
-// Backend API Configuration
-const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app/api/v1";
+
+// Backend API Configuration - USE ROOT URL, not /api/v1
+const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app";
+
 
 const MobileUploadPage = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -433,47 +435,48 @@ const validateQRCode = async (code: string) => {
     else return (bytes / 1048576).toFixed(1) + ' MB';
   };
 
-  // Upload image to backend
-  const uploadImage = async () => {
-    if (!selectedImage || !connectionCode || !file) {
-      setErrorMessage('Please select an image first');
-      return;
-    }
+ // Upload image to backend - UPDATED
+const uploadImage = async () => {
+  if (!selectedImage || !connectionCode || !file) {
+    setErrorMessage('Please select an image first');
+    return;
+  }
 
-    setUploadStatus('uploading');
-    setErrorMessage('');
+  setUploadStatus('uploading');
+  setErrorMessage('');
 
-    try {
-      // Create form data
-      const formData = new FormData();
-      formData.append('code', connectionCode);
-      formData.append('image', file);
+  try {
+    // Create form data
+    const formData = new FormData();
+    formData.append('code', connectionCode);
+    formData.append('image', file);
 
-      // Upload to backend
-      const response = await fetch(`${API_BASE_URL}/upload/upload`, {
-        method: 'POST',
-        body: formData,
-      });
+    // Upload to backend - FIXED URL
+    const response = await fetch(`${API_BASE_URL}/api/v1/upload/upload`, {
+      method: 'POST',
+      body: formData,
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (data.success) {
-        setUploadStatus('success');
-        
-        // Auto-show close message after 2 seconds
-        setTimeout(() => {
-          document.getElementById('close-message')?.classList.remove('hidden');
-        }, 2000);
-      } else {
-        setUploadStatus('error');
-        setErrorMessage(data.message || 'Upload failed. Please try again.');
-      }
-    } catch (error: any) {
+    if (data.success) {
+      setUploadStatus('success');
+      
+      // Auto-show close message after 2 seconds
+      setTimeout(() => {
+        const closeMsg = document.getElementById('close-message');
+        if (closeMsg) closeMsg.classList.remove('hidden');
+      }, 2000);
+    } else {
       setUploadStatus('error');
-      setErrorMessage('Upload failed. Please check your connection and try again.');
+      setErrorMessage(data.error || 'Upload failed. Please try again.');
     }
-  };
-
+  } catch (error: any) {
+    console.error('Upload error:', error);
+    setUploadStatus('error');
+    setErrorMessage('Upload failed. Please check your connection and try again.');
+  }
+};
   // Remove selected image
   const removeImage = () => {
     setSelectedImage(null);
@@ -719,9 +722,4 @@ const validateQRCode = async (code: string) => {
   );
 };
 
-export default MobileUploadPage;
-<<<<<<< HEAD
-
-
-=======
->>>>>>> b79aac1f3db3672eab837f6e2ebd22cf85438289
+export default MobileUploadPage; 
