@@ -80,7 +80,7 @@
 //               }}
 //             />
 //             <img
-//               src="/general/onlybluetooth.png"
+//               src="/general/onlybluetooth.svg"
 //               alt="QR Upload"
 //               className="size-24 relative z-10"
 //             />
@@ -635,6 +635,8 @@
 // };
 
 // export default QRUploadPage;
+
+
 import { useState, useRef, useEffect } from "react";
 import CustomButton from "@/components/common/customButton";
 import { Box } from "@/components/ui/box";
@@ -674,7 +676,7 @@ const QRUploadPage = () => {
 
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/health`);
+      const response = await fetch(`https://kiosk-ai-be-production.up.railway.app/health`);
       const data = await response.json();
       if (response.ok) {
         setBackendStatus('connected');
