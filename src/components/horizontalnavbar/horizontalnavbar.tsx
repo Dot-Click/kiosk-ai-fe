@@ -88,9 +88,9 @@ const Navbar = ({ handleNavigate }: { handleNavigate: () => void }) => {
       onClick={handleNavigate}
     >
       <img
-        src="/logo/logo.svg"
+        src="/logo/logo.png"
         alt="logo"
-        className="w-[150px] h-[150px] xl:w-[180px] xl:h-[180px] 2xl:w-[220px] 2xl:h-[220px]"
+        className="w-[150px] h-[90px] xl:w-[150px] xl:h-[80px] 2xl:w-[200px] 2xl:h-[100px]"
       />
     </NavbarWrapper>
   );

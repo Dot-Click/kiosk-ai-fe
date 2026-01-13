@@ -20,42 +20,42 @@ const styleOptions: StyleOption[] = [
     id: "caricature",
     title: "Caricature",
     description: "Convert your selfie into a fun caricature portrait",
-    icon: <img src="/chooseaistyle/Caricature.svg" alt="caricature" />,
+    icon: <img src="/chooseaistyle/Caricature.png" alt="caricature" />,
     iconColor: "#A855F7",
   },
   {
     id: "pencil-art",
     title: "Pencil Art",
     description: "Transform into a detailed pencil sketch portrait",
-    icon: <img src="/chooseaistyle/PencilArt.svg" alt="pencil-art" />,
+    icon: <img src="/chooseaistyle/PencilArt.png" alt="pencil-art" />,
     iconColor: "#EAB308",
   },
   {
     id: "anime",
     title: "Anime",
     description: "Transform yourself into an anime-style character",
-    icon: <img src="/chooseaistyle/Anime.svg" alt="anime" />,
+    icon: <img src="/chooseaistyle/Anime.png.png" alt="anime" />,
     iconColor: "#EAB308",
   },
   {
     id: "pixar-disney",
     title: "Pixar/Disney 3D",
     description: "Become a Pixar or Disney 3D cartoon character",
-    icon: <img src="/chooseaistyle/PixarDisney3D.svg" alt="pixar-disney" />,
+    icon: <img src="/chooseaistyle/PixarDisney3D.png" alt="pixar-disney" />,
     iconColor: "#EC4899",
   },
   {
     id: "cyberpunk",
     title: "Cyberpunk",
     description: "Get a futuristic cyberpunk portrait",
-    icon: <img src="/chooseaistyle/Cyberpunk.svg" alt="cyberpunk" />,
+    icon: <img src="/chooseaistyle/Cyberpunk.png" alt="cyberpunk" />,
     iconColor: "#3B82F6",
   },
   {
     id: "vintage-retro",
     title: "Vintage Retro",
     description: "Classic vintage retro sunset aesthetic",
-    icon: <img src="/chooseaistyle/VintageRetro.svg" alt="vintage-retro" />,
+    icon: <img src="/chooseaistyle/VintageRetro.png" alt="vintage-retro" />,
     iconColor: "#A16207",
   },
   {
@@ -63,7 +63,7 @@ const styleOptions: StyleOption[] = [
     title: "Cosmic Superhero",
     description: "Classic vintage retro sunset aesthetic",
     icon: (
-      <img src="/chooseaistyle/CosmicSuperhero.svg" alt="cosmic-superhero" />
+      <img src="/chooseaistyle/CosmicSuperhero.png" alt="cosmic-superhero" />
     ),
     iconColor: "#3B82F6",
   },
@@ -72,7 +72,7 @@ const styleOptions: StyleOption[] = [
     title: "Stencil Graffiti",
     description: "Street art stencil graffiti style",
     icon: (
-      <img src="/chooseaistyle/StencilGraffiti.svg" alt="stencil-graffiti" />
+      <img src="/chooseaistyle/StencilGraffiti.png" alt="stencil-graffiti" />
     ),
     iconColor: "#A855F7",
   },

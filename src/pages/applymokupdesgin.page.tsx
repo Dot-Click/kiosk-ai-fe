@@ -22,7 +22,7 @@
 // } from "lucide-react";
 
 // const productOptions = [
-//   { id: "cup", label: "Cup", image: "/general/cup.png" },
+//   { id: "cup", label: "Cup", image: "/general/cups.png" },
 //   { id: "tshirt", label: "Shirt", image: "/general/tshirt.png" }, // Add tshirt.png when available
 //   { id: "lamp", label: "Lamp", image: "/general/lamp.svg" }, // Add lamp.png when available
 // ];
@@ -716,7 +716,7 @@ import {
 const productOptions = [
   { id: "cup", label: "Cup", image: "/general/cup.png" },
   { id: "tshirt", label: "Shirt", image: "/general/tshirt.png" }, // Add tshirt.png when available
-  { id: "lamp", label: "Lamp", image: "/general/lamp.svg" }, // Add lamp.png when available
+  { id: "lamp", label: "Lamp", image: "/general/lamp.png" }, // Add lamp.png when available
 ];
 
 const colorOptions = [
@@ -851,7 +851,7 @@ const rotateObjectToLeftSide = () => {
     <Box
       className="absolute inset-0 xl:bg-[length:81%_81%] bg-[length:90%_90%] rounded-[10px]"
       style={{
-        backgroundImage: "url('/general/productphotos.svg')",
+        backgroundImage: "url('/general/productphotos.png')",
         // backgroundSize: "81% 81%",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -862,7 +862,7 @@ const rotateObjectToLeftSide = () => {
     <Box className="absolute z-10 xl:left-[12%] left-[10%] top-[8.5%] xl:top-[11.5%] 2xl:top-[12.5%]">
       <Flex className="items-center gap-2 xl:gap-3">
         <img
-          src="/general/cup.svg"
+          src="/general/cups.png"
           alt="icon"
           className="w-6 h-6 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8 object-cover rounded shadow-sm"
         />
@@ -882,7 +882,7 @@ const rotateObjectToLeftSide = () => {
     <Box className="absolute left-[13%] top-[24%] xl:top-[25%] 2xl:top-[27%]">
       <Flex className="items-center gap-3">
         <Box className="w-7 h-7 xl:w-8 xl:h-8 2xl:w-10 2xl:h-10 flex-shrink-0">
-          <img src="/general/squre.svg" alt="square" className="w-full h-full" />
+          <img src="/general/squre.png" alt="square" className="w-full h-full" />
         </Box>
         <span className="text-sm xl:text-base 2xl:text-lg text-white font-light">
           Customize Your Designs:

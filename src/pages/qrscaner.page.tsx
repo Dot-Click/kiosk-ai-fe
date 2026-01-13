@@ -80,7 +80,7 @@
 //               }}
 //             />
 //             <img
-//               src="/general/onlybluetooth.svg"
+//               src="/general/onlybluetooth.png"
 //               alt="QR Upload"
 //               className="size-24 relative z-10"
 //             />

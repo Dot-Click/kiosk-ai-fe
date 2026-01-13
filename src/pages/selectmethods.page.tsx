@@ -115,7 +115,7 @@ const SelectMethodsPage = () => {
     {
       title: "Take A Photo",
       description: "Capture your picture",
-      imageSrc: "/general/onlycamerA.svg",
+      imageSrc: "/general/image 10.svg",
       onClick: () => {
         navigate("/select-methods/capture-photo");
       },
@@ -123,7 +123,7 @@ const SelectMethodsPage = () => {
     {
       title: "Via Bluetooth",
       description: "Send any image from phone",
-      imageSrc: "/general/onlybluetooth.svg",
+      imageSrc: "/general/onlybluetooth.png",
       onClick: () => {
         navigate("/select-methods/bluetooth");
       },
@@ -131,7 +131,7 @@ const SelectMethodsPage = () => {
     {
       title: "Speak Prompt",
       description: "Use your Voice",
-      imageSrc: "/general/onlyspeak.svg",
+      imageSrc: "/general/onlyspeak.png",
       onClick: () => {
         navigate("/select-methods/speak-prompt");
       },

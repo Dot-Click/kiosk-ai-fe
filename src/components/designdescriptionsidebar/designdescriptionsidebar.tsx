@@ -35,7 +35,7 @@ const DesignDescriptionInput = () => {
       <Box
         className="absolute inset-0"
         style={{
-          backgroundImage: "url('/general/dropeffect.svg')",
+          backgroundImage: "url('/general/dropeffects.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",

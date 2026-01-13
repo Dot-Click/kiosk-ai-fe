@@ -88,7 +88,7 @@ const BluetoothPage = () => {
             }}
           />
           <img
-            src="/general/onlybluetooth.svg"
+            src="/general/onlybluetooth.png"
             alt="bluetooth"
             className="size-46 object-cover relative z-10"
           />
