@@ -1064,6 +1064,7 @@ const checkForUploadFromBackend = async (code: string) => {
                 <img 
                   src={receivedImage} 
                   alt="Uploaded" 
+                  loading="lazy"
                   className="w-full h-32 sm:h-40 object-cover"
                   onError={(e) => {
                     e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Uploaded';
