@@ -751,182 +751,31 @@ const QRUploadPage = () => {
   };
 
   // Check if image was uploaded
-  // const checkForUploadFromBackend = async (code: string) => {
-  //   try {
-  //     const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
-      
-  //     if (response.ok) {
-  //       const data = await response.json();
-        
-  //       if (data.success && data.data && data.data.exists) {
-  //         // Image found
-  //         const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
-  //         setReceivedImage(imageUrl);
-  //         setShowNext(true);
-  //         setIsChecking(false);
-          
-  //         // Clear the interval
-  //         if (checkIntervalRef.current) {
-  //           clearInterval(checkIntervalRef.current);
-  //           checkIntervalRef.current = null;
-  //         }
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error("Error checking upload:", error);
-  //   }
-  // };
-
-
   const checkForUploadFromBackend = async (code: string) => {
-  try {
-    console.log(`🔄 Checking for upload (code: ${code})`);
-    
-    // 1. Check if image exists
-    const checkResponse = await fetch(`${API_BASE_URL}/upload/check/${code}`);
-    
-    if (!checkResponse.ok) {
-      console.log('❌ Check endpoint failed:', checkResponse.status);
-      return;
-    }
-    
-    const checkData = await checkResponse.json();
-    console.log('📊 Check response:', checkData);
-    
-    if (checkData.success && checkData.data?.exists) {
-      console.log('✅ Backend confirms image exists!');
+    try {
+      const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
       
-      // 2. Try to fetch the image with error handling
-      const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
-      
-      try {
-        // Try to fetch with CORS mode
-        const imgResponse = await fetch(imageUrl, {
-          mode: 'cors',
-          cache: 'no-cache',
-          credentials: 'omit',
-        });
+      if (response.ok) {
+        const data = await response.json();
         
-        console.log('📡 Image fetch status:', imgResponse.status);
-        
-        if (imgResponse.ok) {
-          const contentType = imgResponse.headers.get('content-type');
-          console.log('📄 Content-Type:', contentType);
+        if (data.success && data.data && data.data.exists) {
+          // Image found
+          const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
+          setReceivedImage(imageUrl);
+          setShowNext(true);
+          setIsChecking(false);
           
-          if (contentType && contentType.startsWith('image/')) {
-            // Create blob URL from actual image
-            const blob = await imgResponse.blob();
-            const objectUrl = URL.createObjectURL(blob);
-            showSuccessState(code, objectUrl);
-          } else {
-            // Not an image, but backend says exists - show success anyway
-            console.log('⚠️ Response not an image, but backend says uploaded');
-            showSuccessState(code);
+          // Clear the interval
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
           }
-        } else {
-          // Fetch failed but backend says exists - show success anyway
-          console.log('⚠️ Image fetch failed but backend confirms upload');
-          showSuccessState(code);
         }
-      } catch (fetchError) {
-        // Fetch error but backend says exists - show success anyway
-        console.log('⚠️ Image fetch error:', fetchError);
-        showSuccessState(code);
       }
-    } else {
-      console.log('⏳ Waiting for upload...');
+    } catch (error) {
+      console.error("Error checking upload:", error);
     }
-  } catch (error) {
-    console.error('❌ Error in checkForUploadFromBackend:', error);
-  }
-};
-
-// Updated showSuccessState function with better image
-const showSuccessState = (code: string, imageUrl?: string) => {
-  console.log('🎉 Showing success state for code:', code);
-  
-  // Stop checking interval
-  if (checkIntervalRef.current) {
-    clearInterval(checkIntervalRef.current);
-    checkIntervalRef.current = null;
-  }
-  
-  // Use provided image or create success image
-  const finalImageUrl = imageUrl || createUploadedSuccessImage(code);
-  
-  // Update state
-  setReceivedImage(finalImageUrl);
-  setShowNext(true);
-  setIsChecking(false);
-  
-  // Force state update
-  setTimeout(() => {
-    console.log('✅ Success state should be visible now');
-  }, 100);
-};
-
-// Better success image creator
-const createUploadedSuccessImage = (code: string) => {
-  const svgContent = `
-    <svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-      <!-- Background with gradient -->
-      <defs>
-        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#080319"/>
-          <stop offset="100%" stop-color="#1a103d"/>
-        </linearGradient>
-        
-        <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#F70353"/>
-          <stop offset="50%" stop-color="#8B5CF6"/>
-          <stop offset="100%" stop-color="#00ff88"/>
-        </linearGradient>
-      </defs>
-      
-      <!-- Main background -->
-      <rect width="400" height="300" fill="url(#bgGradient)"/>
-      
-      <!-- Animated border -->
-      <rect x="5" y="5" width="390" height="290" rx="20" fill="none" 
-            stroke="url(#borderGradient)" stroke-width="2">
-        <animate attributeName="stroke-dashoffset" from="0" to="1000" dur="3s" repeatCount="indefinite"/>
-      </rect>
-      
-      <!-- Success icon -->
-      <circle cx="200" cy="110" r="50" fill="#00ff88" opacity="0.1"/>
-      <circle cx="200" cy="110" r="40" fill="#00ff88" opacity="0.2"/>
-      <circle cx="200" cy="110" r="30" fill="#00ff88" opacity="0.3"/>
-      
-      <!-- Checkmark -->
-      <path d="M185,115 L200,135 L225,100" fill="none" stroke="white" 
-            stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-        <animate attributeName="stroke-dasharray" values="0,100;100,0" dur="0.5s" fill="freeze"/>
-      </path>
-      
-      <!-- Text content -->
-      <text x="200" y="180" text-anchor="middle" fill="white" font-family="Arial" font-size="20" font-weight="bold">
-        📸 Image Uploaded!
-      </text>
-      
-      <text x="200" y="210" text-anchor="middle" fill="#a5b4fc" font-family="Arial" font-size="14">
-        Successfully received from phone
-      </text>
-      
-      <rect x="100" y="225" width="200" height="1" fill="#444"/>
-      
-      <text x="200" y="250" text-anchor="middle" fill="#888" font-family="monospace" font-size="12">
-        Code: ${code}
-      </text>
-      
-      <!-- Phone icon -->
-      <rect x="185" y="65" width="30" height="50" rx="5" fill="#333" stroke="#666" stroke-width="2"/>
-      <circle cx="200" cy="85" r="3" fill="#666"/>
-      <rect x="192" y="100" width="16" height="2" rx="1" fill="#666"/>
-    </svg>
-  `;
-  
-  return `data:image/svg+xml;base64,${btoa(svgContent)}`;
-};
+  };
 
   // Manual check button
   const manualCheck = async () => {
@@ -974,15 +823,6 @@ const createUploadedSuccessImage = (code: string) => {
       }
     };
   }, []);
-
-  useEffect(() => {
-  console.log('🔄 State update:', {
-    receivedImage: receivedImage ? 'Set' : 'Not set',
-    showNext,
-    isChecking,
-    qrCodeData: qrCodeData?.code
-  });
-}, [receivedImage, showNext, isChecking, qrCodeData]);
 
   // Handle back navigation
   const handleGoBack = (e: React.MouseEvent) => {
@@ -1150,68 +990,49 @@ const createUploadedSuccessImage = (code: string) => {
             </Box>
           )}
 
-        {receivedImage && (
-  <Box className="w-full space-y-3 sm:space-y-4 px-2 sm:px-0 animate-in fade-in">
-    <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg animate-pulse">
-      <div className="flex items-center justify-center gap-2">
-        <ImageIcon size={16} className="text-green-400 animate-bounce" />
-        <p className="text-green-300 text-sm font-medium">
-          🎉 IMAGE RECEIVED SUCCESSFULLY!
-        </p>
-      </div>
-      <p className="text-green-300/70 text-xs text-center mt-1">
-        Code: {qrCodeData?.code} • Ready for next step
-      </p>
-    </div>
-    
-    {/* Image Preview */}
-    <Box className="bg-white/5 rounded-lg border border-green-500/20 overflow-hidden">
-      <div className="relative">
-        <img 
-          src={receivedImage} 
-          alt="Uploaded from phone" 
-          loading="eager"
-          className="w-full h-32 sm:h-40 object-contain bg-gradient-to-br from-purple-900/10 to-green-900/10"
-          onLoad={(e) => {
-            console.log('✅ Image element loaded successfully');
-            console.log('📐 Image dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
-          }}
-          onError={(e) => {
-            console.error('❌ Image failed to load in img element');
-            // Create a fallback image immediately
-            const fallbackSvg = createUploadedSuccessImage(qrCodeData?.code || 'N/A');
-            e.currentTarget.src = fallbackSvg;
-          }}
-        />
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-          <div className="flex items-center gap-2">
-            <Smartphone size={12} className="text-green-400" />
-            <p className="text-white text-xs font-medium">Uploaded from Phone</p>
-          </div>
-          <p className="text-white/60 text-[10px] mt-0.5">
-            Ready for processing • Tap Continue below
-          </p>
-        </div>
-      </div>
-    </Box>
+          {/* Received Image Display */}
+          {receivedImage && (
+            <Box className="w-full space-y-3 sm:space-y-4 px-2 sm:px-0 animate-in fade-in">
+              <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <div className="flex items-center justify-center gap-2">
+                  <ImageIcon size={16} className="text-green-400" />
+                  <p className="text-green-300 text-sm font-medium">
+                    ✅ Image received successfully!
+                  </p>
+                </div>
+                <p className="text-green-300/70 text-xs text-center mt-1">
+                  Code: {qrCodeData?.code}
+                </p>
+              </div>
+              
+              <Box className="bg-white/5 rounded-lg border border-white/20 overflow-hidden">
+                <img 
+                  src={receivedImage} 
+                  alt="Uploaded" 
+                  className="w-full h-32 sm:h-40 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Uploaded';
+                  }}
+                />
+                <div className="p-3 bg-black/30">
+                  <p className="text-white text-sm">Image uploaded from phone</p>
+                  <p className="text-white/60 text-xs mt-1">
+                    Ready for processing
+                  </p>
+                </div>
+              </Box>
 
-    {/* Next Button - Make sure this shows! */}
-    {showNext && (
-      <div className="animate-in slide-in-up duration-300">
-        <CustomButton
-          wrapperClassName="w-full h-10 sm:h-12 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-          title="CONTINUE TO NEXT STEP →"
-          icon={<ArrowRight size={18} />}
-          onClick={handleNext}
-          className="font-bold"
-        />
-        <p className="text-white/40 text-xs text-center mt-2 animate-pulse">
-          Tap to proceed with the uploaded image
-        </p>
-      </div>
-    )}
-  </Box>
-)}
+              {/* Next Button */}
+              {showNext && (
+                <CustomButton
+                  wrapperClassName="w-full h-10 sm:h-12"
+                  title="Continue to Next Step"
+                  icon={<ArrowRight size={18} />}
+                  onClick={handleNext}
+                />
+              )}
+            </Box>
+          )}
 
           {/* Status Message */}
           {qrCodeData && !receivedImage && (
