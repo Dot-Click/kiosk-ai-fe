@@ -750,90 +750,33 @@ const QRUploadPage = () => {
     }, 2000);
   };
 
-  // // Check if image was uploaded
-  // const checkForUploadFromBackend = async (code: string) => {
-  //   try {
-  //     const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
+  // Check if image was uploaded
+  const checkForUploadFromBackend = async (code: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
       
-  //     if (response.ok) {
-  //       const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
         
-  //       if (data.success && data.data && data.data.exists) {
-  //         // Image found
-  //         const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
-  //         setReceivedImage(imageUrl);
-  //         setShowNext(true);
-  //         setIsChecking(false);
-          
-  //         // Clear the interval
-  //         if (checkIntervalRef.current) {
-  //           clearInterval(checkIntervalRef.current);
-  //           checkIntervalRef.current = null;
-  //         }
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error("Error checking upload:", error);
-  //   }
-  // };
-
-  // Update checkForUploadFromBackend function:
-
-  
-const checkForUploadFromBackend = async (code: string) => {
-  try {
-    console.log(`🔍 Checking upload for code: ${code}`);
-    
-    const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
-    
-    console.log('📊 Check response status:', response.status);
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log('📦 Check response data:', data);
-      
-      if (data.success && data.data && data.data.exists) {
-        // Image found
-        const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
-        console.log('🖼️ Image URL:', imageUrl);
-        
-        // Test if image loads
-        const img = new Image();
-        img.onload = () => {
-          console.log('✅ Image loaded successfully');
+        if (data.success && data.data && data.data.exists) {
+          // Image found
+          const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
           setReceivedImage(imageUrl);
           setShowNext(true);
           setIsChecking(false);
           
+          // Clear the interval
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
             checkIntervalRef.current = null;
           }
-        };
-        
-        img.onerror = () => {
-          console.error('❌ Failed to load image from:', imageUrl);
-          // Try with timestamp to avoid cache
-          const timestampedUrl = `${imageUrl}?t=${Date.now()}`;
-          setReceivedImage(timestampedUrl);
-          setShowNext(true);
-          setIsChecking(false);
-          
-          if (checkIntervalRef.current) {
-            clearInterval(checkIntervalRef.current);
-            checkIntervalRef.current = null;
-          }
-        };
-        
-        img.src = imageUrl;
-      } else {
-        console.log('📭 No image found yet');
+        }
       }
+    } catch (error) {
+      console.error("Error checking upload:", error);
     }
-  } catch (error) {
-    console.error("❌ Error checking upload:", error);
-  }
-};
+  };
+
   // Manual check button
   const manualCheck = async () => {
     if (qrCodeData?.code) {
@@ -1066,7 +1009,6 @@ const checkForUploadFromBackend = async (code: string) => {
                 <img 
                   src={receivedImage} 
                   alt="Uploaded" 
-                  loading="lazy"
                   className="w-full h-32 sm:h-40 object-cover"
                   onError={(e) => {
                     e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Uploaded';
