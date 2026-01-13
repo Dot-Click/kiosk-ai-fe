@@ -750,183 +750,33 @@ const QRUploadPage = () => {
     }, 2000);
   };
 
-  // // Check if image was uploaded
-  // const checkForUploadFromBackend = async (code: string) => {
-  //   try {
-  //     const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
-      
-  //     if (response.ok) {
-  //       const data = await response.json();
-        
-  //       if (data.success && data.data && data.data.exists) {
-  //         // Image found
-  //         const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
-  //         setReceivedImage(imageUrl);
-  //         setShowNext(true);
-  //         setIsChecking(false);
-          
-  //         // Clear the interval
-  //         if (checkIntervalRef.current) {
-  //           clearInterval(checkIntervalRef.current);
-  //           checkIntervalRef.current = null;
-  //         }
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error("Error checking upload:", error);
-  //   }
-  // };
-
+  // Check if image was uploaded
   const checkForUploadFromBackend = async (code: string) => {
-  try {
-    console.log(`🔄 Checking for upload (code: ${code})`);
-    
-    // 1. Check if image exists
-    const checkResponse = await fetch(`${API_BASE_URL}/upload/check/${code}`);
-    
-    if (!checkResponse.ok) {
-      console.log('❌ Check endpoint failed:', checkResponse.status);
-      return;
-    }
-    
-    const checkData = await checkResponse.json();
-    console.log('📊 Check response:', checkData);
-    
-    if (checkData.success && checkData.data?.exists) {
-      // 2. Try to fetch the image WITHOUT following redirects
-      try {
-        const imgResponse = await fetch(`${API_BASE_URL}/upload/image/${code}`, {
-          method: 'GET',
-          redirect: 'manual', // Don't follow redirects automatically
-        });
+    try {
+      const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
+      
+      if (response.ok) {
+        const data = await response.json();
         
-        console.log('📡 Image fetch status:', imgResponse.status);
-        console.log('📡 Image fetch type:', imgResponse.type);
-        
-        // Check if it's a redirect
-        if (imgResponse.status === 301 || imgResponse.status === 302 || imgResponse.status === 307) {
-          const redirectUrl = imgResponse.headers.get('location');
-          console.log('🔄 Redirect detected to:', redirectUrl);
+        if (data.success && data.data && data.data.exists) {
+          // Image found
+          const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
+          setReceivedImage(imageUrl);
+          setShowNext(true);
+          setIsChecking(false);
           
-          // If it redirects to via.placeholder.com, skip it and show success
-          if (redirectUrl && redirectUrl.includes('via.placeholder.com')) {
-            console.log('⚠️ Redirects to placeholder - showing success state');
-            showSuccessState(code);
-            return;
-          }
-          
-          // Try to fetch from redirect URL if it's not placeholder
-          if (redirectUrl && !redirectUrl.includes('via.placeholder.com')) {
-            try {
-              const redirectedResponse = await fetch(redirectUrl);
-              if (redirectedResponse.ok) {
-                const contentType = redirectedResponse.headers.get('content-type');
-                if (contentType?.startsWith('image/')) {
-                  const blob = await redirectedResponse.blob();
-                  const objectUrl = URL.createObjectURL(blob);
-                  showSuccessState(code, objectUrl);
-                  return;
-                }
-              }
-            } catch (e) {
-              console.error('❌ Error fetching from redirect:', e);
-              showSuccessState(code);
-            }
-          } else {
-            showSuccessState(code);
+          // Clear the interval
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
           }
         }
-        // Check if it's an actual image
-        else if (imgResponse.ok) {
-          const contentType = imgResponse.headers.get('content-type');
-          console.log('📄 Content-Type:', contentType);
-          
-          if (contentType && contentType.startsWith('image/')) {
-            const blob = await imgResponse.blob();
-            const objectUrl = URL.createObjectURL(blob);
-            showSuccessState(code, objectUrl);
-            return;
-          } else {
-            console.error('❌ Not an image response');
-            showSuccessState(code);
-          }
-        }
-        // Any other status
-        else {
-          console.error('❌ Image fetch failed:', imgResponse.status);
-          // Still show success if backend says image exists
-          showSuccessState(code);
-        }
-      } catch (imgError) {
-        console.error('❌ Error fetching image:', imgError);
-        // Still show success if backend says image exists
-        showSuccessState(code);
       }
-    } else {
-      console.log('⏳ Waiting for upload...');
+    } catch (error) {
+      console.error("Error checking upload:", error);
     }
-  } catch (error) {
-    console.error('❌ Error in checkForUploadFromBackend:', error);
-  }
-};
+  };
 
-// Helper function to show success state
-const showSuccessState = (code: string, imageUrl?: string) => {
-  console.log('✅ Backend confirms image uploaded for code:', code);
-  
-  // Create a custom success image
-  const successImageUrl = imageUrl || createSuccessImage(code);
-  
-  // Update state
-  setReceivedImage(successImageUrl);
-  setShowNext(true);
-  setIsChecking(false);
-  
-  // Stop checking interval
-  if (checkIntervalRef.current) {
-    clearInterval(checkIntervalRef.current);
-    checkIntervalRef.current = null;
-  }
-};
-
-// Create a success image SVG
-const createSuccessImage = (code: string) => {
-  return `data:image/svg+xml;base64,${btoa(`
-    <svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
-      <!-- Background -->
-      <rect width="400" height="300" fill="#080319"/>
-      
-      <!-- Gradient border -->
-      <rect x="10" y="10" width="380" height="280" rx="15" fill="none" stroke="url(#gradient)" stroke-width="2"/>
-      
-      <!-- Checkmark circle -->
-      <circle cx="200" cy="100" r="50" fill="#00ff88" opacity="0.2"/>
-      <circle cx="200" cy="100" r="40" fill="#00ff88" opacity="0.3"/>
-      <circle cx="200" cy="100" r="30" fill="#00ff88"/>
-      
-      <!-- Checkmark -->
-      <path d="M185,105 L195,120 L220,85" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-      
-      <!-- Text -->
-      <text x="200" y="180" text-anchor="middle" fill="white" font-family="Arial" font-size="20" font-weight="bold">
-        Image Uploaded Successfully!
-      </text>
-      <text x="200" y="210" text-anchor="middle" fill="#a5b4fc" font-family="Arial" font-size="14">
-        Ready for processing
-      </text>
-      <text x="200" y="240" text-anchor="middle" fill="#888" font-family="monospace" font-size="12">
-        Code: ${code}
-      </text>
-      
-      <defs>
-        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#F70353"/>
-          <stop offset="100%" stop-color="#8B5CF6"/>
-        </linearGradient>
-      </defs>
-    </svg>
-  `)}`;
-};
   // Manual check button
   const manualCheck = async () => {
     if (qrCodeData?.code) {
@@ -1156,28 +1006,14 @@ const createSuccessImage = (code: string) => {
               </div>
               
               <Box className="bg-white/5 rounded-lg border border-white/20 overflow-hidden">
-                {/* <img 
+                <img 
                   src={receivedImage} 
                   alt="Uploaded" 
                   className="w-full h-32 sm:h-40 object-cover"
                   onError={(e) => {
                     e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Uploaded';
                   }}
-                /> */}
-                {/* Replace the image display with this: */}
-<img 
-  src={receivedImage} 
-  alt="Uploaded" 
-  loading="lazy"
-  className="w-full h-32 sm:h-40 object-contain"
-  onError={(e) => {
-    console.error('🖼️ Image failed to load');
-    // Replace with our success image
-    if (qrCodeData?.code) {
-      e.currentTarget.src = createSuccessImage(qrCodeData.code);
-    }
-  }}
-/>
+                />
                 <div className="p-3 bg-black/30">
                   <p className="text-white text-sm">Image uploaded from phone</p>
                   <p className="text-white/60 text-xs mt-1">
