@@ -635,7 +635,6 @@
 // };
 
 // export default QRUploadPage;
-
 import { useState, useRef, useEffect } from "react";
 import CustomButton from "@/components/common/customButton";
 import { Box } from "@/components/ui/box";
@@ -644,10 +643,11 @@ import { useNavigate } from "react-router";
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
 import { QrCode, Image as ImageIcon, ArrowRight, Copy, Smartphone, RefreshCw } from "lucide-react";
+import GoBackButton from "../components/horizontalnavbar/horizontalnavbar.tsx";
 import { HorizontalNavbar } from "../components/horizontalnavbar/horizontalnavbar.tsx";
 
 // Backend API Configuration
-const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app";
+const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app/api/v1";
 
 interface QRCodeData {
   code: string;
@@ -834,34 +834,36 @@ const QRUploadPage = () => {
       <HorizontalNavbar />
       
       {/* Back Button */}
-      <Box className="absolute top-8 left-4 z-50">
-        <button 
-          onClick={handleGoBack}
-          className="text-white hover:text-gray-300 transition-colors"
-        >
-          ← Back
-        </button>
+      <Box className="absolute top-8 xl:top-10 2xl:top-12 left-4 sm:left-6 md:left-8 lg:left-10 xl:left-32 2xl:left-40 z-50">
+        <GoBackButton onClick={handleGoBack} />
       </Box>
 
-      {/* Page Header */}
-      <Box className="absolute flex items-center justify-center w-full top-8 z-40 px-4">
-        <Stack className="z-20 justify-center items-center p-0 gap-0">
+      {/* Custom Navbar for QR Upload Page */}
+      <Box className="absolute flex items-center justify-center w-full top-8 xl:top-10 2xl:top-12 z-40 px-4">
+        <Stack className="z-20 justify-center items-center p-0 gap-0 xl:gap-1 2xl:gap-2 max-w-full">
           <Flex className="font-bold flex-col sm:flex-row items-center text-center">
-            <h1 className="bg-[linear-gradient(0deg,#E5E5E1_90%,#E5E5E5_100%)] bg-clip-text text-transparent tracking-wide text-sm sm:text-base">
+            <h1 className="bg-[linear-gradient(0deg,#E5E5E1_90%,#E5E5E5_100%)] bg-clip-text text-transparent tracking-wide text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl">
               Upload from your
             </h1>
-            <span className="text-[#F70353] text-sm sm:text-base ml-0 sm:ml-2">
+            <span className="text-[#F70353] text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl ml-0 sm:ml-2 xl:ml-3 2xl:ml-4">
               PHONE
             </span>
           </Flex>
-          <p className="text-[#FFFFFF]/80 font-light p-0 text-center text-xs">
+          <p
+            className="text-[#FFFFFF]/80 font-light p-0 text-center"
+            style={{
+              letterSpacing: "1.6px",
+              fontSize: "11px",
+              userSelect: "none",
+            }}
+          >
             Scan QR code to upload images from your phone
           </p>
         </Stack>
       </Box>
 
-      <Center className="h-full mt-20 pt-28 overflow-y-auto"> 
-        <Stack className="w-full max-w-md items-center gap-6 px-4">
+      <Center className="h-full mt-20 pt-28 sm:pt-32 md:pt-36 overflow-y-auto"> 
+        <Stack className="w-full max-w-md items-center gap-4 sm:gap-6 px-2 sm:px-4">
           {/* Error Display */}
           {error && (
             <div className="w-full p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
@@ -880,17 +882,17 @@ const QRUploadPage = () => {
                 filter: "blur(30px)",
               }}
             />
-            <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full border border-white/10">
-              <Smartphone className="size-10 text-purple-400" />
+            <div className="p-3 sm:p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full border border-white/10">
+              <Smartphone className="size-8 sm:size-10 md:size-12 text-purple-400" />
             </div>
           </Center>
 
           {/* QR Code Section */}
           {!qrCodeData ? (
             // Initial state - Show generate button
-            <Box className="w-full mt-2">
+            <Box className="w-full mt-2 px-2 sm:px-0">
               <CustomButton
-                wrapperClassName="w-full h-12"
+                wrapperClassName="w-full h-10 sm:h-12"
                 title={isGenerating ? "Generating QR Code..." : "Generate QR Code"}
                 icon={isGenerating ? <RefreshCw className="animate-spin" size={18} /> : <QrCode size={18} />}
                 onClick={generateQRCode}
@@ -902,13 +904,13 @@ const QRUploadPage = () => {
             </Box>
           ) : (
             // QR Code generated state
-            <Box className="w-full space-y-4">
+            <Box className="w-full space-y-3 sm:space-y-4 px-2 sm:px-0">
               {/* QR Code Display */}
-              <Center className="p-4 bg-white rounded-lg">
+              <Center className="p-3 sm:p-4 bg-white rounded-lg">
                 <img 
                   src={qrCodeData.qrImageUrl} 
                   alt="Scan this QR code" 
-                  className="w-56 h-56"
+                  className="w-48 h-48 sm:w-56 sm:h-56"
                 />
               </Center>
 
@@ -918,7 +920,7 @@ const QRUploadPage = () => {
                   <div className="overflow-hidden">
                     <p className="text-white/60 text-xs">Connection Code:</p>
                     <div className="flex items-center gap-2">
-                      <code className="text-white text-lg font-mono truncate">
+                      <code className="text-white text-base sm:text-lg font-mono truncate">
                         {qrCodeData.code}
                       </code>
                       <span className="text-xs bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded">
@@ -952,7 +954,7 @@ const QRUploadPage = () => {
                   <div className="mt-2 p-2 bg-blue-500/10 rounded border border-blue-500/20">
                     <p className="text-blue-300 text-xs flex items-center gap-2">
                       <div className="size-2 rounded-full bg-blue-500 animate-pulse"></div>
-                      Checking for uploads...
+                      Checking for uploads every 2 seconds...
                     </p>
                   </div>
                 )}
@@ -967,19 +969,19 @@ const QRUploadPage = () => {
                 <ol className="text-white/70 text-xs space-y-2">
                   <li className="flex items-start gap-2">
                     <span className="bg-purple-500/20 text-purple-300 rounded-full size-5 flex items-center justify-center text-xs mt-0.5 flex-shrink-0">1</span>
-                    <span>Open your phone camera and scan the QR code</span>
+                    <span>Open your phone camera and scan the QR code above</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-purple-500/20 text-purple-300 rounded-full size-5 flex items-center justify-center text-xs mt-0.5 flex-shrink-0">2</span>
-                    <span>Tap the link that appears on your phone</span>
+                    <span>Tap the link that appears on your phone screen</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-purple-500/20 text-purple-300 rounded-full size-5 flex items-center justify-center text-xs mt-0.5 flex-shrink-0">3</span>
-                    <span>Select an image from your phone gallery</span>
+                    <span>Select an image from your phone gallery or take a photo</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="bg-purple-500/20 text-purple-300 rounded-full size-5 flex items-center justify-center text-xs mt-0.5 flex-shrink-0">4</span>
-                    <span>Upload - the image will appear here automatically</span>
+                    <span>Tap "Upload" - the image will appear here automatically</span>
                   </li>
                 </ol>
               </Box>
@@ -988,7 +990,7 @@ const QRUploadPage = () => {
 
           {/* Received Image Display */}
           {receivedImage && (
-            <Box className="w-full space-y-4 animate-in fade-in">
+            <Box className="w-full space-y-3 sm:space-y-4 px-2 sm:px-0 animate-in fade-in">
               <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
                 <div className="flex items-center justify-center gap-2">
                   <ImageIcon size={16} className="text-green-400" />
@@ -1005,7 +1007,7 @@ const QRUploadPage = () => {
                 <img 
                   src={receivedImage} 
                   alt="Uploaded" 
-                  className="w-full h-40 object-cover"
+                  className="w-full h-32 sm:h-40 object-cover"
                   onError={(e) => {
                     e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Uploaded';
                   }}
@@ -1021,7 +1023,7 @@ const QRUploadPage = () => {
               {/* Next Button */}
               {showNext && (
                 <CustomButton
-                  wrapperClassName="w-full h-12"
+                  wrapperClassName="w-full h-10 sm:h-12"
                   title="Continue to Next Step"
                   icon={<ArrowRight size={18} />}
                   onClick={handleNext}
@@ -1032,35 +1034,44 @@ const QRUploadPage = () => {
 
           {/* Status Message */}
           {qrCodeData && !receivedImage && (
-            <div className="w-full space-y-3">
+            <div className="w-full space-y-3 px-2 sm:px-0">
               <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                <p className="text-blue-300 text-sm text-center">
+                <p className="text-blue-300 text-xs sm:text-sm text-center">
                   {isChecking ? "🔄 Checking for uploads..." : "⏳ Waiting for image upload..."}
                 </p>
+                <p className="text-blue-300/70 text-[10px] sm:text-xs text-center mt-1">
+                  Auto-refreshing every 2 seconds
+                </p>
               </div>
+              
+              <button
+                onClick={manualCheck}
+                className="w-full py-2 rounded-lg border border-white/20 bg-white/5 text-white text-xs sm:text-sm hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+              >
+                <RefreshCw size={12} className={isChecking ? "animate-spin" : ""} />
+                Check Now for Upload
+              </button>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 w-full">
+          <div className="flex gap-2 w-full px-2 sm:px-0">
             {qrCodeData && !receivedImage && (
               <button
                 onClick={resetAll}
-                className="flex-1 py-2 rounded-lg border border-white/20 bg-white/5 text-white text-sm hover:bg-white/10 transition-colors"
+                className="flex-1 py-2 rounded-lg border border-white/20 bg-white/5 text-white text-xs sm:text-sm hover:bg-white/10 transition-colors"
               >
-                Generate New Code
+                Start Over
               </button>
             )}
             
             {receivedImage && (
-              <>
-                <button
-                  onClick={resetAll}
-                  className="flex-1 py-2 rounded-lg border border-white/20 bg-white/5 text-white text-sm hover:bg-white/10 transition-colors"
-                >
-                  Upload Another
-                </button>
-              </>
+              <button
+                onClick={resetAll}
+                className="flex-1 py-2 rounded-lg border border-white/20 bg-white/5 text-white text-xs sm:text-sm hover:bg-white/10 transition-colors"
+              >
+                Upload Another Image
+              </button>
             )}
           </div>
         </Stack>
