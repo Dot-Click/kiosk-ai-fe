@@ -21,7 +21,7 @@
 //     setConnectionCode(code);
     
 //     // Create mobile upload URL with your domain
-//     const uploadUrl = `localhost:4001upload?code=${code}`;
+//     const uploadUrl = `kiosk-ai.vercel.appupload?code=${code}`;
     
 //     // Generate QR code image
 //     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(uploadUrl)}`;
@@ -250,7 +250,7 @@
 //     setConnectionCode(code);
     
 //     // Create mobile upload URL with your domain
-//     const uploadUrl = `localhost:4001upload?code=${code}`;
+//     const uploadUrl = `kiosk-ai.vercel.appupload?code=${code}`;
     
 //     // Generate QR code image
 //     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=png&data=${encodeURIComponent(uploadUrl)}&color=2d2d6d&bgcolor=ffffff`;
@@ -644,7 +644,7 @@ import { Center } from "@/components/ui/center";
 import { useNavigate } from "react-router";
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
-import { QrCode, Image as ImageIcon, ArrowRight, Copy, Smartphone, RefreshCw, ExternalLink, AlertCircle, Check } from "lucide-react";
+import { QrCode, Image as ImageIcon, ArrowRight, Copy, Smartphone, RefreshCw} from "lucide-react";
 import GoBackButton from "../components/horizontalnavbar/horizontalnavbar.tsx";
 import { HorizontalNavbar } from "../components/horizontalnavbar/horizontalnavbar.tsx";
 
@@ -667,8 +667,8 @@ const QRUploadPage = () => {
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'error'>('checking');
-  const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [ , setError] = useState<string | null>(null);
+  const [ , setDebugInfo] = useState<any>(null);
   
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
@@ -836,44 +836,44 @@ interface DebugInfo {
     }
   };
 
-  // Copy upload URL to clipboard
-  const copyUploadUrl = () => {
-    if (qrCodeData?.uploadUrl) {
-      navigator.clipboard.writeText(qrCodeData.uploadUrl);
-      alert("Upload URL copied to clipboard!");
-    }
-  };
+  // // Copy upload URL to clipboard
+  // const copyUploadUrl = () => {
+  //   if (qrCodeData?.uploadUrl) {
+  //     navigator.clipboard.writeText(qrCodeData.uploadUrl);
+  //     alert("Upload URL copied to clipboard!");
+  //   }
+  // };
 
-  // Open upload URL in new tab
-  const openUploadPage = () => {
-    if (qrCodeData?.uploadUrl) {
-      window.open(qrCodeData.uploadUrl, '_blank', 'noopener,noreferrer');
-    }
-  };
+  // // Open upload URL in new tab
+  // const openUploadPage = () => {
+  //   if (qrCodeData?.uploadUrl) {
+  //     window.open(qrCodeData.uploadUrl, '_blank', 'noopener,noreferrer');
+  //   }
+  // };
 
-  // Test upload URL
-  const testUploadUrl = () => {
-    if (qrCodeData?.uploadUrl) {
-      const testWindow = window.open('', '_blank');
-      if (testWindow) {
-        testWindow.document.write(`
-          <html>
-            <head><title>Test Upload URL</title></head>
-            <body style="padding: 20px; font-family: Arial;">
-              <h1>Upload URL Test</h1>
-              <p>URL: ${qrCodeData.uploadUrl}</p>
-              <p>Code: ${qrCodeData.code}</p>
-              <button onclick="window.location.href='${qrCodeData.uploadUrl}'" 
-                      style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                Open Upload Page
-              </button>
-            </body>
-          </html>
-        `);
-        testWindow.document.close();
-      }
-    }
-  };
+  // // Test upload URL
+  // const testUploadUrl = () => {
+  //   if (qrCodeData?.uploadUrl) {
+  //     const testWindow = window.open('', '_blank');
+  //     if (testWindow) {
+  //       testWindow.document.write(`
+  //         <html>
+  //           <head><title>Test Upload URL</title></head>
+  //           <body style="padding: 20px; font-family: Arial;">
+  //             <h1>Upload URL Test</h1>
+  //             <p>URL: ${qrCodeData.uploadUrl}</p>
+  //             <p>Code: ${qrCodeData.code}</p>
+  //             <button onclick="window.location.href='${qrCodeData.uploadUrl}'" 
+  //                     style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+  //               Open Upload Page
+  //             </button>
+  //           </body>
+  //         </html>
+  //       `);
+  //       testWindow.document.close();
+  //     }
+  //   }
+  // };
 
   // Proceed to next step
   const handleNext = () => {
@@ -913,16 +913,16 @@ interface DebugInfo {
     navigate("/select-methods"); 
   };
 
-  // Test backend connection
-  const testBackend = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/health`);
-      const data = await response.json();
-      alert(`✅ Backend is running!\nStatus: ${data.status}\nTime: ${data.timestamp}`);
-    } catch (err: any) {
-      alert(`❌ Backend test failed: ${err.message}`);
-    }
-  };
+  // // Test backend connection
+  // const testBackend = async () => {
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/health`);
+  //     const data = await response.json();
+  //     alert(`✅ Backend is running!\nStatus: ${data.status}\nTime: ${data.timestamp}`);
+  //   } catch (err: any) {
+  //     alert(`❌ Backend test failed: ${err.message}`);
+  //   }
+  // };
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/capture-bg.png')] bg-cover bg-no-repeat p-4 relative overflow-x-hidden">

@@ -19,9 +19,9 @@ export const getBackendDomain = (): string => {
     // Development fallback
     if (import.meta.env.MODE === "development") {
       console.warn(
-        "⚠️ VITE_BACKEND_DOMAIN not set, using development fallback: http://localhost:3001"
+        "⚠️ VITE_BACKEND_DOMAIN not set, using development fallback: https://localhost:3001"
       );
-      return "http://localhost:3001";
+      return "https://localhost:3001";
     }
 
     // Production error
