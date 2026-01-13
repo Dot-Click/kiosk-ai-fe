@@ -1191,24 +1191,34 @@ const handleNext = () => {
                   }}
                 /> */}
                 {/* Update the image display section: */}
-{/* Update the image display section: */}
-<img 
-  src={receivedImage} 
-  alt="Uploaded" 
-  loading="lazy"
-  className="w-full h-32 sm:h-40 object-contain bg-gradient-to-br from-purple-900/20 to-pink-900/20"
-  onError={(e) => {
-    console.error('🖼️ Image failed to load in DOM');
-    // Use a simple data URL instead of external placeholder
-    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMyRDIkNkQiLz48dGV4dCB4PSIyMDAiIHk9IjE1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+VXBsb2FkZWQgSW1hZ2U8L3RleHQ+PC9zdmc+';
-    e.currentTarget.classList.add('p-4');
-  }}
-  onLoad={(e) => {
-    console.log('🖼️ Image loaded successfully in DOM');
-    console.log('🖼️ Natural dimensions:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
-  }}
-/>
-                <div className="p-3 bg-black/30">
+// Simple colored div as placeholder instead of broken image
+{receivedImage ? (
+  <img 
+    src={receivedImage} 
+    alt="Uploaded" 
+    loading="lazy"
+    className="w-full h-32 sm:h-40 object-contain bg-gradient-to-br from-purple-900/20 to-pink-900/20"
+    onError={(e) => {
+      console.error('🖼️ Image failed to load');
+      // Hide the broken image and show a placeholder div instead
+      e.currentTarget.style.display = 'none';
+      const parent = e.currentTarget.parentElement;
+      if (parent) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'w-full h-32 sm:h-40 bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center';
+        placeholder.innerHTML = '<span class="text-white/70 text-sm">Image Loaded ✓</span>';
+        parent.appendChild(placeholder);
+      }
+    }}
+  />
+) : (
+  <div className="w-full h-32 sm:h-40 bg-gradient-to-br from-purple-900/20 to-pink-900/20 flex items-center justify-center rounded-lg border border-white/10">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mx-auto mb-2"></div>
+      <p className="text-white/60 text-sm">Waiting for image...</p>
+    </div>
+  </div>
+)}        <div className="p-3 bg-black/30">
                   <p className="text-white text-sm">Image uploaded from phone</p>
                   <p className="text-white/60 text-xs mt-1">
                     Ready for processing
