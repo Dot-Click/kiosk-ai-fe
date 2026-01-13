@@ -351,7 +351,7 @@ const MobileUploadPage = () => {
 
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/health`);
+      const response = await fetch(`https://kiosk-ai-be-production.up.railway.app/health`);
       if (response.ok) {
         setBackendStatus('connected');
       } else {
