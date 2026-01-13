@@ -317,10 +317,8 @@ import {
   AlertCircle
 } from "lucide-react";
 
-
-// Backend API Configuration - USE ROOT URL, not /api/v1
-const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app";
-
+// Backend API Configuration
+const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app/api/v1";
 
 const MobileUploadPage = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -435,48 +433,47 @@ const validateQRCode = async (code: string) => {
     else return (bytes / 1048576).toFixed(1) + ' MB';
   };
 
- // Upload image to backend - UPDATED
-const uploadImage = async () => {
-  if (!selectedImage || !connectionCode || !file) {
-    setErrorMessage('Please select an image first');
-    return;
-  }
-
-  setUploadStatus('uploading');
-  setErrorMessage('');
-
-  try {
-    // Create form data
-    const formData = new FormData();
-    formData.append('code', connectionCode);
-    formData.append('image', file);
-
-    // Upload to backend - FIXED URL
-    const response = await fetch(`${API_BASE_URL}/api/v1/upload/upload`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      setUploadStatus('success');
-      
-      // Auto-show close message after 2 seconds
-      setTimeout(() => {
-        const closeMsg = document.getElementById('close-message');
-        if (closeMsg) closeMsg.classList.remove('hidden');
-      }, 2000);
-    } else {
-      setUploadStatus('error');
-      setErrorMessage(data.error || 'Upload failed. Please try again.');
+  // Upload image to backend
+  const uploadImage = async () => {
+    if (!selectedImage || !connectionCode || !file) {
+      setErrorMessage('Please select an image first');
+      return;
     }
-  } catch (error: any) {
-    console.error('Upload error:', error);
-    setUploadStatus('error');
-    setErrorMessage('Upload failed. Please check your connection and try again.');
-  }
-};
+
+    setUploadStatus('uploading');
+    setErrorMessage('');
+
+    try {
+      // Create form data
+      const formData = new FormData();
+      formData.append('code', connectionCode);
+      formData.append('image', file);
+
+      // Upload to backend
+      const response = await fetch(`${API_BASE_URL}/upload/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setUploadStatus('success');
+        
+        // Auto-show close message after 2 seconds
+        setTimeout(() => {
+          document.getElementById('close-message')?.classList.remove('hidden');
+        }, 2000);
+      } else {
+        setUploadStatus('error');
+        setErrorMessage(data.message || 'Upload failed. Please try again.');
+      }
+    } catch (error: any) {
+      setUploadStatus('error');
+      setErrorMessage('Upload failed. Please check your connection and try again.');
+    }
+  };
+
   // Remove selected image
   const removeImage = () => {
     setSelectedImage(null);
@@ -722,4 +719,4 @@ const uploadImage = async () => {
   );
 };
 
-export default MobileUploadPage; 
+export default MobileUploadPage;
