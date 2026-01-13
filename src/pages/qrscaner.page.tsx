@@ -778,55 +778,104 @@ const QRUploadPage = () => {
   // };
 
   // Update checkForUploadFromBackend function:
+// Updated checkForUploadFromBackend function with better image validation:
 const checkForUploadFromBackend = async (code: string) => {
   try {
     console.log(`🔍 Checking upload for code: ${code}`);
     
     const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
-    
     console.log('📊 Check response status:', response.status);
     
     if (response.ok) {
       const data = await response.json();
-      console.log('📦 Check response data:', data);
+      console.log('📦 Check response data:', JSON.stringify(data));
       
       if (data.success && data.data && data.data.exists) {
-        // Image found
-        const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
+        // Create image URL with cache busting
+        const imageUrl = `${API_BASE_URL}/upload/image/${code}?t=${Date.now()}`;
         console.log('🖼️ Image URL:', imageUrl);
         
-        // Test if image loads
-        const img = new Image();
-        img.onload = () => {
-          console.log('✅ Image loaded successfully');
-          setReceivedImage(imageUrl);
-          setShowNext(true);
-          setIsChecking(false);
-          
-          if (checkIntervalRef.current) {
-            clearInterval(checkIntervalRef.current);
-            checkIntervalRef.current = null;
-          }
-        };
+        // First, verify the image actually exists and has content
+        const imageResponse = await fetch(imageUrl);
+        console.log('🖼️ Image fetch status:', imageResponse.status);
+        console.log('🖼️ Image content type:', imageResponse.headers.get('content-type'));
+        console.log('🖼️ Image size:', imageResponse.headers.get('content-length'), 'bytes');
         
-        img.onerror = () => {
-          console.error('❌ Failed to load image from:', imageUrl);
-          // Try with timestamp to avoid cache
-          const timestampedUrl = `${imageUrl}?t=${Date.now()}`;
-          setReceivedImage(timestampedUrl);
-          setShowNext(true);
-          setIsChecking(false);
-          
-          if (checkIntervalRef.current) {
-            clearInterval(checkIntervalRef.current);
-            checkIntervalRef.current = null;
+        if (imageResponse.ok) {
+          // Check if response actually contains an image
+          const contentType = imageResponse.headers.get('content-type');
+          if (!contentType || !contentType.startsWith('image/')) {
+            console.error('❌ Response is not an image:', contentType);
+            return;
           }
-        };
-        
-        img.src = imageUrl;
+          
+          // Get image as blob to verify it has content
+          const blob = await imageResponse.blob();
+          console.log('📊 Blob size:', blob.size, 'bytes');
+          console.log('📊 Blob type:', blob.type);
+          
+          if (blob.size === 0) {
+            console.error('❌ Image blob is empty (0 bytes)');
+            return;
+          }
+          
+          // Create object URL for the blob
+          const objectUrl = URL.createObjectURL(blob);
+          console.log('✅ Created object URL:', objectUrl);
+          
+          // Test the image with HTMLImageElement
+          return new Promise((resolve) => {
+            const img = new Image();
+            
+            img.onload = () => {
+              console.log('✅ Image loaded successfully, dimensions:', img.width, 'x', img.height);
+              
+              // Check if image is not transparent/blank
+              if (img.width === 0 || img.height === 0) {
+                console.error('❌ Image has zero dimensions');
+                URL.revokeObjectURL(objectUrl);
+                resolve(false);
+                return;
+              }
+              
+              setReceivedImage(objectUrl);
+              setShowNext(true);
+              setIsChecking(false);
+              
+              if (checkIntervalRef.current) {
+                clearInterval(checkIntervalRef.current);
+                checkIntervalRef.current = null;
+              }
+              
+              resolve(true);
+            };
+            
+            img.onerror = (error) => {
+              console.error('❌ Failed to load image:', error);
+              URL.revokeObjectURL(objectUrl);
+              resolve(false);
+            };
+            
+            // Set timeout in case image never loads
+            setTimeout(() => {
+              if (!img.complete) {
+                console.error('❌ Image load timeout');
+                URL.revokeObjectURL(objectUrl);
+                resolve(false);
+              }
+            }, 5000);
+            
+            img.src = objectUrl;
+          });
+          
+        } else {
+          console.error('❌ Failed to fetch image:', imageResponse.status);
+        }
       } else {
-        console.log('📭 No image found yet');
+        console.log('📭 No image found yet or incomplete data');
       }
+    } else {
+      console.error('❌ Check endpoint error:', response.status);
     }
   } catch (error) {
     console.error("❌ Error checking upload:", error);
@@ -849,12 +898,25 @@ const checkForUploadFromBackend = async (code: string) => {
     }
   };
 
-  // Proceed to next step
-  const handleNext = () => {
-    if (receivedImage && qrCodeData) {
-      navigate(`/process-image?code=${qrCodeData.code}`);
-    }
-  };
+  // // Proceed to next step
+  // const handleNext = () => {
+  //   if (receivedImage && qrCodeData) {
+  //     navigate(`/process-image?code=${qrCodeData.code}`);
+  //   }
+  // };
+
+  // Update handleNext function:
+const handleNext = () => {
+  if (receivedImage && qrCodeData) {
+    // Check if it's an object URL or regular URL
+    const imageUrl = receivedImage.startsWith('blob:') 
+      ? receivedImage // Keep blob URL for immediate use
+      : `${receivedImage}&t=${Date.now()}`; // Add timestamp for cache busting
+    
+    console.log('🚀 Navigating with image URL:', imageUrl);
+    navigate(`/process-image?code=${qrCodeData.code}&image=${encodeURIComponent(imageUrl)}`);
+  }
+};
 
   // Reset everything
   const resetAll = () => {
@@ -1061,7 +1123,7 @@ const checkForUploadFromBackend = async (code: string) => {
               </div>
               
               <Box className="bg-white/5 rounded-lg border border-white/20 overflow-hidden">
-                <img 
+                {/* <img 
                   src={receivedImage} 
                   alt="Uploaded" 
                   loading="lazy"
@@ -1069,7 +1131,22 @@ const checkForUploadFromBackend = async (code: string) => {
                   onError={(e) => {
                     e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Uploaded';
                   }}
-                />
+                /> */}
+                {/* Update the image display section: */}
+<img 
+  src={receivedImage} 
+  alt="Uploaded" 
+  loading="lazy"
+  className="w-full h-32 sm:h-40 object-contain bg-black"
+  onError={(e) => {
+    console.error('🖼️ Image failed to load in DOM');
+    e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Processing';
+  }}
+  onLoad={(e) => {
+    console.log('🖼️ Image loaded in DOM successfully');
+    console.log('🖼️ Image natural size:', e.currentTarget.naturalWidth, 'x', e.currentTarget.naturalHeight);
+  }}
+/>``
                 <div className="p-3 bg-black/30">
                   <p className="text-white text-sm">Image uploaded from phone</p>
                   <p className="text-white/60 text-xs mt-1">
