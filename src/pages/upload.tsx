@@ -720,5 +720,8 @@ const validateQRCode = async (code: string) => {
 };
 
 export default MobileUploadPage;
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> b79aac1f3db3672eab837f6e2ebd22cf85438289
