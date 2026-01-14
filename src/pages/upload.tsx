@@ -822,24 +822,24 @@ const MobileUploadPage = () => {
     }
   };
 
-  // Handle camera selection
-  const handleOpenCamera = () => {
-    // Create a temporary input for camera
-    const cameraInput = document.createElement('input');
-    cameraInput.type = 'file';
-    cameraInput.accept = 'image/*';
-    cameraInput.capture = 'environment'; // This opens camera
+  // // Handle camera selection
+  // const handleOpenCamera = () => {
+  //   // Create a temporary input for camera
+  //   const cameraInput = document.createElement('input');
+  //   cameraInput.type = 'file';
+  //   cameraInput.accept = 'image/*';
+  //   cameraInput.capture = 'environment'; // This opens camera
     
-    cameraInput.onchange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      const selectedFile = target.files?.[0];
-      if (selectedFile) {
-        handleFileSelection(selectedFile);
-      }
-    };
+  //   cameraInput.onchange = (e: Event) => {
+  //     const target = e.target as HTMLInputElement;
+  //     const selectedFile = target.files?.[0];
+  //     if (selectedFile) {
+  //       handleFileSelection(selectedFile);
+  //     }
+  //   };
     
-    cameraInput.click();
-  };
+  //   cameraInput.click();
+  // };
 
   // Handle file selection from both sources
   const handleFileSelection = (selectedFile: File) => {
