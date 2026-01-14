@@ -691,48 +691,54 @@ const QRUploadPage = () => {
   };
 
   // Generate QR code from backend
-  const generateQRCode = async () => {
-    setIsGenerating(true);
-    setError(null);
-    setQrCodeData(null);
-    setReceivedImage(null);
+ const generateQRCode = async () => {
+  setIsGenerating(true);
+  setError(null);
+  setQrCodeData(null);
+  setReceivedImage(null);
+  
+  try {
+    console.log('🔄 Generating QR code...');
+    const response = await fetch(`${API_BASE_URL}/qr/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: `kiosk-${Date.now()}` })
+    });
     
-    try {
-      const response = await fetch(`${API_BASE_URL}/qr/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ data: `kiosk-${Date.now()}` })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (data.success && data.data) {
-        // Create QR code data
-        const qrCode = {
-          code: data.data.id,
-          qrImageUrl: data.data.url, // Using external QR service
-          expiresAt: new Date(Date.now() + 30 * 60000).toISOString() // 30 minutes from now
-        };
-        
-        setQrCodeData(qrCode);
-        startCheckingForUploads(qrCode.code);
-      } else {
-        throw new Error(data.message || 'Invalid response from server');
-      }
-    } catch (error: any) {
-      console.error('❌ Error generating QR code:', error);
-      setError(`Failed to generate QR code: ${error.message}`);
-    } finally {
-      setIsGenerating(false);
+    console.log('📥 Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Server error:', errorText);
+      throw new Error(`Server error: ${response.status} - ${errorText}`);
     }
-  };
-
+    
+    const data = await response.json();
+    console.log('📦 Response data:', data);
+    
+    if (data.success && data.data) {
+      // Create QR code data
+      const qrCode = {
+        code: data.data.id || data.data.code,
+        qrImageUrl: data.data.url, // Using external QR service
+        expiresAt: new Date(Date.now() + 30 * 60000).toISOString() // 30 minutes from now
+      };
+      
+      console.log('✅ QR Code generated:', qrCode);
+      setQrCodeData(qrCode);
+    } else {
+      throw new Error(data.message || 'Invalid response from server');
+    }
+  } catch (error: any) {
+    console.error('❌ Error generating QR code:', error);
+    setError(`Failed to generate QR code: ${error.message}`);
+    setQrCodeData(null);
+  } finally {
+    setIsGenerating(false);
+  }
+};
   // Start checking for uploaded images
   const startCheckingForUploads = (code: string) => {
     if (checkIntervalRef.current) {
@@ -751,32 +757,43 @@ const QRUploadPage = () => {
   };
 
   // Check if image was uploaded
-  const checkForUploadFromBackend = async (code: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
+const checkForUploadFromBackend = async (code: string) => {
+  try {
+    console.log(`🔍 Checking upload for code: ${code}`);
+    const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
+    
+    if (response.ok) {
+      const data = await response.json();
       
-      if (response.ok) {
-        const data = await response.json();
+      console.log('📊 Upload check response:', data);
+      
+      if (data.success && data.data && data.data.exists) {
+        // Image found
+        console.log('✅ Image found on server');
+        // Use the imageUrl from server response
+        const imageUrl = data.data.imageUrl || `${API_BASE_URL}/upload/image/${code}`;
+        setReceivedImage(imageUrl);
+        setShowNext(true);
+        setIsChecking(false);
         
-        if (data.success && data.data && data.data.exists) {
-          // Image found
-          const imageUrl = `${API_BASE_URL}/upload/image/${code}`;
-          setReceivedImage(imageUrl);
-          setShowNext(true);
-          setIsChecking(false);
-          
-          // Clear the interval
-          if (checkIntervalRef.current) {
-            clearInterval(checkIntervalRef.current);
-            checkIntervalRef.current = null;
-          }
+        // Clear the interval
+        if (checkIntervalRef.current) {
+          clearInterval(checkIntervalRef.current);
+          checkIntervalRef.current = null;
         }
       }
-    } catch (error) {
-      console.error("Error checking upload:", error);
     }
-  };
+  } catch (error) {
+    console.error("Error checking upload:", error);
+  }
+};
 
+useEffect(() => {
+  if (qrCodeData && !receivedImage) {
+    // Start checking immediately
+    startCheckingForUploads(qrCodeData.code);
+  }
+}, [qrCodeData, receivedImage]);
   // Manual check button
   const manualCheck = async () => {
     if (qrCodeData?.code) {

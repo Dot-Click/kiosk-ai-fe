@@ -395,37 +395,37 @@ const validateQRCode = async (code: string) => {
   };
 
   // Handle file selection
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (!selectedFile) return;
-    
-    // Validate file type
-    if (!selectedFile.type.startsWith('image/')) {
-      setErrorMessage('Please select an image file (JPG, PNG, etc.)');
-      return;
-    }
-    
-    // Validate file size (10MB limit)
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      setErrorMessage('Image too large! Please select an image under 10MB.');
-      return;
-    }
+ const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const selectedFile = event.target.files?.[0];
+  if (!selectedFile) return;
+  
+  // Validate file type
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowedTypes.includes(selectedFile.type)) {
+    setErrorMessage('Please select an image file (JPG, PNG, GIF, WebP)');
+    return;
+  }
+  
+  // Validate file size (10MB limit)
+  if (selectedFile.size > 10 * 1024 * 1024) {
+    setErrorMessage('Image too large! Please select an image under 10MB.');
+    return;
+  }
 
-    // Set file info
-    setFileName(selectedFile.name);
-    setFileSize(formatFileSize(selectedFile.size));
-    setFile(selectedFile);
-    setErrorMessage('');
+  // Set file info
+  setFileName(selectedFile.name);
+  setFileSize(formatFileSize(selectedFile.size));
+  setFile(selectedFile);
+  setErrorMessage('');
 
-    // Preview image
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imageUrl = e.target?.result as string;
-      setSelectedImage(imageUrl);
-    };
-    reader.readAsDataURL(selectedFile);
+  // Preview image
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const imageUrl = e.target?.result as string;
+    setSelectedImage(imageUrl);
   };
-
+  reader.readAsDataURL(selectedFile);
+};
   // Format file size
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return bytes + ' bytes';
@@ -434,45 +434,68 @@ const validateQRCode = async (code: string) => {
   };
 
   // Upload image to backend
-  const uploadImage = async () => {
-    if (!selectedImage || !connectionCode || !file) {
-      setErrorMessage('Please select an image first');
-      return;
-    }
+ const uploadImage = async () => {
+  if (!selectedImage || !connectionCode || !file) {
+    setErrorMessage('Please select an image first');
+    return;
+  }
 
-    setUploadStatus('uploading');
-    setErrorMessage('');
+  setUploadStatus('uploading');
+  setErrorMessage('');
 
+  try {
+    console.log('🔼 Starting upload...');
+    console.log('📁 File:', file.name, file.size);
+    console.log('🔢 Code:', connectionCode);
+
+    // Create form data
+    const formData = new FormData();
+    formData.append('code', connectionCode);
+    formData.append('image', file);
+
+    // Upload to backend
+    console.log('📤 Uploading to:', `${API_BASE_URL}/upload/upload`);
+    const response = await fetch(`${API_BASE_URL}/upload/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    console.log('📥 Response status:', response.status);
+    const responseText = await response.text();
+    console.log('📦 Response text:', responseText);
+
+    let data;
     try {
-      // Create form data
-      const formData = new FormData();
-      formData.append('code', connectionCode);
-      formData.append('image', file);
-
-      // Upload to backend
-      const response = await fetch(`${API_BASE_URL}/upload/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setUploadStatus('success');
-        
-        // Auto-show close message after 2 seconds
-        setTimeout(() => {
-          document.getElementById('close-message')?.classList.remove('hidden');
-        }, 2000);
-      } else {
-        setUploadStatus('error');
-        setErrorMessage(data.message || 'Upload failed. Please try again.');
-      }
-    } catch (error: any) {
-      setUploadStatus('error');
-      setErrorMessage('Upload failed. Please check your connection and try again.');
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('❌ Invalid JSON response:', responseText);
+      throw new Error('Invalid server response');
     }
-  };
+
+    if (data.success) {
+      console.log('✅ Upload successful:', data);
+      setUploadStatus('success');
+      
+      // Auto-show close message after 2 seconds
+      setTimeout(() => {
+        document.getElementById('close-message')?.classList.remove('hidden');
+      }, 2000);
+      
+      // Also show alert for user
+      setTimeout(() => {
+        alert('✅ Upload successful! You can now close this page.');
+      }, 500);
+    } else {
+      console.error('❌ Upload failed:', data);
+      setUploadStatus('error');
+      setErrorMessage(data.error || data.message || 'Upload failed. Please try again.');
+    }
+  } catch (error: any) {
+    console.error('❌ Upload error:', error);
+    setUploadStatus('error');
+    setErrorMessage(error.message || 'Upload failed. Please check your connection and try again.');
+  }
+};
 
   // Remove selected image
   const removeImage = () => {
