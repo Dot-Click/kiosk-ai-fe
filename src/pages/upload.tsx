@@ -751,7 +751,6 @@ import { Box } from "@/components/ui/box";
 import { Center } from "@/components/ui/center";
 import { Stack } from "@/components/ui/stack";
 import { 
-  Camera, 
   Upload as UploadIcon,
   CheckCircle,
   Smartphone,
