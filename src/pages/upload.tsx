@@ -992,7 +992,7 @@ const MobileUploadPage = () => {
                     </div>
                   </div>
                   
-                  <button
+                  {/*<button
                     onClick={handleOpenCamera}
                     disabled={!connectionCode || backendStatus !== 'connected'}
                     className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-green-500/30 hover:border-green-500/50 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1000,11 +1000,11 @@ const MobileUploadPage = () => {
                     <div className="p-3 rounded-full bg-green-500/20">
                       <Camera className="size-6 text-green-400" />
                     </div>
-                    {/* <div className="text-left flex-1">
+                     <div className="text-left flex-1">
                       <p className="text-white font-medium text-lg">Take a Photo</p>
                       <p className="text-white/60 text-sm">Open camera now</p>
-                    </div> */}
-                  </button>
+                    </div> 
+                  </button>*/}
                 </div>
               ) : (
                 // Image Preview
