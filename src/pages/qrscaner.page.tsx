@@ -1028,7 +1028,7 @@ useEffect(() => {
                   alt="Uploaded" 
                   className="w-full h-32 sm:h-40 object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Uploaded';
+                    e.currentTarget.src = 'https://cdn.pixabay.com/photo/2024/02/03/02/16/earth-8549451_1280.png';
                   }}
                 />
                 <div className="p-3 bg-black/30">
