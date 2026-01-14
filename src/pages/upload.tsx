@@ -1000,10 +1000,10 @@ const MobileUploadPage = () => {
                     <div className="p-3 rounded-full bg-green-500/20">
                       <Camera className="size-6 text-green-400" />
                     </div>
-                    <div className="text-left flex-1">
+                    {/* <div className="text-left flex-1">
                       <p className="text-white font-medium text-lg">Take a Photo</p>
                       <p className="text-white/60 text-sm">Open camera now</p>
-                    </div>
+                    </div> */}
                   </button>
                 </div>
               ) : (
