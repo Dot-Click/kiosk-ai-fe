@@ -1028,7 +1028,7 @@ useEffect(() => {
                   alt="Uploaded" 
                   className="w-full h-32 sm:h-40 object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/400x300/2d2d6d/ffffff?text=Image+Uploaded';
+                    e.currentTarget.src = `https://kiosk-ai-be-production.up.railway.app/api/v1/upload/image/${receivedImage}`;
                   }}
                 />
                 <div className="p-3 bg-black/30">
