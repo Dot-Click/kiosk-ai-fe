@@ -756,7 +756,6 @@ import {
   CheckCircle,
   Smartphone,
   X,
-  AlertCircle,
   Image as ImageIcon
 } from "lucide-react";
 
