@@ -647,6 +647,7 @@ import { Stack } from "@/components/ui/stack";
 import { QrCode, Image as ImageIcon, ArrowRight, Copy, Smartphone, RefreshCw } from "lucide-react";
 import GoBackButton from "../components/horizontalnavbar/horizontalnavbar.tsx";
 import { HorizontalNavbar } from "../components/horizontalnavbar/horizontalnavbar.tsx";
+import { useImageStore } from "@/store/image.store";
 
 // Backend API Configuration
 const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app/api/v1";
@@ -668,6 +669,7 @@ const QRUploadPage = () => {
   
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
+  const setSelectedImage = useImageStore((state) => state.setSelectedImage);
 
   // Check backend health on component mount
   useEffect(() => {
@@ -814,7 +816,10 @@ useEffect(() => {
   // Proceed to next step
   const handleNext = () => {
     if (receivedImage && qrCodeData) {
-      navigate(`/process-image?code=${qrCodeData.code}`);
+      // Store the image in the image store
+      setSelectedImage(receivedImage);
+      // Navigate to apply mokup design page
+      navigate("/select-methods/capture-photo/describe-design/apply-mokup-design");
     }
   };
 
