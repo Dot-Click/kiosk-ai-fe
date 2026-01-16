@@ -841,6 +841,7 @@ const MobileUploadPage = () => {
   //   cameraInput.click();
   // };
 
+
   // Handle file selection from both sources
   const handleFileSelection = (selectedFile: File) => {
     // Validate file type
@@ -1133,4 +1134,5 @@ const MobileUploadPage = () => {
   );
 };
 
-export default MobileUploadPage;
+export default MobileUploadPage;    
+
