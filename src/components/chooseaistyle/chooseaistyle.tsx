@@ -67,15 +67,15 @@ const styleOptions: StyleOption[] = [
     ),
     iconColor: "#3B82F6",
   },
-  {
-    id: "stencil-graffiti",
-    title: "Stencil Graffiti",
-    description: "Street art stencil graffiti style",
-    icon: (
-      <img src="/chooseaistyle/StencilGraffiti.png" alt="stencil-graffiti" />
-    ),
-    iconColor: "#A855F7",
-  },
+  // {
+  //   id: "stencil-graffiti",
+  //   title: "Stencil Graffiti",
+  //   description: "Street art stencil graffiti style",
+  //   icon: (
+  //     <img src="/chooseaistyle/StencilGraffiti.png" alt="stencil-graffiti" />
+  //   ),
+  //   iconColor: "#A855F7",
+  // },
 ];
 
 const ChooseAiStyle = () => {
