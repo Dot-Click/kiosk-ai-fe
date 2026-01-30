@@ -131,7 +131,7 @@ const FirstPage = () => {
 
       {/* Background Image with Animation */}
       <img
-        src="/general/gif2222.jpg"
+        src="/general/gif22222.jpg"
         alt="background"
         className="absolute inset-0 w-full h-full object-cover max-md:object-center"
         style={{
