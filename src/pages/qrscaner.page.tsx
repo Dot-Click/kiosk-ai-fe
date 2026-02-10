@@ -1082,3 +1082,4 @@ const QRUploadPage = () => {
 };
 
 export default QRUploadPage;
+
