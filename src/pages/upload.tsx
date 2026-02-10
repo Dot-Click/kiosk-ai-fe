@@ -750,18 +750,19 @@ import { useState, useRef, useEffect } from "react";
 import { Box } from "@/components/ui/box";
 import { Center } from "@/components/ui/center";
 import { Stack } from "@/components/ui/stack";
-import { 
+import {
   Upload as UploadIcon,
   CheckCircle,
   Smartphone,
   X,
-  Image as ImageIcon
+  Image as ImageIcon,
 } from "lucide-react";
-
-// Backend API Configuration
-const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app/api/v1";
+import { useUploadApi } from "@/hooks/useUploadApi";
 
 const MobileUploadPage = () => {
+  const { checkBackendHealth: checkBackendHealthApi, validateQRCode: validateQRCodeApi, uploadImage: uploadImageApi } =
+    useUploadApi();
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [uploadStatus, setUploadStatus] = useState<'ready' | 'uploading' | 'success' | 'error'>('ready');
   const [connectionCode, setConnectionCode] = useState<string>('');
@@ -791,12 +792,8 @@ const MobileUploadPage = () => {
 
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch(`https://kiosk-ai-be-production.up.railway.app/health`);
-      if (response.ok) {
-        setBackendStatus('connected');
-      } else {
-        setBackendStatus('error');
-      }
+      await checkBackendHealthApi();
+      setBackendStatus('connected');
     } catch {
       setBackendStatus('error');
     }
@@ -804,10 +801,8 @@ const MobileUploadPage = () => {
 
   const validateQRCode = async (code: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/qr/validate/${code}`);
-      if (!response.ok) return;
-      const data = await response.json();
-      if (!data.success || !data.data.isValid) {
+      const data = await validateQRCodeApi(code);
+      if (!data.success || !data.data?.isValid) {
         setErrorMessage('Note: QR code may be expired. You can still try uploading.');
       }
     } catch (error) {
@@ -896,29 +891,25 @@ const MobileUploadPage = () => {
     setErrorMessage('');
 
     try {
-      const formData = new FormData();
-      formData.append('code', connectionCode);
-      formData.append('image', file);
+      const data = await uploadImageApi(connectionCode, file);
 
-      const response = await fetch(`${API_BASE_URL}/upload/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
+      if ((data as any).success) {
         setUploadStatus('success');
         setTimeout(() => {
           document.getElementById('close-message')?.classList.remove('hidden');
         }, 2000);
       } else {
         setUploadStatus('error');
-        setErrorMessage(data.error || data.message || 'Upload failed');
+        // Fallback to generic message if backend does not send `error`/`message`
+        const message =
+          (data as any).error || (data as any).message || 'Upload failed';
+        setErrorMessage(message);
       }
     } catch (error: any) {
       setUploadStatus('error');
-      setErrorMessage('Upload failed. Please check your connection.');
+      setErrorMessage(
+        error?.message || 'Upload failed. Please check your connection.'
+      );
     }
   };
 

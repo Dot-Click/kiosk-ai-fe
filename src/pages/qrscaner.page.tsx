@@ -644,13 +644,18 @@ import { Center } from "@/components/ui/center";
 import { useNavigate } from "react-router";
 import { Flex } from "@/components/ui/flex";
 import { Stack } from "@/components/ui/stack";
-import { QrCode, Image as ImageIcon, ArrowRight, Copy, Smartphone, RefreshCw } from "lucide-react";
+import {
+  QrCode,
+  Image as ImageIcon,
+  ArrowRight,
+  Copy,
+  Smartphone,
+  RefreshCw,
+} from "lucide-react";
 import GoBackButton from "../components/horizontalnavbar/horizontalnavbar.tsx";
 import { HorizontalNavbar } from "../components/horizontalnavbar/horizontalnavbar.tsx";
 import { useImageStore } from "@/store/image.store";
-
-// Backend API Configuration
-const API_BASE_URL = "https://kiosk-ai-be-production.up.railway.app/api/v1";
+import { useQrApi } from "@/hooks/useQrApi";
 
 interface QRCodeData {
   code: string;
@@ -659,6 +664,8 @@ interface QRCodeData {
 }
 
 const QRUploadPage = () => {
+  const { checkBackendHealth: checkBackendHealthApi, generateQRCode: generateQRCodeApi, checkUpload, buildImageUrl } =
+    useQrApi();
   const [qrCodeData, setQrCodeData] = useState<QRCodeData | null>(null);
   const [receivedImage, setReceivedImage] = useState<string | null>(null);
   const [showNext, setShowNext] = useState<boolean>(false);
@@ -678,14 +685,8 @@ const QRUploadPage = () => {
 
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch(`https://kiosk-ai-be-production.up.railway.app/health`);
-      const data = await response.json();
-      if (response.ok) {
-        setBackendStatus('connected');
-      } else {
-        setBackendStatus('error');
-        setError(`Backend error: ${data.message || response.status}`);
-      }
+      await checkBackendHealthApi();
+      setBackendStatus("connected");
     } catch (err: any) {
       setBackendStatus('error');
       setError(`Cannot connect to backend: ${err.message}`);
@@ -693,54 +694,39 @@ const QRUploadPage = () => {
   };
 
   // Generate QR code from backend
- const generateQRCode = async () => {
-  setIsGenerating(true);
-  setError(null);
-  setQrCodeData(null);
-  setReceivedImage(null);
-  
-  try {
-    console.log('🔄 Generating QR code...');
-    const response = await fetch(`${API_BASE_URL}/qr/generate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ data: `kiosk-${Date.now()}` })
-    });
-    
-    console.log('📥 Response status:', response.status);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Server error:', errorText);
-      throw new Error(`Server error: ${response.status} - ${errorText}`);
-    }
-    
-    const data = await response.json();
-    console.log('📦 Response data:', data);
-    
-    if (data.success && data.data) {
-      // Create QR code data
-      const qrCode = {
-        code: data.data.id || data.data.code,
-        qrImageUrl: data.data.url, // Using external QR service
-        expiresAt: new Date(Date.now() + 30 * 60000).toISOString() // 30 minutes from now
-      };
-      
-      console.log('✅ QR Code generated:', qrCode);
-      setQrCodeData(qrCode);
-    } else {
-      throw new Error(data.message || 'Invalid response from server');
-    }
-  } catch (error: any) {
-    console.error('❌ Error generating QR code:', error);
-    setError(`Failed to generate QR code: ${error.message}`);
+  const generateQRCode = async () => {
+    setIsGenerating(true);
+    setError(null);
     setQrCodeData(null);
-  } finally {
-    setIsGenerating(false);
-  }
-};
+    setReceivedImage(null);
+
+    try {
+      const data = await generateQRCodeApi();
+
+      if (data.success && data.data) {
+        // Prefer `id`, fall back to `code`, and ensure it's a string
+        const qrCodeValue = data.data.id ?? data.data.code;
+        if (!qrCodeValue) {
+          throw new Error("QR code value missing in server response");
+        }
+
+        const qrCode: QRCodeData = {
+          code: qrCodeValue,
+          qrImageUrl: data.data.url, // Using external QR service
+          expiresAt: new Date(Date.now() + 30 * 60000).toISOString(), // 30 minutes from now
+        };
+
+        setQrCodeData(qrCode);
+      } else {
+        throw new Error(data.message || "Invalid response from server");
+      }
+    } catch (error: any) {
+      setError(`Failed to generate QR code: ${error.message}`);
+      setQrCodeData(null);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
   // Start checking for uploaded images
   const startCheckingForUploads = (code: string) => {
     if (checkIntervalRef.current) {
@@ -759,43 +745,34 @@ const QRUploadPage = () => {
   };
 
   // Check if image was uploaded
-const checkForUploadFromBackend = async (code: string) => {
-  try {
-    console.log(`🔍 Checking upload for code: ${code}`);
-    const response = await fetch(`${API_BASE_URL}/upload/check/${code}`);
-    
-    if (response.ok) {
-      const data = await response.json();
-      
-      console.log('📊 Upload check response:', data);
-      
+  const checkForUploadFromBackend = async (code: string) => {
+    try {
+      const data = await checkUpload(code);
+
       if (data.success && data.data && data.data.exists) {
         // Image found
-        console.log('✅ Image found on server');
-        // Use the imageUrl from server response
-        const imageUrl = data.data.imageUrl || `${API_BASE_URL}/upload/image/${code}`;
+        const imageUrl = data.data.imageUrl || buildImageUrl(code);
         setReceivedImage(imageUrl);
         setShowNext(true);
         setIsChecking(false);
-        
+
         // Clear the interval
         if (checkIntervalRef.current) {
           clearInterval(checkIntervalRef.current);
           checkIntervalRef.current = null;
         }
       }
+    } catch (error) {
+      console.error("Error checking upload:", error);
     }
-  } catch (error) {
-    console.error("Error checking upload:", error);
-  }
-};
+  };
 
-useEffect(() => {
-  if (qrCodeData && !receivedImage) {
-    // Start checking immediately
-    startCheckingForUploads(qrCodeData.code);
-  }
-}, [qrCodeData, receivedImage]);
+  useEffect(() => {
+    if (qrCodeData && !receivedImage) {
+      // Start checking immediately
+      startCheckingForUploads(qrCodeData.code);
+    }
+  }, [qrCodeData, receivedImage]);
   // Manual check button
   const manualCheck = async () => {
     if (qrCodeData?.code) {
