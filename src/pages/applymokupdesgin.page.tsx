@@ -8,18 +8,17 @@
 
 
 import { useState, useEffect } from "react";
-import { Center } from "../components/ui/center";
-import { Box} from "../components/ui/box";
-import { Stack} from "../components/ui/stack";
-// import { Flex} from "../components/ui/flex";
+import { Box } from "../components/ui/box";
 import { useImageStore } from "@/store/image.store";
 import { useNavigate } from "react-router";
 import ProductOptions from "@/components/common/ProductOptions";
 import DesignCard from "@/components/common/DesignCard";
 import ThreeMugViewer from "@/components/3dView/ThreeMugViewer";
+import TShirtMockupCanvas from "@/components/3dView/TShirtMockupCanvas";
 import ColorSelector, { ColorOption } from "@/components/common/ColorSelector";
 import ScaleControl from "@/components/common/ScaleControl";
 import RotationControl from "@/components/common/RotationControl";
+import ImagePositionControl from "@/components/common/ImagePositionControl";
 
 const productOptions = [
   { id: "cup", label: "Cup", image: "/general/cup.png" },
@@ -43,11 +42,14 @@ const ApplyMokupDesignPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<string>("cup");
   const [selectedColor, setSelectedColor] = useState<ColorOption>(customColorOptions[0]);
   const [zoomScale, setZoomScale] = useState(100);
+  const [rotationAngle, setRotationAngle] = useState(0);
   const [isApplied, setIsApplied] = useState(false);
-  
+  const [decalPosition, setDecalPosition] = useState<[number, number, number]>([0, 0.04, 0.15]);
+  const [decalScale, setDecalScale] = useState(0.18);
+  const [decalRotation, setDecalRotation] = useState(0);
+
   const navigate = useNavigate();
 
-  // Handle zoom
   const handleZoomIn = () => {
     setZoomScale((prev) => Math.min(prev + 10, 200));
   };
@@ -56,13 +58,47 @@ const ApplyMokupDesignPage = () => {
     setZoomScale((prev) => Math.max(prev - 10, 50));
   };
 
-  // Handle rotation (empty for now as they use Three.js internal controls)
   const handleRotateLeft = () => {
-    // Implement via ThreeMugViewer if needed
+    setRotationAngle((prev) => prev - 15);
   };
 
   const handleRotateRight = () => {
-    // Implement via ThreeMugViewer if needed
+    setRotationAngle((prev) => prev + 15);
+  };
+
+  // Image position handlers
+  const handleDecalPositionXChange = (delta: number) => {
+    setDecalPosition((prev) => [prev[0] + delta, prev[1], prev[2]]);
+  };
+
+  const handleDecalPositionYChange = (delta: number) => {
+    setDecalPosition((prev) => [prev[0], prev[1] + delta, prev[2]]);
+  };
+
+  const handleDecalPositionZChange = (delta: number) => {
+    setDecalPosition((prev) => [prev[0], prev[1], prev[2] + delta]);
+  };
+
+  const handleSetDecalPosition = (position: [number, number, number]) => {
+    setDecalPosition(position);
+  };
+
+  const handleSetDecalPositionAndScale = (position: [number, number, number], scale: number) => {
+    setDecalPosition(position);
+    setDecalScale(scale);
+  };
+
+  const handleDecalScaleChange = (delta: number) => {
+    setDecalScale((prev) => {
+      const newScale = prev + delta;
+      // Max scale is 0.23 for back, 0.8 for others
+      const maxScale = decalPosition[2] < 0 ? 0.23 : 0.8;
+      return Math.max(0.05, Math.min(maxScale, newScale));
+    });
+  };
+
+  const handleDecalRotationChange = (delta: number) => {
+    setDecalRotation((prev) => prev + delta);
   };
 
   // Toggle design application
@@ -107,20 +143,20 @@ const ApplyMokupDesignPage = () => {
               imageUrl={selectedImage ?? undefined}
               color={selectedColor.hex}
               isApplied={isApplied}
+              zoomScale={zoomScale}
+              rotationAngle={rotationAngle}
             />
           ) : (
-            <Stack className="w-full max-w-[650px] xl:max-w-[800px] 2xl:max-w-[950px] items-center justify-center">
-              <Center
-                className="w-full bg-transparent p-2 xl:p-3 2xl:p-4 h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] xl:h-[550px] 2xl:h-[650px] rounded-2xl xl:rounded-3xl 2xl:rounded-[32px] overflow-visible relative"
-                style={{ userSelect: "none" }}
-              >
-                <img
-                  src="/general/tshirt.png"
-                  alt="Product"
-                  className="w-full h-full object-contain"
-                />
-              </Center>
-            </Stack>
+            <TShirtMockupCanvas
+              imageUrl={selectedImage ?? undefined}
+              color={selectedColor.hex}
+              isApplied={isApplied}
+              zoomScale={zoomScale}
+              rotationAngle={rotationAngle}
+              decalPosition={decalPosition}
+              decalScale={decalScale}
+              decalRotation={decalRotation}
+            />
           )}
         </Box>
 
@@ -142,6 +178,18 @@ const ApplyMokupDesignPage = () => {
             onRotateLeft={handleRotateLeft}
             onRotateRight={handleRotateRight}
           />
+
+          {/* Image Position Control - only show for t-shirt when image is applied */}
+          {selectedProduct === "tshirt" && isApplied && selectedImage && (
+            <ImagePositionControl
+              positionY={decalPosition[1]}
+              scale={decalScale}
+              onPositionYChange={handleDecalPositionYChange}
+              onScaleChange={handleDecalScaleChange}
+              onSetPositionAndScale={handleSetDecalPositionAndScale}
+              onCurrentPositionChange={handleSetDecalPosition}
+            />
+          )}
         </Box>
       </Box>
     </Box>

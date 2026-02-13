@@ -1,5 +1,4 @@
 import ax, { AxiosError } from "axios";
-import { getBackendDomain, logEnvConfig } from "../utils/env.util";
 
 export const environment =
   (import.meta.env.MODE as "production" | "development") ?? "development";
@@ -15,17 +14,10 @@ export interface ApiResponse<T = unknown> {
   message: string;
 }
 
-const buildApiBaseUrl = (domain: string): string => {
-  const trimmed = domain.endsWith("/") ? domain.slice(0, -1) : domain;
-  return `${trimmed}/api`;
-};
-
-// Backend domain and base API URL (shared across app)
-export const backendDomain = getBackendDomain();
-export const apiBaseUrl = buildApiBaseUrl(backendDomain);
-
-// Log environment config in development
-logEnvConfig();
+// Backend base URL (Railway)
+// export const backendDomain = "http://kiosk-ai-be-production.up.railway.app";
+export const backendDomain = "http://localhost:5000";
+export const apiBaseUrl = `${backendDomain}/api`;
 
 // Pre-configured axios instance for the frontend
 export const axios = ax.create({

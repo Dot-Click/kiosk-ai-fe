@@ -6,11 +6,23 @@ interface ThreeMugViewerProps {
   imageUrl?: string;
   color: string;
   isApplied: boolean;
+  zoomScale?: number;
+  rotationAngle?: number;
 }
 
-const ThreeMugViewer = ({ imageUrl, color, isApplied }: ThreeMugViewerProps) => {
+const MIN_DISTANCE = 4;
+const MAX_DISTANCE = 15;
+
+const ThreeMugViewer = ({
+  imageUrl,
+  color,
+  isApplied,
+  zoomScale = 100,
+  rotationAngle = 0,
+}: ThreeMugViewerProps) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const wrapMeshRef = useRef<THREE.Mesh | null>(null);
@@ -40,6 +52,7 @@ const ThreeMugViewer = ({ imageUrl, color, isApplied }: ThreeMugViewerProps) => 
       1000
     );
     camera.position.set(5, 4, 7);
+    cameraRef.current = camera;
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ 
@@ -153,7 +166,8 @@ const ThreeMugViewer = ({ imageUrl, color, isApplied }: ThreeMugViewerProps) => 
     handle.castShadow = true;
     mugGroup.add(handle);
 
-    mugGroup.rotation.y = -Math.PI / 2 + 0.3;
+    const baseRotationY = -Math.PI / 2 + 0.3;
+    mugGroup.rotation.y = baseRotationY + (rotationAngle * Math.PI) / 180;
     scene.add(mugGroup);
 
     // Animation loop
@@ -211,6 +225,26 @@ const ThreeMugViewer = ({ imageUrl, color, isApplied }: ThreeMugViewerProps) => 
       });
     }
   }, [imageUrl, isApplied]);
+
+  // Apply zoom scale: 50 = closest, 200 = farthest
+  useEffect(() => {
+    const controls = controlsRef.current;
+    const camera = cameraRef.current;
+    if (!controls || !camera) return;
+    const target = controls.target.clone();
+    const dir = new THREE.Vector3().subVectors(camera.position, target).normalize();
+    const t = (zoomScale - 50) / 150;
+    const distance = MIN_DISTANCE + (MAX_DISTANCE - MIN_DISTANCE) * Math.max(0, Math.min(1, t));
+    camera.position.copy(target).add(dir.multiplyScalar(distance));
+  }, [zoomScale]);
+
+  // Apply rotation angle to mug group
+  useEffect(() => {
+    const group = mugGroupRef.current;
+    if (!group) return;
+    const baseRotationY = -Math.PI / 2 + 0.3;
+    group.rotation.y = baseRotationY + (rotationAngle * Math.PI) / 180;
+  }, [rotationAngle]);
 
   return (
     <div
