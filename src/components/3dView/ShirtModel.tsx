@@ -1,4 +1,4 @@
-import {   useEffect } from "react";
+import { useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Decal, useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -35,8 +35,6 @@ function ShirtDecal({
       scale={scale}
       map={texture}
       depthTest={false}
-      depthWrite={false}
-      polygonOffset
       polygonOffsetFactor={-4}
     />
   );
@@ -50,7 +48,7 @@ export default function ShirtModel({
   decalScale = 0.18,
   decalRotation = 0,
 }: ShirtModelProps) {
-  const { nodes, materials } = useGLTF("/shirt_baked.glb");
+  const { nodes } = useGLTF("/shirt_baked.glb");
   
   // Create completely matte material (no shine, proper cotton fabric)
   const mat = new THREE.MeshLambertMaterial({

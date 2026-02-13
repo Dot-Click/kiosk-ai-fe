@@ -46,7 +46,7 @@ const ApplyMokupDesignPage = () => {
   const [isApplied, setIsApplied] = useState(false);
   const [decalPosition, setDecalPosition] = useState<[number, number, number]>([0, 0.04, 0.15]);
   const [decalScale, setDecalScale] = useState(0.18);
-  const [decalRotation, setDecalRotation] = useState(0);
+  const [decalRotation,  ] = useState(0);
 
   const navigate = useNavigate();
 
@@ -67,17 +67,17 @@ const ApplyMokupDesignPage = () => {
   };
 
   // Image position handlers
-  const handleDecalPositionXChange = (delta: number) => {
-    setDecalPosition((prev) => [prev[0] + delta, prev[1], prev[2]]);
-  };
+  // const handleDecalPositionXChange = (delta: number) => {
+  //   setDecalPosition((prev) => [prev[0] + delta, prev[1], prev[2]]);
+  // };
 
   const handleDecalPositionYChange = (delta: number) => {
     setDecalPosition((prev) => [prev[0], prev[1] + delta, prev[2]]);
   };
 
-  const handleDecalPositionZChange = (delta: number) => {
-    setDecalPosition((prev) => [prev[0], prev[1], prev[2] + delta]);
-  };
+  // const handleDecalPositionZChange = (delta: number) => {
+  //   setDecalPosition((prev) => [prev[0], prev[1], prev[2] + delta]);
+  // };
 
   const handleSetDecalPosition = (position: [number, number, number]) => {
     setDecalPosition(position);
@@ -97,9 +97,9 @@ const ApplyMokupDesignPage = () => {
     });
   };
 
-  const handleDecalRotationChange = (delta: number) => {
-    setDecalRotation((prev) => prev + delta);
-  };
+  // const handleDecalRotationChange = (delta: number) => {
+  //   setDecalRotation((prev) => prev + delta);
+  // };
 
   // Toggle design application
   const handleApplyDesign = () => {

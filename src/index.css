@@ -95,6 +95,87 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Ensure overlays are hidden when dialogs/sheets are closed - SPECIFIC TO OVERLAYS ONLY */
+  [data-slot="dialog-overlay"][data-state="closed"],
+  [data-slot="sheet-overlay"][data-state="closed"],
+  [data-slot="dialog-overlay"][aria-hidden="true"]:not([data-state="open"]),
+  [data-slot="sheet-overlay"][aria-hidden="true"]:not([data-state="open"]) {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    z-index: -9999 !important;
+  }
+  
+  /* Hide any stuck overlays - SPECIFIC TO OVERLAY ELEMENTS ONLY */
+  [data-slot="dialog-overlay"]:not([data-state="open"]):not([aria-hidden="false"]),
+  [data-slot="sheet-overlay"]:not([data-state="open"]):not([aria-hidden="false"]) {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    z-index: -9999 !important;
+  }
+  
+  /* Hide overlays that don't have data-state attribute set correctly */
+  [data-slot="dialog-overlay"]:not([data-state]):not([aria-hidden="false"]),
+  [data-slot="sheet-overlay"]:not([data-state]):not([aria-hidden="false"]) {
+    display: none !important;
+    pointer-events: none !important;
+    z-index: -9999 !important;
+  }
+  
+  /* Force hide any dark overlays that might be stuck - ONLY OVERLAY CLASSES */
+  body > div[class*="overlay"]:not([data-state="open"]):not([aria-hidden="false"]):not(button):not([role="button"]),
+  body > div[class*="backdrop"]:not([data-state="open"]):not([aria-hidden="false"]):not(button):not([role="button"]),
+  body > div[data-overlay]:not([data-state="open"]):not([aria-hidden="false"]),
+  body > div[data-backdrop]:not([data-state="open"]):not([aria-hidden="false"]) {
+    display: none !important;
+    pointer-events: none !important;
+    z-index: -9999 !important;
+  }
+  
+  /* Hide any fixed/absolute dark backgrounds covering the page - EXCLUDE BUTTONS */
+  body > div[style*="background"][style*="black"]:not([data-state="open"]):not([aria-hidden="false"]):not(button):not([role="button"]):not([class*="button"]),
+  body > div[style*="background"][style*="rgba(0,0,0"]:not([data-state="open"]):not([aria-hidden="false"]):not(button):not([role="button"]):not([class*="button"]) {
+    display: none !important;
+    pointer-events: none !important;
+    z-index: -9999 !important;
+  }
+  
+  /* Specifically target common overlay patterns - EXCLUDE BUTTONS */
+  [role="dialog"]:not([data-state="open"]) + [class*="overlay"]:not([aria-hidden="false"]):not(button):not([role="button"]),
+  [role="dialog"]:not([data-state="open"]) ~ [class*="overlay"]:not([aria-hidden="false"]):not(button):not([role="button"]) {
+    display: none !important;
+    pointer-events: none !important;
+    z-index: -9999 !important;
+  }
+  
+  /* Ensure buttons are always visible and clickable - HIGH PRIORITY */
+  button,
+  [role="button"],
+  [class*="button"]:not([class*="overlay"]):not([class*="backdrop"]),
+  [class*="Button"]:not([class*="overlay"]):not([class*="backdrop"]),
+  [data-slot="button"],
+  input[type="button"],
+  input[type="submit"],
+  a[role="button"] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: auto !important;
+  }
+  
+  /* Ensure button wrappers are visible */
+  div:has(> button),
+  div:has(> [role="button"]) {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
 
   /* Kiosk and touch device optimizations */
   @media (pointer: coarse) {

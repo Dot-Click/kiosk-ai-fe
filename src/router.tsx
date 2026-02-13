@@ -11,6 +11,11 @@ import ApplyMokupDesignPage from "./pages/applymokupdesgin.page";
 import Checkout from "./pages/checkout.page";
 import SpeakPrompt from "./pages/speakprompt.page";
 import MobileToWebTransfer from "./pages/upload";
+import LoginPage from "./pages/login.page";
+import AdminDashboardPage from "./pages/admindashboard.page";
+import StripeSettingsPage from "./pages/stripeSettings.page";
+import AdminSettingsPage from "./pages/adminSettings.page";
+import AdminOrdersPage from "./pages/adminOrders.page";
 
 export const Router = () => {
   return (
@@ -43,8 +48,14 @@ export const Router = () => {
             element={<Checkout />}
           />
           <Route path="/select-methods/qrscanner" element={<QrScanner />} />
-            <Route path="/select-methods/bluetooth" element={<Bluetooth />} />
+          <Route path="/select-methods/bluetooth" element={<Bluetooth />} />
         </Route>
+        {/* Admin Routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route path="/admin/stripe-settings" element={<StripeSettingsPage />} />
+        <Route path="/admin/settings" element={<AdminSettingsPage />} />
+        <Route path="/admin/orders" element={<AdminOrdersPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

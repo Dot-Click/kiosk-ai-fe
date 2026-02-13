@@ -73,16 +73,16 @@ const ImagePositionControl = ({
           <span className="text-white/50 text-[11px] uppercase tracking-wider font-bold mb-3 block">Position</span>
           <div className="grid grid-cols-2 gap-2">
             <button 
-              onClick={() => handlePresetClick("left", [-0.06, 0.06, 0.12], 0.09)} 
+              onClick={() => handlePresetClick("left", [-0.06, 0.08, 0.15], 0.10)} 
               className={`${presetBtnClass} ${selectedPreset === "left" ? activeBtnClass : inactiveBtnClass}`}
-              title="Left side (properly aligned, no clipping)"
+              title="Left side (horizontal -0.06, vertical 0.08, size 0.10)"
             >
               <ArrowLeft className="w-3 h-3" /> Left
             </button>
             <button 
-              onClick={() => handlePresetClick("right", [0.06, 0.08, 0.15], 0.09)} 
+              onClick={() => handlePresetClick("right", [0.10, 0.08, 0.15], 0.10)} 
               className={`${presetBtnClass} ${selectedPreset === "right" ? activeBtnClass : inactiveBtnClass}`}
-              title="Right side (properly aligned, no clipping)"
+              title="Right side (horizontal 0.10, vertical 0.08, size 0.10)"
             >
               <ArrowRight className="w-3 h-3" /> Right
             </button>

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Center, Environment, OrbitControls } from "@react-three/drei";
+import { Center, OrbitControls } from "@react-three/drei";
 import ShirtModel from "./ShirtModel";
 import CameraZoomSync from "./CameraZoomSync";
 

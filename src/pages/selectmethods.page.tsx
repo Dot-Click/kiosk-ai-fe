@@ -113,21 +113,21 @@ const SelectMethodsPage = () => {
   const navigate = useNavigate();
   const methods = [
     {
-      title: "Take A Photo",
+      title: "Upload A Photo",
       description: "Capture your picture",
       imageSrc: "/general/image 10.svg",
       onClick: () => {
         navigate("/select-methods/capture-photo");
       },
     },
-    {
-      title: "Via Bluetooth",
-      description: "Send any image from phone",
-      imageSrc: "/general/onlybluetooth.png",
-      onClick: () => {
-        navigate("/select-methods/bluetooth");
-      },
-    }, 
+    // {
+    //   title: "Via Bluetooth",
+    //   description: "Send any image from phone",
+    //   imageSrc: "/general/onlybluetooth.png",
+    //   onClick: () => {
+    //     navigate("/select-methods/bluetooth");
+    //   },
+    // }, 
     {
       title: "Speak Prompt",
       description: "Use your Voice",
