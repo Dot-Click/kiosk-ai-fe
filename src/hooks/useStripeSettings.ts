@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
 import { axios } from "@/config/axios";
 
-interface StripeSettings {
+export interface StripeSettings {
   id: string;
   publishableKey: string;
-  secretKey: string; // This will be masked
+  secretKey: string;
   webhookSecret: string;
   isActive: boolean;
   currency: string;
@@ -18,131 +18,151 @@ interface StripeSettingsResponse {
   data?: StripeSettings;
 }
 
+/** Secret key is masked when it contains **** (from API). Don't send masked value on update. */
+export function isMaskedSecret(value: string): boolean {
+  return !value || value.includes("****");
+}
+
+export interface UpdateStripeSettingsPayload {
+  publishableKey: string;
+  /** Send only when user entered a new key (not masked). Omit to keep existing. */
+  secretKey?: string;
+  webhookSecret?: string;
+  isActive?: boolean;
+  currency?: string;
+}
+
 interface UseStripeSettingsReturn {
   settings: StripeSettings | null;
-  loading: boolean;
+  fetchLoading: boolean;
+  updateLoading: boolean;
+  testLoading: boolean;
   error: string | null;
   fetchSettings: () => Promise<void>;
-  updateSettings: (settings: Partial<StripeSettings> & { secretKey: string }) => Promise<void>;
+  updateSettings: (payload: UpdateStripeSettingsPayload) => Promise<void>;
   testConnection: () => Promise<{ success: boolean; message: string }>;
+  clearError: () => void;
 }
+
+const AUTH_HEADERS = (): { Authorization: string } => {
+  const token = localStorage.getItem("adminToken");
+  return { Authorization: `Bearer ${token}` };
+};
 
 export const useStripeSettings = (): UseStripeSettingsReturn => {
   const [settings, setSettings] = useState<StripeSettings | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [testLoading, setTestLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getAuthHeaders = useCallback(() => {
-    const token = localStorage.getItem("adminToken");
-    return {
-      Authorization: `Bearer ${token}`,
-    };
-  }, []);
+  const clearError = useCallback(() => setError(null), []);
 
   const fetchSettings = useCallback(async () => {
-    setLoading(true);
+    setFetchLoading(true);
     setError(null);
-
     try {
       const response = await axios.get<StripeSettingsResponse>(
         "/admin/stripe-settings",
-        {
-          headers: getAuthHeaders(),
-        }
+        { headers: AUTH_HEADERS() }
       );
-
       if (response.data.success && response.data.data) {
         setSettings(response.data.data);
       } else {
-        throw new Error(response.data.message || "Failed to fetch settings");
+        setError(response.data.message || "Failed to fetch settings");
       }
     } catch (err: any) {
-      const errorMessage =
+      const msg =
         err.response?.data?.message ||
         err.message ||
         "Failed to fetch Stripe settings";
-      setError(errorMessage);
-      throw new Error(errorMessage);
+      setError(msg);
     } finally {
-      setLoading(false);
+      setFetchLoading(false);
     }
-  }, [getAuthHeaders]);
+  }, []);
 
   const updateSettings = useCallback(
-    async (newSettings: Partial<StripeSettings> & { secretKey: string }) => {
-      setLoading(true);
+    async (payload: UpdateStripeSettingsPayload) => {
+      setUpdateLoading(true);
       setError(null);
-
       try {
+        const body: Record<string, unknown> = {
+          publishableKey: payload.publishableKey,
+          webhookSecret: payload.webhookSecret ?? "",
+          isActive: payload.isActive ?? false,
+          currency: payload.currency ?? "usd",
+        };
+        if (
+          payload.secretKey &&
+          !isMaskedSecret(payload.secretKey)
+        ) {
+          body.secretKey = payload.secretKey;
+        }
         const response = await axios.put<StripeSettingsResponse>(
           "/admin/stripe-settings",
-          newSettings,
-          {
-            headers: getAuthHeaders(),
-          }
+          body,
+          { headers: AUTH_HEADERS() }
         );
-
         if (response.data.success && response.data.data) {
           setSettings(response.data.data);
         } else {
-          throw new Error(response.data.message || "Failed to update settings");
+          setError(response.data.message || "Failed to update settings");
+          throw new Error(response.data.message);
         }
       } catch (err: any) {
-        const errorMessage =
+        const msg =
           err.response?.data?.message ||
           err.message ||
           "Failed to update Stripe settings";
-        setError(errorMessage);
-        throw new Error(errorMessage);
+        setError(msg);
+        throw new Error(msg);
       } finally {
-        setLoading(false);
+        setUpdateLoading(false);
       }
     },
-    [getAuthHeaders]
+    []
   );
 
   const testConnection = useCallback(async () => {
-    setLoading(true);
+    setTestLoading(true);
     setError(null);
-
     try {
       const response = await axios.post<{
         success: boolean;
         message: string;
-        data?: any;
-      }>("/admin/stripe-settings/test", {}, {
-        headers: getAuthHeaders(),
-      });
-
+        data?: { connected?: boolean };
+      }>("/admin/stripe-settings/test", {}, { headers: AUTH_HEADERS() });
       if (response.data.success) {
         return {
           success: true,
           message: response.data.message || "Connection test successful",
         };
-      } else {
-        throw new Error(response.data.message || "Connection test failed");
       }
+      const msg = response.data.message || "Connection test failed";
+      setError(msg);
+      return { success: false, message: msg };
     } catch (err: any) {
-      const errorMessage =
+      const msg =
         err.response?.data?.message ||
         err.message ||
         "Connection test failed";
-      setError(errorMessage);
-      return {
-        success: false,
-        message: errorMessage,
-      };
+      setError(msg);
+      return { success: false, message: msg };
     } finally {
-      setLoading(false);
+      setTestLoading(false);
     }
-  }, [getAuthHeaders]);
+  }, []);
 
   return {
     settings,
-    loading,
+    fetchLoading,
+    updateLoading,
+    testLoading,
     error,
     fetchSettings,
     updateSettings,
     testConnection,
+    clearError,
   };
 };

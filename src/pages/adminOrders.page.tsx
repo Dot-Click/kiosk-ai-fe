@@ -5,28 +5,18 @@ import { Stack } from "@/components/ui/stack";
 import { Flex } from "@/components/ui/flex";
 import { ArrowLeft, Search, Filter, Eye, Download } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { axios } from "@/config/axios";
-
-interface Order {
-  _id: string;
-  orderNumber: string;
-  customerName: string;
-  customerEmail: string;
-  totalAmount: number;
-  status: "pending" | "processing" | "completed" | "cancelled";
-  createdAt: string;
-  items: Array<{
-    productName: string;
-    quantity: number;
-    price: number;
-  }>;
-}
+import { useAdminOrders } from "@/hooks/useAdminOrders";
 
 const AdminOrdersPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAdminAuth();
-  const [loading, setLoading] = useState(true);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const {
+    orders,
+    loading,
+    error,
+    fetchOrders,
+    formatCurrency,
+  } = useAdminOrders();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -35,42 +25,11 @@ const AdminOrdersPage = () => {
       navigate("/login");
       return;
     }
-
-    fetchOrders();
-  }, [navigate, isAuthenticated]);
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("adminToken");
-      const response = await axios.get("/admin/orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-          status: statusFilter !== "all" ? statusFilter : undefined,
-          search: searchTerm || undefined,
-        },
-      });
-
-      if (response.data.success) {
-        setOrders(response.data.data || []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch orders:", error);
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      fetchOrders();
-    }, 500);
-
+      fetchOrders({ status: statusFilter, search: searchTerm || undefined });
+    }, searchTerm ? 500 : 0);
     return () => clearTimeout(debounceTimer);
-  }, [searchTerm, statusFilter]);
+  }, [navigate, isAuthenticated, statusFilter, searchTerm, fetchOrders]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -88,7 +47,7 @@ const AdminOrdersPage = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-EU", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -96,6 +55,8 @@ const AdminOrdersPage = () => {
       minute: "2-digit",
     });
   };
+
+  if (!isAuthenticated) return null;
 
   if (loading) {
     return (
@@ -118,9 +79,16 @@ const AdminOrdersPage = () => {
           </Box>
           <Box className="flex-1">
             <h1 className="text-3xl font-bold text-white mb-2">Orders Management</h1>
-            <p className="text-white/60">View and manage all customer orders</p>
+            <p className="text-white/60">View and manage all customer orders (amounts in €)</p>
           </Box>
         </Flex>
+
+        {/* Error */}
+        {error && (
+          <Box className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+            <p className="text-red-300 text-sm">{error}</p>
+          </Box>
+        )}
 
         {/* Filters */}
         <Box className="bg-[#16121E] border border-white/10 rounded-2xl p-6 mb-6">
@@ -166,7 +134,7 @@ const AdminOrdersPage = () => {
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Order #</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Customer</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Items</th>
-                    <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Amount</th>
+                    <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Amount (€)</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Status</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Date</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Actions</th>
@@ -189,7 +157,7 @@ const AdminOrdersPage = () => {
                         {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                       </td>
                       <td className="px-6 py-4 text-white font-semibold">
-                        ${order.totalAmount.toFixed(2)}
+                        {formatCurrency(order.totalAmount)}
                       </td>
                       <td className="px-6 py-4">
                         <span

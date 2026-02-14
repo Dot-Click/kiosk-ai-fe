@@ -656,6 +656,7 @@ import GoBackButton from "../components/horizontalnavbar/horizontalnavbar.tsx";
 import { HorizontalNavbar } from "../components/horizontalnavbar/horizontalnavbar.tsx";
 import { useImageStore } from "@/store/image.store";
 import { useQrApi } from "@/hooks/useQrApi";
+import { backendDomain } from "@/config/axios";
 
 interface QRCodeData {
   code: string;
@@ -685,10 +686,12 @@ const QRUploadPage = () => {
 
   const checkBackendHealth = async () => {
     try {
+      setBackendStatus("checking");
+      setError((e) => (e?.startsWith("Cannot connect to backend") ? null : e));
       await checkBackendHealthApi();
       setBackendStatus("connected");
     } catch (err: any) {
-      setBackendStatus('error');
+      setBackendStatus("error");
       setError(`Cannot connect to backend: ${err.message}`);
     }
   };
@@ -865,8 +868,35 @@ const QRUploadPage = () => {
 
       <Center className="h-full mt-20 pt-28 sm:pt-32 md:pt-36 overflow-y-auto"> 
         <Stack className="w-full max-w-md items-center gap-4 sm:gap-6 px-2 sm:px-4">
-          {/* Error Display */}
-          {error && (
+          {/* Backend connection: checking or error with Retry */}
+          {backendStatus === "checking" && (
+            <div className="w-full p-4 bg-white/5 border border-white/10 rounded-lg">
+              <p className="text-white/70 text-sm text-center flex items-center justify-center gap-2">
+                <RefreshCw className="animate-spin" size={16} />
+                Connecting to backend…
+              </p>
+            </div>
+          )}
+          {backendStatus === "error" && (
+            <div className="w-full p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg space-y-3">
+              <p className="text-amber-200 text-sm text-center">
+                Backend not reachable. Make sure the kiosk backend is running at{" "}
+                <span className="font-mono text-amber-100">{backendDomain}</span>
+              </p>
+              <p className="text-white/60 text-xs text-center">
+                In the backend project (kiosk-ai-be), run: <code className="bg-white/10 px-1 rounded">npm run dev</code>
+              </p>
+              <CustomButton
+                wrapperClassName="w-full h-10"
+                title="Retry connection"
+                icon={<RefreshCw size={18} />}
+                onClick={checkBackendHealth}
+              />
+            </div>
+          )}
+
+          {/* Other errors (e.g. generate QR failed) */}
+          {error && backendStatus !== "error" && (
             <div className="w-full p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
               <p className="text-red-300 text-sm text-center">{error}</p>
             </div>

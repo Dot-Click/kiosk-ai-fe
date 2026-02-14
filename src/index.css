@@ -433,3 +433,11 @@ textarea::-webkit-scrollbar-thumb:hover {
   transform: translateZ(0);
   will-change: transform;
 }
+
+/* Stripe Payment Element: keep card form responsive and usable */
+[data-testid="payment-element"] iframe,
+.p-Element iframe,
+[class*="StripeElement"] iframe {
+  max-width: 100% !important;
+  width: 100% !important;
+}
