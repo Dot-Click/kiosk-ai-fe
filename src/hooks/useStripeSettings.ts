@@ -34,10 +34,11 @@ export interface UpdateStripeSettingsPayload {
 
 interface UseStripeSettingsReturn {
   settings: StripeSettings | null;
-  fetchLoading: boolean;
-  updateLoading: boolean;
+  loading: boolean;
+  saving: boolean;
   testLoading: boolean;
   error: string | null;
+  success: string | null;
   fetchSettings: () => Promise<void>;
   updateSettings: (payload: UpdateStripeSettingsPayload) => Promise<void>;
   testConnection: () => Promise<{ success: boolean; message: string }>;
@@ -51,16 +52,18 @@ const AUTH_HEADERS = (): { Authorization: string } => {
 
 export const useStripeSettings = (): UseStripeSettingsReturn => {
   const [settings, setSettings] = useState<StripeSettings | null>(null);
-  const [fetchLoading, setFetchLoading] = useState(false);
-  const [updateLoading, setUpdateLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [testLoading, setTestLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const clearError = useCallback(() => setError(null), []);
 
   const fetchSettings = useCallback(async () => {
-    setFetchLoading(true);
+    setLoading(true);
     setError(null);
+    setSuccess(null);
     try {
       const response = await axios.get<StripeSettingsResponse>(
         "/admin/stripe-settings",
@@ -78,14 +81,15 @@ export const useStripeSettings = (): UseStripeSettingsReturn => {
         "Failed to fetch Stripe settings";
       setError(msg);
     } finally {
-      setFetchLoading(false);
+      setLoading(false);
     }
   }, []);
 
   const updateSettings = useCallback(
     async (payload: UpdateStripeSettingsPayload) => {
-      setUpdateLoading(true);
+      setSaving(true);
       setError(null);
+      setSuccess(null);
       try {
         const body: Record<string, unknown> = {
           publishableKey: payload.publishableKey,
@@ -106,6 +110,7 @@ export const useStripeSettings = (): UseStripeSettingsReturn => {
         );
         if (response.data.success && response.data.data) {
           setSettings(response.data.data);
+          setSuccess(response.data.message || "Settings updated successfully");
         } else {
           setError(response.data.message || "Failed to update settings");
           throw new Error(response.data.message);
@@ -118,7 +123,7 @@ export const useStripeSettings = (): UseStripeSettingsReturn => {
         setError(msg);
         throw new Error(msg);
       } finally {
-        setUpdateLoading(false);
+        setSaving(false);
       }
     },
     []
@@ -156,10 +161,11 @@ export const useStripeSettings = (): UseStripeSettingsReturn => {
 
   return {
     settings,
-    fetchLoading,
-    updateLoading,
+    loading,
+    saving,
     testLoading,
     error,
+    success,
     fetchSettings,
     updateSettings,
     testConnection,

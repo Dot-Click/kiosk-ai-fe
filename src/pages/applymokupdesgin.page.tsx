@@ -1,4 +1,3 @@
- 
 
 
 
@@ -7,18 +6,20 @@
 
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Box } from "../components/ui/box";
 import { useImageStore } from "@/store/image.store";
 import { useNavigate } from "react-router";
 import ProductOptions from "@/components/common/ProductOptions";
 import DesignCard from "@/components/common/DesignCard";
-import ThreeMugViewer from "@/components/3dView/ThreeMugViewer";
+import ThreeMugViewer, { ThreeMugViewerRef } from "@/components/3dView/ThreeMugViewer";
 import TShirtMockupCanvas from "@/components/3dView/TShirtMockupCanvas";
 import ColorSelector, { ColorOption } from "@/components/common/ColorSelector";
 import ScaleControl from "@/components/common/ScaleControl";
 import RotationControl from "@/components/common/RotationControl";
 import ImagePositionControl from "@/components/common/ImagePositionControl";
+import { axios } from "@/config/axios";
+import { Loader2 } from "lucide-react";
 
 const productOptions = [
   { id: "cup", label: "Cup", image: "/general/cup.png" },
@@ -39,6 +40,7 @@ const customColorOptions: ColorOption[] = [
 
 const ApplyMokupDesignPage = () => {
   const selectedImage = useImageStore((state) => state.selectedImage);
+  const setMockupImageUrl = useImageStore((state) => state.setMockupImageUrl);
   const [selectedProduct, setSelectedProduct] = useState<string>("cup");
   const [selectedColor, setSelectedColor] = useState<ColorOption>(customColorOptions[0]);
   const [zoomScale, setZoomScale] = useState(100);
@@ -46,7 +48,12 @@ const ApplyMokupDesignPage = () => {
   const [isApplied, setIsApplied] = useState(false);
   const [decalPosition, setDecalPosition] = useState<[number, number, number]>([0, 0.04, 0.15]);
   const [decalScale, setDecalScale] = useState(0.18);
-  const [decalRotation,  ] = useState(0);
+  const [decalRotation,] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Refs for capturing 3D view
+  const cupRef = useRef<ThreeMugViewerRef>(null);
+  const tshirtCaptureRef = useRef<any>(null);
 
   const navigate = useNavigate();
 
@@ -66,18 +73,9 @@ const ApplyMokupDesignPage = () => {
     setRotationAngle((prev) => prev + 15);
   };
 
-  // Image position handlers
-  // const handleDecalPositionXChange = (delta: number) => {
-  //   setDecalPosition((prev) => [prev[0] + delta, prev[1], prev[2]]);
-  // };
-
   const handleDecalPositionYChange = (delta: number) => {
     setDecalPosition((prev) => [prev[0], prev[1] + delta, prev[2]]);
   };
-
-  // const handleDecalPositionZChange = (delta: number) => {
-  //   setDecalPosition((prev) => [prev[0], prev[1], prev[2] + delta]);
-  // };
 
   const handleSetDecalPosition = (position: [number, number, number]) => {
     setDecalPosition(position);
@@ -97,18 +95,66 @@ const ApplyMokupDesignPage = () => {
     });
   };
 
-  // const handleDecalRotationChange = (delta: number) => {
-  //   setDecalRotation((prev) => prev + delta);
-  // };
-
   // Toggle design application
   const handleApplyDesign = () => {
     setIsApplied(!isApplied);
   };
 
+  // Helper to convert dataURL to Blob
+  const dataURLtoBlob = (dataurl: string) => {
+    const arr = dataurl.split(',');
+    const match = arr[0].match(/:(.*?);/);
+    const mime = match ? match[1] : 'image/png';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  }
+
   // Navigate to checkout
-  const handleCheckout = () => {
-    navigate("/checkout");
+  const handleCheckout = async () => {
+    setIsProcessing(true);
+    try {
+      let dataUrl: string | null = null;
+
+      // Capture the current view
+      if (selectedProduct === "cup" && cupRef.current) {
+        dataUrl = cupRef.current.capture();
+      } else if (selectedProduct === "tshirt" && tshirtCaptureRef.current) {
+        // tshirtCaptureRef.current is the function assigned by CaptureHandler
+        dataUrl = tshirtCaptureRef.current();
+      }
+
+      if (dataUrl) {
+        // Upload the captured image
+        const blob = dataURLtoBlob(dataUrl);
+        const formData = new FormData();
+        const code = `MOCKUP-${Date.now()}`;
+        formData.append("code", code);
+        formData.append("image", blob, "mockup.png");
+
+        const response = await axios.post("/upload/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (response.data.success) {
+          setMockupImageUrl(response.data.data.imageUrl);
+        } else {
+          console.error("Upload failed:", response.data);
+          // Fallback: don't set mockup URL, just proceed
+        }
+      }
+    } catch (error) {
+      console.error("Error capturing/uploading mockup:", error);
+    } finally {
+      setIsProcessing(false);
+      navigate("/checkout");
+    }
   };
 
   useEffect(() => {
@@ -119,6 +165,12 @@ const ApplyMokupDesignPage = () => {
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">
+      {isProcessing && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center">
+          <Loader2 className="w-12 h-12 text-[#F70353] animate-spin mb-4" />
+          <p className="text-white text-xl font-bold">Preparing your design...</p>
+        </div>
+      )}
       <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-lg:flex-col max-lg:items-center items-start max-md:justify-start max-md:py-6 max-sm:mt-30 mt-30">
         {/* Left Side - Product Options & Design Card */}
         <Box className="flex flex-col items-center ml-18 justify-start gap-1 flex-shrink-0">
@@ -127,7 +179,7 @@ const ApplyMokupDesignPage = () => {
             onProductSelect={setSelectedProduct}
             options={productOptions}
           />
-          
+
           <DesignCard
             selectedImage={selectedImage ?? undefined}
             isApplied={isApplied}
@@ -140,6 +192,7 @@ const ApplyMokupDesignPage = () => {
         <Box className="flex-1 flex items-center justify-center min-w-0 max-md:w-full max-md:flex-1 max-md:mt-4">
           {selectedProduct === "cup" ? (
             <ThreeMugViewer
+              ref={cupRef}
               imageUrl={selectedImage ?? undefined}
               color={selectedColor.hex}
               isApplied={isApplied}
@@ -148,6 +201,7 @@ const ApplyMokupDesignPage = () => {
             />
           ) : (
             <TShirtMockupCanvas
+              captureRef={tshirtCaptureRef}
               imageUrl={selectedImage ?? undefined}
               color={selectedColor.hex}
               isApplied={isApplied}
@@ -167,13 +221,13 @@ const ApplyMokupDesignPage = () => {
             onColorSelect={setSelectedColor}
             colors={customColorOptions}
           />
-          
+
           <ScaleControl
             zoomScale={zoomScale}
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
           />
-          
+
           <RotationControl
             onRotateLeft={handleRotateLeft}
             onRotateRight={handleRotateRight}

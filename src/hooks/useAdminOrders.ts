@@ -9,17 +9,8 @@ export interface OrderItem {
   productName: string;
   quantity: number;
   price: number;
-}
-
-export interface Order {
-  _id: string;
-  orderNumber: string;
-  customerName: string;
-  customerEmail: string;
-  totalAmount: number;
-  status: "pending" | "processing" | "completed" | "cancelled";
-  createdAt: string;
-  items: OrderItem[];
+  image?: string;
+  variant?: string;
 }
 
 export interface ShippingAddress {
@@ -30,14 +21,44 @@ export interface ShippingAddress {
   country?: string;
 }
 
-export interface OrderDetail extends Order {
-  shippingAddress?: ShippingAddress;
+export interface Order {
+  _id: string;
+  orderNumber: string;
+  customer: {
+    name: string;
+    email?: string;
+    phone: string;
+  };
+  items: OrderItem[];
+  fulfillment: {
+    method: "express" | "doorstep";
+    address?: ShippingAddress;
+  };
+  payment: {
+    stripeSessionId: string;
+    paymentIntentId?: string;
+    amount: number;
+    currency: string;
+    status: "pending" | "paid" | "failed";
+  };
+  status: "pending" | "processing" | "completed" | "cancelled";
+  createdAt: string;
+  updatedAt: string;
 }
+
+export interface OrderDetail extends Order { }
 
 interface GetOrdersResponse {
   success: boolean;
   message: string;
-  data?: Order[];
+  data?: {
+    orders: Order[];
+    pagination: {
+      total: number;
+      page: number;
+      pages: number;
+    };
+  };
 }
 
 interface GetOrderDetailsResponse {
@@ -52,7 +73,7 @@ export interface OrdersFilters {
 }
 
 export function formatCurrencyEur(amount: number): string {
-  return new Intl.NumberFormat("en-EU", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: CURRENCY_CODE,
     minimumFractionDigits: 2,
@@ -65,9 +86,11 @@ interface UseAdminOrdersReturn {
   orderDetail: OrderDetail | null;
   loading: boolean;
   loadingDetail: boolean;
+  updating: boolean;
   error: string | null;
   fetchOrders: (filters?: OrdersFilters) => Promise<void>;
   fetchOrderDetails: (id: string) => Promise<OrderDetail | null>;
+  updateOrderStatus: (id: string, status: string) => Promise<boolean>;
   clearOrderDetail: () => void;
   formatCurrency: (amount: number) => string;
 }
@@ -84,6 +107,7 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
   const [orderDetail, setOrderDetail] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async (filters?: OrdersFilters) => {
@@ -99,8 +123,9 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
         params,
       });
 
-      if (response.data.success) {
-        setOrders(response.data.data ?? []);
+      if (response.data.success && response.data.data) {
+        // Correctly access the orders array from the data object
+        setOrders(response.data.data.orders ?? []);
       } else {
         setOrders([]);
         setError(response.data.message ?? "Failed to load orders");
@@ -140,6 +165,33 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
     }
   }, []);
 
+  const updateOrderStatus = useCallback(async (id: string, status: string): Promise<boolean> => {
+    setUpdating(true);
+    setError(null);
+    try {
+      const response = await axios.patch<GetOrderDetailsResponse>(
+        `/admin/orders/${id}`,
+        { status },
+        { headers: getAuthHeaders() }
+      );
+
+      if (response.data.success && response.data.data) {
+        setOrderDetail(response.data.data);
+        // Also update the order in the list if it exists
+        setOrders(prev => prev.map(o => o._id === id || o.orderNumber === id ? response.data.data! : o));
+        return true;
+      }
+      setError(response.data.message ?? "Failed to update status");
+      return false;
+    } catch (err: any) {
+      const msg = err.response?.data?.message ?? err.message ?? "Failed to update status";
+      setError(msg);
+      return false;
+    } finally {
+      setUpdating(false);
+    }
+  }, []);
+
   const clearOrderDetail = useCallback(() => {
     setOrderDetail(null);
   }, []);
@@ -149,9 +201,11 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
     orderDetail,
     loading,
     loadingDetail,
+    updating,
     error,
     fetchOrders,
     fetchOrderDetails,
+    updateOrderStatus,
     clearOrderDetail,
     formatCurrency: formatCurrencyEur,
   };

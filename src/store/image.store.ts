@@ -55,15 +55,18 @@ export interface GeneratedImage {
 export interface ImageStore {
   // Single selected image (for current operation)
   selectedImage: string | null;
-  
+  // The captured 3D mockup URL
+  mockupImageUrl: string | null;
+
   // All generated images from the prompt
   generatedImages: GeneratedImage[];
-  
+
   // The prompt/description used
   promptDescription: string;
-  
+
   // Actions
   setSelectedImage: (imageUrl: string | null) => void;
+  setMockupImageUrl: (imageUrl: string | null) => void;
   setGeneratedImages: (images: string[], description: string) => void;
   addGeneratedImage: (image: GeneratedImage) => void;
   clearSelectedImage: () => void;
@@ -77,9 +80,10 @@ export const useImageStore = create(
     persist<ImageStore>(
       (set, get) => ({
         selectedImage: null,
+        mockupImageUrl: null,
         generatedImages: [],
         promptDescription: "",
-        
+
         setSelectedImage: (imageUrl) => {
           set((state) => {
             // Clean up previous image URL if it exists
@@ -89,28 +93,32 @@ export const useImageStore = create(
             return { selectedImage: imageUrl };
           });
         },
-        
+
+        setMockupImageUrl: (imageUrl) => {
+          set({ mockupImageUrl: imageUrl });
+        },
+
         setGeneratedImages: (images: string[], description: string) => {
           const generatedImages: GeneratedImage[] = images.map((url, index) => ({
             url,
             id: `img-${Date.now()}-${index}`,
             prompt: description,
           }));
-          
-          set({ 
+
+          set({
             generatedImages,
             promptDescription: description,
-            selectedImage: images.length > 0 ? images[0] : null 
+            selectedImage: images.length > 0 ? images[0] : null
           });
         },
-        
+
         addGeneratedImage: (image: GeneratedImage) => {
           set((state) => ({
             generatedImages: [...state.generatedImages, image],
             selectedImage: image.url,
           }));
         },
-        
+
         clearSelectedImage: () => {
           set((state) => {
             if (state.selectedImage && state.selectedImage.startsWith("blob:")) {
@@ -119,7 +127,7 @@ export const useImageStore = create(
             return { selectedImage: null };
           });
         },
-        
+
         clearAllImages: () => {
           set((state) => {
             // Clean up all blob URLs
@@ -131,21 +139,21 @@ export const useImageStore = create(
             if (state.selectedImage && state.selectedImage.startsWith("blob:")) {
               URL.revokeObjectURL(state.selectedImage);
             }
-            return { 
+            return {
               selectedImage: null,
               generatedImages: [],
-              promptDescription: "" 
+              promptDescription: ""
             };
           });
         },
-        
+
         selectImageByIndex: (index: number) => {
           const state = get();
           if (index >= 0 && index < state.generatedImages.length) {
             set({ selectedImage: state.generatedImages[index].url });
           }
         },
-        
+
         selectImageByUrl: (url: string) => {
           set({ selectedImage: url });
         },

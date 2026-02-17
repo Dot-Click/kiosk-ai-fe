@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// import { Box } from "@/components/ui/box";
 import { cn } from "@/utils/cn.util";
 import { useNavigate } from "react-router";
 import { useImageStore } from "@/store/image.store";
@@ -7,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Minus,
   Plus,
-  // Clock,
   Truck,
   Loader2,
   ShieldCheck,
@@ -16,18 +14,17 @@ import {
   MapPin,
   CreditCard,
   Sparkles,
-  // CheckCircle,
-  // Coffee,
   Zap,
   Home,
   Lock,
   Gift,
   Star,
-  Heart
+  Heart,
+  User,
+  Eye,
+  X
 } from "lucide-react";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 const UNIT_PRICE = 29.99;
 
@@ -39,121 +36,22 @@ function formatAmount(amount: number, currency: string): string {
   }).format(amount);
 }
 
-// Payment Form Component
-function PaymentForm({ amountInCents, currency, onBack }: { 
-  amountInCents: number; 
-  currency: string; 
-  onBack: () => void;
-}) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-    
-    setLoading(true);
-    setError(null);
-    
-    const { error: confirmError } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/checkout/success`,
-      },
-    });
-    
-    if (confirmError) {
-      setError(confirmError.message || "Payment failed");
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Header with Back */}
-      <div className="flex items-center gap-4 pb-4 border-b border-white/10">
-        <button
-          type="button"
-          onClick={onBack}
-          className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <div>
-          <h3 className="font-bold text-lg">Complete Payment</h3>
-          <p className="text-white/40 text-sm">Secure checkout powered by Stripe</p>
-        </div>
-      </div>
-
-      {/* Payment Element */}
-      <div className="bg-gradient-to-b from-white/5 to-transparent rounded-2xl border border-white/10 p-6">
-        <PaymentElement />
-      </div>
-
-      {/* Total Amount */}
-      <div className="bg-gradient-to-r from-[#F70353]/20 to-transparent rounded-xl p-4">
-        <div className="flex justify-between items-center">
-          <span className="text-white/60">Total to pay</span>
-          <span className="text-2xl font-bold text-[#F70353]">
-            {formatAmount(amountInCents / 100, currency)}
-          </span>
-        </div>
-      </div>
-      
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm">
-          {error}
-        </div>
-      )}
-      
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={!stripe || loading}
-        className="w-full py-5 rounded-xl font-bold text-lg bg-gradient-to-r from-[#F70353] to-[#C20241] text-white shadow-lg shadow-[#F70353]/25 hover:shadow-xl hover:shadow-[#F70353]/30 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
-      >
-        {loading ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Processing Payment...
-          </>
-        ) : (
-          <>
-            <Lock size={18} />
-            Pay {formatAmount(amountInCents / 100, currency)}
-          </>
-        )}
-      </button>
-
-      {/* Security Badge */}
-      <div className="flex items-center justify-center gap-3 text-white/30 text-xs">
-        <ShieldCheck size={14} />
-        <span>256-bit SSL Encryption</span>
-        <span>•</span>
-        <span>PCI Compliant</span>
-      </div>
-    </form>
-  );
-}
-
-// Main Checkout Component
 const Checkout = () => {
   const navigate = useNavigate();
   const selectedImage = useImageStore((state) => state.selectedImage);
-  
+  const mockupImageUrl = useImageStore((state) => state.mockupImageUrl);
+
   // State
   const [quantity, setQuantity] = useState(1);
   const [fulfillment, setFulfillment] = useState<"express" | "doorstep">("express");
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [contactInfo, setContactInfo] = useState({ name: "", email: "", phone: "" });
   const [address, setAddress] = useState({ street: "", city: "", zip: "" });
   const [showAddress, setShowAddress] = useState(false);
+  const [showDesignPreview, setShowDesignPreview] = useState(false);
 
   // Hooks
-  const { config, fetchStripeConfig, createPaymentIntent } = useStripeCheckout();
+  const { config, fetchStripeConfig, createCheckoutSession } = useStripeCheckout();
 
   useEffect(() => {
     fetchStripeConfig();
@@ -163,47 +61,62 @@ const Checkout = () => {
   const subtotal = UNIT_PRICE * quantity;
   const shippingCost = fulfillment === "doorstep" ? 5 : 0;
   const total = subtotal + shippingCost;
-  const amountInCents = Math.round(total * 100);
   const currency = config?.currency || "usd";
 
   // Handle fulfillment change
   const handleFulfillmentChange = (type: "express" | "doorstep") => {
     setFulfillment(type);
-    if (type === "doorstep") {
-      setShowAddress(true);
-    } else {
-      setShowAddress(false);
-    }
+    setShowAddress(type === "doorstep");
   };
 
-  // Handle continue to payment
-  const handleContinue = async () => {
-    if (fulfillment === "doorstep" && (!address.street || !address.city || !address.zip)) {
-      alert("Please fill in your delivery address");
+  // Handle Payment
+  const handlePay = async () => {
+    // Validation
+    if (!contactInfo.name || !contactInfo.phone) {
+      alert("Please fill in your name and phone number");
       return;
     }
-    
+
+    if (fulfillment === "doorstep") {
+      if (!contactInfo.email) {
+        alert("Email is required for doorstep delivery");
+        return;
+      }
+      if (!address.street || !address.city || !address.zip) {
+        alert("Please fill in your delivery address");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      const metadata: Record<string, string> = {
-        quantity: String(quantity),
-        fulfillment,
+      const checkoutData = {
+        items: [{
+          name: "AI-Generated Mug",
+          quantity,
+          price: UNIT_PRICE * 100, // cents
+          image: mockupImageUrl || selectedImage
+        }],
+        customer: {
+          name: contactInfo.name,
+          email: contactInfo.email,
+          phone: contactInfo.phone
+        },
+        fulfillment: {
+          method: fulfillment,
+          address: fulfillment === 'doorstep' ? address : undefined
+        }
       };
-      if (fulfillment === "doorstep") {
-        metadata.addressStreet = address.street;
-        metadata.addressCity = address.city;
-        metadata.addressZip = address.zip;
-      }
-      const secret = await createPaymentIntent(amountInCents, metadata);
-      setClientSecret(secret);
-    } catch (err) {
-      navigate("/checkout/failed");
-    } finally {
+
+      const url = await createCheckoutSession(checkoutData);
+      window.location.href = url;
+
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Failed to start payment");
       setLoading(false);
     }
   };
-
-  const stripePromise = config?.publishableKey ? loadStripe(config.publishableKey) : null;
 
   return (
     <div className="min-h-screen w-full bg-[#080319] text-white font-['Outfit'] relative overflow-x-hidden">
@@ -215,93 +128,112 @@ const Checkout = () => {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-12">
-        
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
+
         {/* Header with Back Button */}
-        <div className="flex items-center gap-4 mb-6 md:mb-8">
+        <div className="flex items-center gap-3 md:gap-4 mb-8 md:mb-10">
           <button
-            onClick={() => clientSecret ? setClientSecret(null) : navigate(-1)}
-            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-white/10"
           >
             <ChevronLeft size={20} className="md:w-5 md:h-5" />
           </button>
-          <h1 className="text-2xl md:text-4xl font-black tracking-tighter">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tighter">
             CHECK<span className="text-[#F70353] drop-shadow-[0_0_10px_rgba(247,3,83,0.5)]">OUT</span>
           </h1>
         </div>
 
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8">
-          
-          {/* LEFT COLUMN - Order Summary */}
-          <div className="space-y-4 md:space-y-6">
+        {/* Two Column Layout - Perfect alignment with image */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 xl:gap-12">
+
+          {/* LEFT COLUMN - Order Summary (Matches image layout) */}
+          <div className="space-y-6 lg:sticky lg:top-24 lg:h-fit">
             {/* Product Card */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden">
-              <div className="p-6 md:p-8 bg-gradient-to-br from-[#F70353]/10 to-transparent">
-                <div className="flex items-center gap-3 mb-4">
-                  <Sparkles className="text-[#F70353]" size={20} />
-                  <span className="text-sm uppercase tracking-wider text-[#F70353] font-semibold">Your Custom Design</span>
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden">
+              {/* Product Header */}
+              <div className="p-5 md:p-6 lg:p-7 border-b border-white/10">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="text-[#F70353]" size={16} />
+                  <span className="text-xs uppercase tracking-wider text-[#F70353] font-semibold">Your Custom Design</span>
                 </div>
-                
-                <div className="flex flex-col sm:flex-row items-center gap-6">
+
+                <div className="flex items-start gap-4">
                   {/* Product Image */}
-                  <div className="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#F70353]/30 to-transparent rounded-2xl blur-xl" />
-                    <div className="relative w-full h-full bg-gradient-to-br from-white/20 to-transparent rounded-2xl overflow-hidden flex items-center justify-center border-2 border-white/10">
-                      <img 
-                        src="/general/cup.png" 
-                        alt="Mug" 
-                        className="w-full h-full object-contain p-3"
-                      />
-                      {selectedImage && (
-                        <img 
-                          src={selectedImage} 
-                          className="absolute w-[40%] h-[40%] top-[38%] left-[28%] object-cover mix-blend-multiply opacity-90"
-                          alt="Custom print"
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#F70353]/30 to-transparent rounded-xl blur-md" />
+                    <div 
+                      className="relative w-full h-full bg-gradient-to-br from-white/20 to-transparent rounded-xl overflow-hidden flex items-center justify-center border border-white/10 group-hover:border-[#F70353]/50 transition-colors cursor-pointer" 
+                      onClick={() => setShowDesignPreview(true)}
+                    >
+                      {mockupImageUrl ? (
+                        <img
+                          src={mockupImageUrl}
+                          alt="Custom Mockup"
+                          className="w-full h-full object-contain"
                         />
+                      ) : (
+                        <>
+                          <img
+                            src="/general/cup.png"
+                            alt="Mug"
+                            className="w-full h-full object-contain p-2"
+                          />
+                          {selectedImage && (
+                            <img
+                              src={selectedImage}
+                              className="absolute w-[40%] h-[40%] top-[38%] left-[28%] object-cover mix-blend-multiply opacity-90"
+                              alt="Custom print"
+                            />
+                          )}
+                        </>
                       )}
+
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Eye className="text-white w-4 h-4" />
+                      </div>
                     </div>
                   </div>
-                  
+
                   {/* Product Info */}
-                  <div className="flex-1 text-center sm:text-left">
-                    <h2 className="text-xl md:text-2xl font-bold mb-2">AI-Generated Mug</h2>
-                    <p className="text-white/40 text-sm mb-3">Premium ceramic • 11oz</p>
-                    <div className="flex items-center justify-center sm:justify-start gap-3">
-                      <span className="text-2xl font-bold text-[#F70353]">{formatAmount(UNIT_PRICE, currency)}</span>
-                      <span className="text-white/30 line-through text-sm">{formatAmount(39.99, currency)}</span>
+                  <div className="flex-1">
+                    <h2 className="text-base md:text-lg font-bold mb-1">AI-Generated Mug</h2>
+                    <p className="text-white/40 text-xs mb-2">Premium ceramic • 11oz</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg md:text-xl font-bold text-[#F70353]">{formatAmount(UNIT_PRICE, currency)}</span>
+                      <span className="text-white/30 line-through text-xs">{formatAmount(39.99, currency)}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Quantity Selector */}
-              <div className="p-6 md:p-8 border-t border-white/10">
-                <label className="block text-sm font-medium text-white/60 mb-3">Quantity</label>
-                <div className="flex items-center justify-between bg-black/40 rounded-2xl border border-white/10 p-2">
+              <div className="p-5 md:p-6 lg:p-7 border-b border-white/10">
+                <label className="block text-xs font-medium text-white/60 mb-2">Quantity</label>
+                <div className="flex items-center justify-between bg-black/40 rounded-xl border border-white/10 p-1">
                   <button
                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    className="w-12 h-12 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                    className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
                   >
-                    <Minus size={18} />
+                    <Minus size={16} />
                   </button>
-                  <span className="font-bold text-2xl w-16 text-center">{quantity}</span>
+                  <span className="font-bold text-xl w-12 text-center">{quantity}</span>
                   <button
                     onClick={() => setQuantity(q => q + 1)}
-                    className="w-12 h-12 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                    className="w-10 h-10 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
                   >
-                    <Plus size={18} />
+                    <Plus size={16} />
                   </button>
                 </div>
               </div>
 
               {/* Price Breakdown */}
-              <div className="p-6 md:p-8 border-t border-white/10 bg-gradient-to-r from-[#F70353]/5 to-transparent">
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <Gift size={18} className="text-[#F70353]" />
+              <div className="p-5 md:p-6 lg:p-7 border-b border-white/10 bg-gradient-to-r from-[#F70353]/5 to-transparent">
+                <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+                  <Gift size={16} className="text-[#F70353]" />
                   Order Summary
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-white/60">
                     <span>Subtotal ({quantity} item{quantity > 1 ? 's' : ''})</span>
                     <span>{formatAmount(subtotal, currency)}</span>
@@ -309,20 +241,20 @@ const Checkout = () => {
                   <div className="flex justify-between text-white/60">
                     <span>Shipping</span>
                     <span className={fulfillment === "doorstep" ? "text-white" : "text-green-400"}>
-                      {fulfillment === "doorstep" ? "$5.00" : "Free"}
+                      {fulfillment === "doorstep" ? "+$5.00" : "Free"}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center pt-3 border-t border-white/10">
-                    <span className="font-bold text-lg">Total</span>
-                    <span className="text-3xl font-black text-[#F70353]">
+                  <div className="flex justify-between items-center pt-2 border-t border-white/10 mt-2">
+                    <span className="font-bold">Total</span>
+                    <span className="text-xl font-black text-[#F70353]">
                       {formatAmount(total, currency)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Trust Badges */}
-              <div className="p-6 md:p-8 border-t border-white/10">
+              {/* Trust Badges - Perfect grid as in image */}
+              <div className="p-5 md:p-6 lg:p-7">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center gap-2 text-white/40 text-xs">
                     <ShieldCheck size={14} className="text-green-400" />
@@ -345,182 +277,186 @@ const Checkout = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN - Fulfillment & Payment */}
-          <div className="space-y-4 md:space-y-6">
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden">
-              
-              {!clientSecret ? (
-                /* Fulfillment Section */
-                <div>
-                  <div className="p-6 md:p-8 border-b border-white/10">
-                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                      <Package size={18} className="text-[#F70353]" />
-                      Delivery Method
-                    </h3>
-                    
-                    <div className="space-y-3">
-                      {/* Express Option */}
-                      <button
-                        onClick={() => handleFulfillmentChange("express")}
-                        className={cn(
-                          "w-full text-left p-5 rounded-2xl border-2 transition-all",
-                          fulfillment === "express" 
-                            ? "border-[#F70353] bg-[#F70353]/10 shadow-lg shadow-[#F70353]/20" 
-                            : "border-white/10 bg-white/5 hover:bg-white/10"
-                        )}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className={cn(
-                            "p-3 rounded-xl",
-                            fulfillment === "express" ? "bg-[#F70353] text-white" : "bg-white/10 text-white/60"
-                          )}>
-                            <Zap size={20} />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-bold text-lg">Express Printing</span>
-                              <span className={fulfillment === "express" ? "text-[#F70353]" : "text-white/40"}>Free</span>
-                            </div>
-                            <p className="text-white/40 text-sm">Ready in 15-20 minutes • In-store pickup</p>
-                          </div>
-                        </div>
-                      </button>
+          {/* RIGHT COLUMN - Fulfillment & Payment (Matches image exactly) */}
+          <div className="space-y-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden">
+              {/* Delivery Method Section */}
+              <div className="p-5 md:p-6 lg:p-7">
+                <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                  <Package size={16} className="text-[#F70353]" />
+                  Delivery Method
+                </h3>
 
-                      {/* Doorstep Option */}
-                      <button
-                        onClick={() => handleFulfillmentChange("doorstep")}
-                        className={cn(
-                          "w-full text-left p-5 rounded-2xl border-2 transition-all",
-                          fulfillment === "doorstep" 
-                            ? "border-[#F70353] bg-[#F70353]/10 shadow-lg shadow-[#F70353]/20" 
-                            : "border-white/10 bg-white/5 hover:bg-white/10"
-                        )}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className={cn(
-                            "p-3 rounded-xl",
-                            fulfillment === "doorstep" ? "bg-[#F70353] text-white" : "bg-white/10 text-white/60"
-                          )}>
-                            <Home size={20} />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-bold text-lg">Doorstep Delivery</span>
-                              <span className={fulfillment === "doorstep" ? "text-[#F70353]" : "text-white/40"}>+$5.00</span>
-                            </div>
-                            <p className="text-white/40 text-sm">2-3 business days • Tracked shipping</p>
-                          </div>
-                        </div>
-                      </button>
-                    </div>
-
-                    {/* Address Form - Animated */}
-                    <AnimatePresence>
-                      {showAddress && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="mt-4 p-5 bg-white/5 rounded-2xl border border-white/10">
-                            <div className="flex items-center gap-2 mb-4 text-white/60">
-                              <MapPin size={16} />
-                              <span className="text-sm font-medium">Delivery Address</span>
-                            </div>
-                            <div className="space-y-3">
-                              <input
-                                type="text"
-                                placeholder="Street Address"
-                                value={address.street}
-                                onChange={(e) => setAddress({...address, street: e.target.value})}
-                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 ring-[#F70353]/50 outline-none transition-all"
-                              />
-                              <div className="grid grid-cols-2 gap-3">
-                                <input
-                                  type="text"
-                                  placeholder="City"
-                                  value={address.city}
-                                  onChange={(e) => setAddress({...address, city: e.target.value})}
-                                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 ring-[#F70353]/50 outline-none"
-                                />
-                                <input
-                                  type="text"
-                                  placeholder="ZIP Code"
-                                  value={address.zip}
-                                  onChange={(e) => setAddress({...address, zip: e.target.value})}
-                                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 ring-[#F70353]/50 outline-none"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Continue Button */}
-                  <div className="p-6 md:p-8">
-                    <button
-                      onClick={handleContinue}
-                      disabled={loading}
-                      className="w-full py-5 rounded-xl font-bold text-lg bg-gradient-to-r from-[#F70353] to-[#C20241] text-white shadow-lg shadow-[#F70353]/25 hover:shadow-xl hover:shadow-[#F70353]/30 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          Processing...
-                        </>
-                      ) : (
-                        <>
-                          <CreditCard size={20} />
-                          Continue to Payment
-                        </>
-                      )}
-                    </button>
-
-                    {/* Secure Checkout Note */}
-                    <p className="text-center text-white/30 text-xs mt-4 flex items-center justify-center gap-2">
-                      <Lock size={12} />
-                      <span>Your information is secure and encrypted</span>
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                /* Payment Section */
-                <div className="p-6 md:p-8">
-                  {stripePromise && clientSecret && (
-                    <Elements
-                      stripe={stripePromise}
-                      options={{
-                        clientSecret,
-                        appearance: {
-                          theme: "night",
-                          variables: {
-                            colorPrimary: "#F70353",
-                            colorBackground: "#1a1625",
-                            colorText: "#ffffff",
-                            colorDanger: "#ef4444",
-                            fontFamily: "Outfit, system-ui, sans-serif",
-                            borderRadius: "12px",
-                            spacingUnit: "4px",
-                          },
-                        },
-                      }}
-                    >
-                      <PaymentForm
-                        amountInCents={amountInCents}
-                        currency={currency}
-                        onBack={() => setClientSecret(null)}
+                {/* Contact Information - Matches image layout */}
+                <div className="mb-5 p-4 bg-white/5 rounded-xl border border-white/10">
+                  <h4 className="text-white/60 text-xs font-medium mb-3 flex items-center gap-2">
+                    <User size={14} />
+                    Contact Details
+                  </h4>
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Full Name"
+                      value={contactInfo.name}
+                      onChange={(e) => setContactInfo({ ...contactInfo, name: e.target.value })}
+                      className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm focus:ring-2 ring-[#F70353]/50 outline-none transition-all placeholder:text-white/30"
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <input
+                        type="tel"
+                        placeholder="Phone Number"
+                        value={contactInfo.phone}
+                        onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                        className="bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm focus:ring-2 ring-[#F70353]/50 outline-none transition-all placeholder:text-white/30"
                       />
-                    </Elements>
-                  )}
+                      <input
+                        type="email"
+                        placeholder={fulfillment === "express" ? "Email (Optional)" : "Email (Required)"}
+                        value={contactInfo.email}
+                        onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
+                        className="bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm focus:ring-2 ring-[#F70353]/50 outline-none transition-all placeholder:text-white/30"
+                      />
+                    </div>
+                  </div>
                 </div>
-              )}
+
+                {/* Delivery Options - Perfect alignment with image */}
+                <div className="space-y-3">
+                  {/* Express Option */}
+                  <button
+                    onClick={() => handleFulfillmentChange("express")}
+                    className={cn(
+                      "w-full text-left p-4 rounded-xl border transition-all",
+                      fulfillment === "express"
+                        ? "border-[#F70353] bg-[#F70353]/10"
+                        : "border-white/10 bg-white/5 hover:bg-white/10"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "p-2 rounded-lg",
+                        fulfillment === "express" ? "bg-[#F70353] text-white" : "bg-white/10 text-white/60"
+                      )}>
+                        <Zap size={16} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-sm">Express Printing</span>
+                          <span className={fulfillment === "express" ? "text-[#F70353] text-sm font-medium" : "text-white/40 text-sm"}>
+                            Free
+                          </span>
+                        </div>
+                        <p className="text-white/40 text-xs mt-0.5">Ready in 15-20 minutes • In-store pickup</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Doorstep Option */}
+                  <button
+                    onClick={() => handleFulfillmentChange("doorstep")}
+                    className={cn(
+                      "w-full text-left p-4 rounded-xl border transition-all",
+                      fulfillment === "doorstep"
+                        ? "border-[#F70353] bg-[#F70353]/10"
+                        : "border-white/10 bg-white/5 hover:bg-white/10"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "p-2 rounded-lg",
+                        fulfillment === "doorstep" ? "bg-[#F70353] text-white" : "bg-white/10 text-white/60"
+                      )}>
+                        <Home size={16} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-sm">Doorstep Delivery</span>
+                          <span className={fulfillment === "doorstep" ? "text-[#F70353] text-sm font-medium" : "text-white/40 text-sm"}>
+                            +$5.00
+                          </span>
+                        </div>
+                        <p className="text-white/40 text-xs mt-0.5">2-3 business days • Tracked shipping</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Address Form - Animated */}
+                <AnimatePresence>
+                  {showAddress && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                        <div className="flex items-center gap-2 mb-3 text-white/60">
+                          <MapPin size={14} />
+                          <span className="text-xs font-medium">Delivery Address</span>
+                        </div>
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            placeholder="Street Address"
+                            value={address.street}
+                            onChange={(e) => setAddress({ ...address, street: e.target.value })}
+                            className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm focus:ring-2 ring-[#F70353]/50 outline-none transition-all placeholder:text-white/30"
+                          />
+                          <div className="grid grid-cols-2 gap-3">
+                            <input
+                              type="text"
+                              placeholder="City"
+                              value={address.city}
+                              onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                              className="bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm focus:ring-2 ring-[#F70353]/50 outline-none placeholder:text-white/30"
+                            />
+                            <input
+                              type="text"
+                              placeholder="ZIP Code"
+                              value={address.zip}
+                              onChange={(e) => setAddress({ ...address, zip: e.target.value })}
+                              className="bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm focus:ring-2 ring-[#F70353]/50 outline-none placeholder:text-white/30"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Pay Button Section */}
+              <div className="p-5 md:p-6 lg:p-7 border-t border-white/10">
+                <button
+                  onClick={handlePay}
+                  disabled={loading}
+                  className="w-full py-4 rounded-xl font-semibold text-base bg-gradient-to-r from-[#F70353] to-[#C20241] text-white shadow-lg shadow-[#F70353]/25 hover:shadow-xl hover:shadow-[#F70353]/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={16} />
+                      Pay {formatAmount(total, currency)}
+                    </>
+                  )}
+                </button>
+
+                {/* Secure Checkout Note - Exactly as in image */}
+                <p className="text-center text-white/30 text-xs mt-3 flex items-center justify-center gap-1.5">
+                  <Lock size={10} />
+                  <span>Your information is secure and encrypted</span>
+                </p>
+              </div>
             </div>
 
-            {/* Help Card */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
+            {/* Help Card - Matches image */}
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
               <p className="text-white/40 text-xs text-center">
                 Need help? Contact our support team 24/7
               </p>
@@ -528,6 +464,54 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+
+      {/* Design Preview Modal */}
+      <AnimatePresence>
+        {showDesignPreview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={() => setShowDesignPreview(false)}
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative bg-[#1a1a2e] border border-white/10 rounded-2xl p-4 max-w-md w-full max-h-[90vh] flex flex-col"
+            >
+              <button
+                onClick={() => setShowDesignPreview(false)}
+                className="absolute top-3 right-3 p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-colors z-10"
+              >
+                <X size={16} />
+              </button>
+
+              <div className="flex-1 flex items-center justify-center p-6 bg-[#080319]/50 rounded-xl overflow-hidden relative min-h-[300px]">
+                <img
+                  src="/general/cup.png"
+                  alt="Mug"
+                  className="w-full h-full object-contain max-h-[300px]"
+                />
+                {selectedImage && (
+                  <img
+                    src={selectedImage}
+                    className="absolute w-[40%] h-[40%] top-[38%] left-[28%] object-cover mix-blend-multiply opacity-90"
+                    alt="Custom print"
+                  />
+                )}
+              </div>
+
+              <div className="p-4 text-center">
+                <h3 className="text-base font-bold mb-1">Your Custom Masterpiece</h3>
+                <p className="text-white/40 text-xs">Preview of how your design will look on the mug</p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

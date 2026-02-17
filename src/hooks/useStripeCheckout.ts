@@ -13,11 +13,7 @@ interface StripeConfigResponse {
   data?: StripeConfig;
 }
 
-interface CreatePaymentIntentResponse {
-  success: boolean;
-  message: string;
-  data?: { clientSecret: string };
-}
+
 
 export function useStripeCheckout() {
   const [config, setConfig] = useState<StripeConfig | null>(null);
@@ -28,7 +24,7 @@ export function useStripeCheckout() {
     setConfigLoading(true);
     setConfigError(null);
     try {
-      const res = await axios.get<StripeConfigResponse>("/stripe-config");
+      const res = await axios.get<StripeConfigResponse>("/payment/config");
       if (res.data.success && res.data.data) {
         setConfig(res.data.data);
         return res.data.data;
@@ -44,25 +40,37 @@ export function useStripeCheckout() {
     }
   }, []);
 
-  const createPaymentIntent = useCallback(
-    async (amountInCents: number, metadata?: Record<string, string>) => {
-      const res = await axios.post<CreatePaymentIntentResponse>(
-        "/payment/create-payment-intent",
-        { amountInCents, metadata }
-      );
-      if (res.data.success && res.data.data?.clientSecret) {
-        return res.data.data.clientSecret;
+  const createCheckoutSession = useCallback(
+    async (data: {
+      items: any[],
+      customer: any,
+      fulfillment: any
+    }) => {
+      const res = await axios.post<{
+        success: boolean;
+        message: string;
+        data?: { url: string; sessionId: string };
+      }>("/payment/create-session", data);
+
+      if (res.data.success && res.data.data?.url) {
+        return res.data.data.url;
       }
-      throw new Error(res.data.message || "Failed to create payment");
+      throw new Error(res.data.message || "Failed to create checkout session");
     },
     []
   );
+
+  const verifySession = useCallback(async (sessionId: string) => {
+    const res = await axios.post("/payment/verify-session", { sessionId });
+    return res.data;
+  }, []);
 
   return {
     config,
     configLoading,
     configError,
     fetchStripeConfig,
-    createPaymentIntent,
+    createCheckoutSession,
+    verifySession,
   };
 }

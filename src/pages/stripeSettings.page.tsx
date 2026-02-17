@@ -1,74 +1,44 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { Box } from "@/components/ui/box";
-import { Flex } from "@/components/ui/flex";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
 import {
-  useStripeSettings,
-  isMaskedSecret,
-  type StripeSettings,
-  type UpdateStripeSettingsPayload,
-} from "@/hooks/useStripeSettings";
-import {
-  CreditCard,
   ArrowLeft,
-  CheckCircle,
-  XCircle,
-  Loader2,
+  DollarSign,
+  Key,
+  Globe,
+  Settings,
+  Shield,
+  CreditCard,
+  RefreshCw,
   Eye,
-  EyeOff,
+  EyeOff
 } from "lucide-react";
-
-const CURRENCY_OPTIONS = [
-  { value: "usd", label: "USD - US Dollar" },
-  { value: "eur", label: "EUR - Euro" },
-  { value: "gbp", label: "GBP - British Pound" },
-  { value: "cad", label: "CAD - Canadian Dollar" },
-  { value: "aud", label: "AUD - Australian Dollar" },
-] as const;
-
-function getInitialFormData(settings: StripeSettings | null) {
-  if (!settings) {
-    return {
-      publishableKey: "",
-      secretKey: "",
-      webhookSecret: "",
-      isActive: false,
-      currency: "usd",
-    };
-  }
-  return {
-    publishableKey: settings.publishableKey || "",
-    secretKey: isMaskedSecret(settings.secretKey) ? "" : settings.secretKey,
-    webhookSecret: settings.webhookSecret || "",
-    isActive: settings.isActive ?? false,
-    currency: settings.currency || "usd",
-  };
-}
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useStripeSettings } from "@/hooks/useStripeSettings";
+import CustomButton from "@/components/common/customButton";
 
 const StripeSettingsPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAdminAuth();
   const {
     settings,
-    fetchLoading,
-    updateLoading,
-    testLoading,
+    loading,
+    saving,
     error,
+    success,
     fetchSettings,
     updateSettings,
-    testConnection,
-    clearError,
   } = useStripeSettings();
 
-  const [formData, setFormData] = useState(getInitialFormData(null));
+  const [localSettings, setLocalSettings] = useState({
+    publishableKey: "",
+    secretKey: "",
+    webhookSecret: "",
+    currency: "EUR",
+    isActive: true,
+  });
+
   const [showSecretKey, setShowSecretKey] = useState(false);
   const [showWebhookSecret, setShowWebhookSecret] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [testResult, setTestResult] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -76,291 +46,212 @@ const StripeSettingsPage = () => {
       return;
     }
     fetchSettings();
-  }, [isAuthenticated, navigate, fetchSettings]);
+  }, [navigate, isAuthenticated, fetchSettings]);
 
   useEffect(() => {
     if (settings) {
-      setFormData(getInitialFormData(settings));
+      setLocalSettings({
+        publishableKey: settings.publishableKey || "",
+        secretKey: settings.secretKey || "",
+        webhookSecret: settings.webhookSecret || "",
+        currency: settings.currency || "EUR",
+        isActive: settings.isActive ?? true,
+      });
     }
   }, [settings]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSuccessMessage("");
-    setTestResult(null);
-    const payload: UpdateStripeSettingsPayload = {
-      publishableKey: formData.publishableKey.trim(),
-      webhookSecret: formData.webhookSecret.trim(),
-      isActive: formData.isActive,
-      currency: formData.currency,
-    };
-    if (formData.secretKey && !isMaskedSecret(formData.secretKey)) {
-      payload.secretKey = formData.secretKey.trim();
-    }
-    try {
-      await updateSettings(payload);
-      setSuccessMessage("Stripe settings updated successfully.");
-      setTimeout(() => setSuccessMessage(""), 5000);
-    } catch {
-      // error set in hook
-    }
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setLocalSettings((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleTestConnection = async () => {
-    setTestResult(null);
-    const result = await testConnection();
-    setTestResult(result);
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await updateSettings(localSettings);
   };
 
   if (!isAuthenticated) return null;
 
-  if (fetchLoading && !settings) {
+  if (loading) {
     return (
-      <Box className="min-h-screen w-full bg-[#080319] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-white animate-spin" />
-      </Box>
+      <div className="min-h-screen w-full bg-[#080319] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <RefreshCw className="w-8 h-8 text-[#4A0E64] animate-spin" />
+          <p className="text-white text-lg">Loading Stripe settings...</p>
+        </div>
+      </div>
     );
   }
 
-  const hasExistingSecret = settings && isMaskedSecret(settings.secretKey);
-  const secretPlaceholder = hasExistingSecret
-    ? "Leave blank to keep current secret key"
-    : "sk_test_...";
-
   return (
-    <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/selectmethod.png')] bg-cover bg-no-repeat p-4 md:p-8">
-      <Box className="max-w-4xl mx-auto">
-        <Flex className="items-center justify-between mb-8">
-          <Flex className="items-center gap-4">
-            <Box
-              onClick={() => navigate("/admin/dashboard")}
-              className="p-2 rounded-lg bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] cursor-pointer transition-all"
-            >
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </Box>
-            <Box>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                Stripe Payment Settings
-              </h1>
-              <p className="text-white/60">
-                Configure your Stripe payment gateway
-              </p>
-            </Box>
-          </Flex>
-        </Flex>
-
-        {successMessage && (
-          <Box className="mb-6 p-4 rounded-lg bg-green-500/20 border border-green-500/50">
-            <Flex className="items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
-              <p className="text-green-400">{successMessage}</p>
-            </Flex>
-          </Box>
-        )}
-
-        {error && (
-          <Box className="mb-6 p-4 rounded-lg bg-red-500/20 border border-red-500/50">
-            <Flex className="items-center justify-between gap-2">
-              <Flex className="items-center gap-2">
-                <XCircle className="w-5 h-5 text-red-400 shrink-0" />
-                <p className="text-red-400">{error}</p>
-              </Flex>
-              <button
-                type="button"
-                onClick={clearError}
-                className="text-red-300 hover:text-red-200 text-sm underline"
-              >
-                Dismiss
-              </button>
-            </Flex>
-          </Box>
-        )}
-
-        {testResult && (
-          <Box
-            className={`mb-6 p-4 rounded-lg border ${
-              testResult.success
-                ? "bg-green-500/20 border-green-500/50"
-                : "bg-red-500/20 border-red-500/50"
-            }`}
+    <div className="min-h-screen w-full bg-[#080319] bg-[url('/general/selectmethod.png')] bg-cover bg-center bg-no-repeat bg-fixed p-4 md:p-8 overflow-y-auto">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={() => navigate("/admin/dashboard")}
+            className="h-[40px] w-[40px] flex items-center justify-center rounded-lg bg-[#4A0E64] border border-white/20 hover:bg-[#5A1E74] cursor-pointer transition-all"
           >
-            <Flex className="items-center gap-2">
-              {testResult.success ? (
-                <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
-              ) : (
-                <XCircle className="w-5 h-5 text-red-400 shrink-0" />
-              )}
-              <p
-                className={
-                  testResult.success ? "text-green-400" : "text-red-400"
-                }
-              >
-                {testResult.message}
-              </p>
-            </Flex>
-          </Box>
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </button>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-white mb-2">Stripe Configuration</h1>
+            <p className="text-white/60">Configure your payment gateway settings</p>
+          </div>
+        </div>
+
+        {/* Status messages */}
+        {success && (
+          <div className="mb-6 p-4 rounded-lg bg-green-500/20 border border-green-500/50 flex items-center gap-3">
+            <Shield className="w-5 h-5 text-green-400" />
+            <p className="text-green-400 text-sm">{success}</p>
+          </div>
+        )}
+        {error && (
+          <div className="mb-6 p-4 rounded-lg bg-red-500/20 border border-red-500/50 flex items-center gap-3">
+            <Shield className="w-5 h-5 text-red-400" />
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
         )}
 
-        <Box className="bg-[#16121E] border border-white/10 rounded-2xl p-6 md:p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <Box>
-              <label className="text-white/80 text-sm font-medium mb-2 block">
-                Publishable Key <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.publishableKey}
-                onChange={(e) =>
-                  setFormData({ ...formData, publishableKey: e.target.value })
-                }
-                placeholder="pk_test_..."
-                required
-                className="w-full px-4 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#4A0E64] transition-all"
-              />
-              <p className="text-white/50 text-xs mt-1">
-                Your Stripe publishable key (starts with pk_)
-              </p>
-            </Box>
+        <form onSubmit={handleSave}>
+          <div className="space-y-6">
+            {/* API Keys */}
+            <div className="bg-[#16121E] border border-white/10 rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <Key className="w-5 h-5 text-[#4A0E64]" />
+                API Credentials
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-white/80 text-sm mb-2 block font-medium">Publishable Key</label>
+                  <input
+                    type="text"
+                    value={localSettings.publishableKey}
+                    onChange={(e) => handleInputChange("publishableKey", e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#4A0E64] transition-all"
+                    placeholder="pk_test_..."
+                  />
+                  <p className="text-white/40 text-xs mt-1">Found in your Stripe Dashboard under Developers   API keys</p>
+                </div>
+                <div>
+                  <label className="text-white/80 text-sm mb-2 block font-medium">Secret Key</label>
+                  <div className="relative">
+                    <input
+                      type={showSecretKey ? "text" : "password"}
+                      value={localSettings.secretKey}
+                      onChange={(e) => handleInputChange("secretKey", e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#4A0E64] transition-all"
+                      placeholder="sk_test_..."
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSecretKey(!showSecretKey)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                    >
+                      {showSecretKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            <Box>
-              <label className="text-white/80 text-sm font-medium mb-2 block">
-                Secret Key {hasExistingSecret ? "(optional)" : <span className="text-red-400">*</span>}
-              </label>
-              <Box className="relative">
-                <input
-                  type={showSecretKey ? "text" : "password"}
-                  value={formData.secretKey}
-                  onChange={(e) =>
-                    setFormData({ ...formData, secretKey: e.target.value })
-                  }
-                  placeholder={secretPlaceholder}
-                  required={!hasExistingSecret}
-                  className="w-full px-4 py-3 pr-12 rounded-lg bg-[#211C2C] border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#4A0E64] transition-all"
-                />
-                <Box
-                  onClick={() => setShowSecretKey(!showSecretKey)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-white/40 hover:text-white/60"
+            {/* Webhook */}
+            <div className="bg-[#16121E] border border-white/10 rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-[#4A0E64]" />
+                Webhook Configuration
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-white/80 text-sm mb-2 block font-medium">Webhook Signing Secret</label>
+                  <div className="relative">
+                    <input
+                      type={showWebhookSecret ? "text" : "password"}
+                      value={localSettings.webhookSecret}
+                      onChange={(e) => handleInputChange("webhookSecret", e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#4A0E64] transition-all"
+                      placeholder="whsec_..."
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowWebhookSecret(!showWebhookSecret)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                    >
+                      {showWebhookSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <p className="text-white/40 text-xs mt-1">Needed for receiving payment success notifications</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Site & Currency */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-[#16121E] border border-white/10 rounded-2xl p-6">
+                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-[#4A0E64]" />
+                  Currency
+                </h2>
+                <div className="relative">
+                  <select
+                    value={localSettings.currency}
+                    onChange={(e) => handleInputChange("currency", e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white appearance-none focus:outline-none focus:border-[#4A0E64] cursor-pointer"
+                  >
+                    <option value="EUR">Euro (€)</option>
+                    <option value="USD">US Dollar ($)</option>
+                    <option value="GBP">British Pound (£)</option>
+                    <option value="CAD">Canadian Dollar ($)</option>
+                    <option value="AUD">Australian Dollar ($)</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
+                    <RefreshCw className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#16121E] border border-white/10 rounded-2xl p-6">
+                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-[#4A0E64]" />
+                  Status
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => handleInputChange("isActive", !localSettings.isActive)}
+                  className={`flex items-center gap-3 px-6 py-3 rounded-lg border transition-all w-full justify-center font-bold ${localSettings.isActive
+                    ? "bg-green-500/10 border-green-500/50 text-green-500"
+                    : "bg-red-500/10 border-red-500/50 text-red-500"
+                    }`}
                 >
-                  {showSecretKey ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </Box>
-              </Box>
-              <p className="text-white/50 text-xs mt-1">
-                {hasExistingSecret
-                  ? "Leave blank to keep your current secret key."
-                  : "Your Stripe secret key (starts with sk_) — keep this secure."}
-              </p>
-            </Box>
+                  <RefreshCw className={`w-4 h-4 ${localSettings.isActive ? "" : "rotate-45"}`} />
+                  {localSettings.isActive ? "Stripe Payment Enabled" : "Stripe Payment Disabled"}
+                </button>
+              </div>
+            </div>
 
-            <Box>
-              <label className="text-white/80 text-sm font-medium mb-2 block">
-                Webhook Secret (optional)
-              </label>
-              <Box className="relative">
-                <input
-                  type={showWebhookSecret ? "text" : "password"}
-                  value={formData.webhookSecret}
-                  onChange={(e) =>
-                    setFormData({ ...formData, webhookSecret: e.target.value })
-                  }
-                  placeholder="whsec_..."
-                  className="w-full px-4 py-3 pr-12 rounded-lg bg-[#211C2C] border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#4A0E64] transition-all"
-                />
-                <Box
-                  onClick={() => setShowWebhookSecret(!showWebhookSecret)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-white/40 hover:text-white/60"
-                >
-                  {showWebhookSecret ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </Box>
-              </Box>
-              <p className="text-white/50 text-xs mt-1">
-                Webhook signing secret for verifying Stripe webhooks
-              </p>
-            </Box>
-
-            <Box>
-              <label className="text-white/80 text-sm font-medium mb-2 block">
-                Currency
-              </label>
-              <select
-                value={formData.currency}
-                onChange={(e) =>
-                  setFormData({ ...formData, currency: e.target.value })
-                }
-                className="w-full px-4 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white focus:outline-none focus:border-[#4A0E64] transition-all"
-              >
-                {CURRENCY_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </Box>
-
-            <Flex className="items-center justify-between p-4 rounded-lg bg-[#211C2C] border border-white/10">
-              <Box>
-                <label className="text-white font-medium">
-                  Enable Stripe Payments
-                </label>
-                <p className="text-white/50 text-sm">
-                  Activate Stripe payment processing
-                </p>
-              </Box>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={formData.isActive}
-                onClick={() =>
-                  setFormData({ ...formData, isActive: !formData.isActive })
-                }
-                className={`relative w-14 h-8 rounded-full cursor-pointer transition-colors ${
-                  formData.isActive ? "bg-[#4A0E64]" : "bg-white/20"
-                }`}
-              >
-                <span
-                  className={`absolute top-1 w-6 h-6 rounded-full bg-white transition-all ${
-                    formData.isActive ? "left-7" : "left-1"
-                  }`}
-                />
-              </button>
-            </Flex>
-
-            <Flex className="items-center gap-4 pt-4">
-              <button
+            {/* Actions */}
+            <div className="flex gap-4">
+              <CustomButton
+                title={saving ? "Saving Changes..." : "Save Settings"}
+                wrapperClassName="flex-1 h-[56px]"
+                className="w-full text-lg"
                 type="submit"
-                disabled={updateLoading}
-                className="flex-1 h-12 px-6 rounded-lg bg-[#4A0E64] border border-white/20 hover:bg-[#5A1E74] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all text-white font-semibold flex items-center justify-center gap-2"
-              >
-                {updateLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : null}
-                {updateLoading ? "Saving..." : "Save Settings"}
-              </button>
+                disabled={saving || loading}
+                icon={<CreditCard size={20} />}
+              />
               <button
                 type="button"
-                onClick={handleTestConnection}
-                disabled={testLoading}
-                className="h-12 px-6 flex items-center justify-center gap-2 rounded-lg border border-white/20 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-[#1B5E20] hover:bg-[#2E7D32]"
+                onClick={() => fetchSettings()}
+                className="px-6 py-2 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all font-semibold"
+                title="Discard Changes"
               >
-                {testLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <CreditCard className="w-5 h-5" />
-                )}
-                Test Connection
+                Discard
               </button>
-            </Flex>
-          </form>
-        </Box>
-      </Box>
-    </Box>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 };
 

@@ -1,8 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { Box } from "@/components/ui/box";
-import { Stack } from "@/components/ui/stack";
-import { Flex } from "@/components/ui/flex";
 import { ArrowLeft, Search, Filter, Eye, Download } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAdminOrders } from "@/hooks/useAdminOrders";
@@ -20,16 +17,20 @@ const AdminOrdersPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  const debouncedFetch = useCallback(() => {
+    fetchOrders({ status: statusFilter, search: searchTerm || undefined });
+  }, [statusFilter, searchTerm, fetchOrders]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
       return;
     }
     const debounceTimer = setTimeout(() => {
-      fetchOrders({ status: statusFilter, search: searchTerm || undefined });
+      debouncedFetch();
     }, searchTerm ? 500 : 0);
     return () => clearTimeout(debounceTimer);
-  }, [navigate, isAuthenticated, statusFilter, searchTerm, fetchOrders]);
+  }, [navigate, isAuthenticated, debouncedFetch, searchTerm]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -47,53 +48,57 @@ const AdminOrdersPage = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-EU", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    try {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return dateString;
+    }
   };
 
   if (!isAuthenticated) return null;
 
   if (loading) {
     return (
-      <Box className="min-h-screen w-full bg-[#080319] flex items-center justify-center">
+      <div className="min-h-screen w-full bg-[#080319] flex items-center justify-center">
         <p className="text-white text-xl">Loading...</p>
-      </Box>
+      </div>
     );
   }
 
   return (
-    <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/selectmethod.png')] bg-cover bg-center bg-no-repeat p-4 md:p-8">
-      <Box className="max-w-7xl mx-auto">
+    <div className="min-h-screen w-full bg-[#080319] bg-[url('/general/selectmethod.png')] bg-cover bg-center bg-no-repeat bg-fixed p-4 md:p-8 overflow-y-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <Flex className="items-center gap-4 mb-8">
-          <Box
+        <div className="flex items-center gap-4 mb-8">
+          <button
             onClick={() => navigate("/admin/dashboard")}
             className="h-[40px] w-[40px] flex items-center justify-center rounded-lg bg-[#4A0E64] border border-white/20 hover:bg-[#5A1E74] cursor-pointer transition-all"
           >
             <ArrowLeft className="w-5 h-5 text-white" />
-          </Box>
-          <Box className="flex-1">
+          </button>
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-white mb-2">Orders Management</h1>
             <p className="text-white/60">View and manage all customer orders (amounts in €)</p>
-          </Box>
-        </Flex>
+          </div>
+        </div>
 
         {/* Error */}
         {error && (
-          <Box className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
             <p className="text-red-300 text-sm">{error}</p>
-          </Box>
+          </div>
         )}
 
         {/* Filters */}
-        <Box className="bg-[#16121E] border border-white/10 rounded-2xl p-6 mb-6">
-          <Flex className="gap-4 flex-col md:flex-row">
-            <Box className="flex-1 relative">
+        <div className="bg-[#16121E] border border-white/10 rounded-2xl p-6 mb-6">
+          <div className="flex gap-4 flex-col md:flex-row">
+            <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
               <input
                 type="text"
@@ -102,13 +107,13 @@ const AdminOrdersPage = () => {
                 placeholder="Search by order number, customer name, or email..."
                 className="w-full pl-10 pr-4 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-[#4A0E64] transition-all"
               />
-            </Box>
-            <Box className="relative">
+            </div>
+            <div className="relative">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-10 pr-8 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white focus:outline-none focus:border-[#4A0E64] transition-all appearance-none cursor-pointer"
+                className="pl-10 pr-8 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white focus:outline-none focus:border-[#4A0E64] transition-all appearance-none cursor-pointer min-w-[150px]"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -116,18 +121,18 @@ const AdminOrdersPage = () => {
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>
-            </Box>
-          </Flex>
-        </Box>
+            </div>
+          </div>
+        </div>
 
         {/* Orders Table */}
-        <Box className="bg-[#16121E] border border-white/10 rounded-2xl overflow-hidden">
+        <div className="bg-[#16121E] border border-white/10 rounded-2xl overflow-hidden">
           {orders.length === 0 ? (
-            <Box className="p-12 text-center">
+            <div className="p-12 text-center">
               <p className="text-white/60 text-lg">No orders found</p>
-            </Box>
+            </div>
           ) : (
-            <Box className="overflow-x-auto">
+            <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/10">
@@ -135,6 +140,7 @@ const AdminOrdersPage = () => {
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Customer</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Items</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Amount (€)</th>
+                    <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Fulfillment</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Status</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Date</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Actions</th>
@@ -144,20 +150,26 @@ const AdminOrdersPage = () => {
                   {orders.map((order) => (
                     <tr
                       key={order._id}
-                      className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                      onClick={() => navigate(`/admin/orders/${order.orderNumber}`)}
+                      className="border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors"
                     >
                       <td className="px-6 py-4 text-white font-medium">#{order.orderNumber}</td>
                       <td className="px-6 py-4">
-                        <Stack className="gap-1">
-                          <p className="text-white font-medium">{order.customerName}</p>
-                          <p className="text-white/60 text-sm">{order.customerEmail}</p>
-                        </Stack>
+                        <div className="flex flex-col">
+                          <span className="text-white font-medium">{order.customer.name}</span>
+                          <span className="text-white/40 text-xs">{order.customer.email}</span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-white/80">
-                        {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+                        {order.items?.length || 0} item{(order.items?.length !== 1) ? "s" : ""}
                       </td>
-                      <td className="px-6 py-4 text-white font-semibold">
-                        {formatCurrency(order.totalAmount)}
+                      <td className="px-6 py-4 text-white font-mono font-semibold">
+                        {formatCurrency(order.payment.amount)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-bold border ${order.fulfillment.method === 'express' ? 'bg-purple-500/20 text-purple-400 border-purple-500/50' : 'bg-orange-500/20 text-orange-400 border-orange-500/50'}`}>
+                          {order.fulfillment.method}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <span
@@ -168,47 +180,48 @@ const AdminOrdersPage = () => {
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-white/60 text-sm">
-                        {formatDate(order.createdAt)}
-                      </td>
+                      <td className="px-6 py-4 text-white/60 text-sm">{formatDate(order.createdAt)}</td>
                       <td className="px-6 py-4">
-                        <Flex className="gap-2">
-                          <Box
-                            onClick={() => navigate(`/admin/orders/${order._id}`)}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/admin/orders/${order.orderNumber}`);
+                            }}
                             className="h-8 w-8 flex items-center justify-center rounded-lg bg-[#4A0E64] border border-white/20 hover:bg-[#5A1E74] cursor-pointer transition-all"
                             title="View Details"
                           >
                             <Eye className="w-4 h-4 text-white" />
-                          </Box>
-                        </Flex>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </Box>
+            </div>
           )}
-        </Box>
+        </div>
 
         {/* Summary */}
         {orders.length > 0 && (
-          <Box className="mt-6 bg-[#16121E] border border-white/10 rounded-2xl p-6">
-            <Flex className="items-center justify-between">
+          <div className="mt-6 bg-[#16121E] border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center justify-between">
               <p className="text-white/60">
                 Showing <span className="text-white font-semibold">{orders.length}</span> order
                 {orders.length !== 1 ? "s" : ""}
               </p>
-              <Box className="flex items-center gap-2 text-white/60">
+              <div className="flex items-center gap-2 text-white/60">
                 <Download className="w-4 h-4" />
                 <span className="text-sm cursor-pointer hover:text-white transition-colors">
                   Export CSV
                 </span>
-              </Box>
-            </Flex>
-          </Box>
+              </div>
+            </div>
+          </div>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

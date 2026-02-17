@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
@@ -10,16 +10,20 @@ interface ThreeMugViewerProps {
   rotationAngle?: number;
 }
 
+export interface ThreeMugViewerRef {
+  capture: () => string | null;
+}
+
 const MIN_DISTANCE = 4;
 const MAX_DISTANCE = 15;
 
-const ThreeMugViewer = ({
+const ThreeMugViewer = forwardRef<ThreeMugViewerRef, ThreeMugViewerProps>(({
   imageUrl,
   color,
   isApplied,
   zoomScale = 100,
   rotationAngle = 0,
-}: ThreeMugViewerProps) => {
+}, ref) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -30,6 +34,16 @@ const ThreeMugViewer = ({
   const ceramicMatRef = useRef<THREE.MeshPhysicalMaterial | null>(null);
   const printMatRef = useRef<THREE.MeshPhysicalMaterial | null>(null);
   const animationIdRef = useRef<number>(0);
+
+  useImperativeHandle(ref, () => ({
+    capture: () => {
+      if (rendererRef.current && sceneRef.current && cameraRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+        return rendererRef.current.domElement.toDataURL("image/png");
+      }
+      return null;
+    }
+  }));
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -55,10 +69,11 @@ const ThreeMugViewer = ({
     cameraRef.current = camera;
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
       alpha: true,
-      powerPreference: "high-performance"
+      powerPreference: "high-performance",
+      preserveDrawingBuffer: true // Required for canvas capture
     });
     renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -100,7 +115,7 @@ const ThreeMugViewer = ({
       clearcoatRoughness: 0.05,
     });
     ceramicMatRef.current = ceramicMat;
-    
+
     const printMat = new THREE.MeshPhysicalMaterial({
       roughness: 0.2,
       clearcoat: 0.5,
@@ -123,15 +138,15 @@ const ThreeMugViewer = ({
     points.push(new THREE.Vector2(0.9, 2.5));
     points.push(new THREE.Vector2(0.9, 0.15));
     points.push(new THREE.Vector2(0, 0.15));
-    
+
     const body = new THREE.Mesh(new THREE.LatheGeometry(points, 128), ceramicMat);
     body.castShadow = true;
     body.receiveShadow = true;
     mugGroup.add(body);
 
     // 2. IMAGE WRAP
-    const gap = 0.6; 
-    const wrapGeom = new THREE.CylinderGeometry(1.005, 1.005, 2.1, 128, 1, true, gap/2, Math.PI * 2 - gap);
+    const gap = 0.6;
+    const wrapGeom = new THREE.CylinderGeometry(1.005, 1.005, 2.1, 128, 1, true, gap / 2, Math.PI * 2 - gap);
     const wrapMesh = new THREE.Mesh(wrapGeom, printMat);
     wrapMesh.position.y = 1.35;
     wrapMesh.rotation.y = Math.PI / 2;
@@ -218,7 +233,7 @@ const ThreeMugViewer = ({
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.ClampToEdgeWrapping;
         texture.anisotropy = rendererRef.current?.capabilities.getMaxAnisotropy() || 1;
-        
+
         printMatRef.current!.map = texture;
         printMatRef.current!.needsUpdate = true;
         wrapMeshRef.current!.visible = isApplied;
@@ -252,6 +267,6 @@ const ThreeMugViewer = ({
       className="w-full h-[500px] sm:h-[550px] md:h-[600px] lg:h-[650px] xl:h-[700px] 2xl:h-[750px] rounded-2xl xl:rounded-3xl 2xl:rounded-[32px] overflow-hidden bg-transparent"
     />
   );
-};
+});
 
 export default ThreeMugViewer;
