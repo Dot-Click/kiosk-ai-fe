@@ -33,7 +33,7 @@ const StripeSettingsPage = () => {
     publishableKey: "",
     secretKey: "",
     webhookSecret: "",
-    currency: "EUR",
+    currency: "USD",
     isActive: true,
   });
 
@@ -54,7 +54,7 @@ const StripeSettingsPage = () => {
         publishableKey: settings.publishableKey || "",
         secretKey: settings.secretKey || "",
         webhookSecret: settings.webhookSecret || "",
-        currency: settings.currency || "EUR",
+        currency: settings.currency || "USD",
         isActive: settings.isActive ?? true,
       });
     }

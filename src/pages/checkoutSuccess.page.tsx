@@ -225,25 +225,43 @@ export default function CheckoutSuccessPage() {
 
   // FIXED LOGIC: Correcting the Price vs Total calculation
   const totals = useMemo(() => {
-    if (!order) return { subtotal: 0, shipping: 0, total: 0 };
+    if (!order) return { subtotal: 0, shipping: 0, total: 0, products: [], deliveryItems: [] };
 
-    // Most systems return the price as the 'line total'. 
-    // We sum up the item prices directly.
-    const subtotal = order.items.reduce((acc: number, item: any) => acc + item.price, 0);
+    // Separate products from delivery items
+    const products = order.items.filter((item: any) =>
+      !item.productName.toLowerCase().includes("delivery") &&
+      !item.productName.toLowerCase().includes("shipping")
+    );
+
+    const deliveryItems = order.items.filter((item: any) =>
+      item.productName.toLowerCase().includes("delivery") ||
+      item.productName.toLowerCase().includes("shipping")
+    );
+
+    // Calculate Subtotal (only products)
+    const subtotal = products.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
+
+    // Calculate Shipping (all delivery-related items)
+    const shipping = deliveryItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
+
+    // Total from payment amount (source of truth)
     const total = order.payment.amount;
-    const shipping = total - subtotal;
 
-    return { subtotal, shipping, total };
+    return { subtotal, shipping, total, products, deliveryItems };
   }, [order]);
 
+  const isVerifying = useRef(false);
+
   useEffect(() => {
-    if (!sessionId) {
-      navigate("/");
+    if (!sessionId || order || isVerifying.current) {
+      if (!sessionId) navigate("/");
       return;
     }
 
     const verify = async () => {
+      isVerifying.current = true;
       try {
+        console.log("Verifying session:", sessionId);
         const res = await verifySession(sessionId);
         if (res.success) {
           setOrder(res.data);
@@ -258,7 +276,7 @@ export default function CheckoutSuccessPage() {
       }
     };
     verify();
-  }, [sessionId, verifySession, navigate, handlePrint]);
+  }, [sessionId, verifySession, navigate, handlePrint, order]);
 
   if (loading) return (
     <div className="min-h-screen bg-[#080319] flex items-center justify-center text-white">
@@ -305,78 +323,76 @@ export default function CheckoutSuccessPage() {
           {/* Info */}
           <div className="space-y-1 mb-6">
             <div className="flex justify-between">
-              <span className="font-bold">Order ID:</span>
-              <span>{order?.orderNumber}</span>
+              <span className="font-bold uppercase text-[11px]">Order ID:</span>
+              <span className="font-bold">{order?.orderNumber}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-bold">Date:</span>
+              <span className="font-bold uppercase text-[11px]">Date:</span>
               <span>{new Date(order?.createdAt).toLocaleDateString()} {new Date(order?.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
           </div>
 
           {/* Customer */}
-          <div className="mb-8 bg-gray-50 p-4 rounded-md">
-            <p className="font-bold text-[10px] text-gray-400 uppercase mb-1">Customer Details</p>
-            <p className="font-bold text-base">{order?.customer.name}</p>
-            <p className="text-gray-600">{order?.customer.email}</p>
+          <div className="mb-8 border border-gray-100 p-4 rounded-md">
+            <p className="font-bold text-[10px] text-gray-400 uppercase mb-1">Customer</p>
+            <p className="font-bold text-base uppercase leading-none">{order?.customer.name}</p>
+            <p className="text-gray-500 text-xs mt-1">{order?.customer.email}</p>
           </div>
 
           {/* Table Header */}
           <div className="border-b-2 border-black pb-2 mb-4 flex justify-between font-bold uppercase text-[11px]">
-            <span>Description</span>
+            <span>Item Description</span>
             <span>Total</span>
           </div>
 
-          {/* Items - FIXED CALCULATION HERE */}
+          {/* Items - Products Only */}
           <div className="space-y-6 mb-8">
-            {order?.items.map((item: any, index: number) => {
-              // Calculate the actual unit price (e.g., 299.90 / 10 = 29.99)
-              const unitPrice = item.price / item.quantity;
+            {totals.products.map((item: any, index: number) => {
+              const unitPrice = item.price;
+              const lineTotal = item.price * item.quantity;
 
               return (
                 <div key={index} className="flex justify-between items-start">
                   <div className="max-w-[75%]">
                     <p className="font-bold leading-tight uppercase text-base">{item.productName}</p>
-                    <p className="text-gray-500 mt-1">
+                    <p className="text-gray-400 mt-1 text-xs">
                       {item.quantity} x ${unitPrice.toFixed(2)}
                     </p>
                   </div>
-                  <span className="font-bold text-base">${item.price.toFixed(2)}</span>
+                  <span className="font-bold text-base">${lineTotal.toFixed(2)}</span>
                 </div>
               );
             })}
           </div>
 
-          {/* Totals */}
+          {/* Totals Section */}
           <div className="border-t-2 border-dashed border-gray-200 pt-4 space-y-2">
-            <div className="flex justify-between text-gray-600">
+            <div className="flex justify-between text-gray-500 uppercase text-[11px] font-bold">
               <span>Subtotal</span>
-              <span>${totals.subtotal.toFixed(2)}</span>
+              <span className="text-black text-sm">${totals.subtotal.toFixed(2)}</span>
             </div>
 
-            {totals.shipping > 0 && (
-              <div className="flex justify-between text-gray-600">
-                <span>Shipping</span>
-                <span>${totals.shipping.toFixed(2)}</span>
-              </div>
-            )}
+            <div className="flex justify-between text-gray-500 uppercase text-[11px] font-bold">
+              <span>Shipping</span>
+              <span className="text-black text-sm">${totals.shipping.toFixed(2)}</span>
+            </div>
 
-            <div className="flex justify-between text-xl font-black pt-4 border-t border-gray-100">
+            <div className="flex justify-between text-2xl font-black pt-4 border-t-2 border-black mt-2">
               <span>TOTAL</span>
               <span className="text-[#F70353]">${totals.total.toFixed(2)}</span>
             </div>
           </div>
 
-          <div className="mt-8 text-center text-[11px] italic text-gray-400 uppercase tracking-widest">
+          <div className="mt-8 text-center text-[10px] font-bold text-gray-300 uppercase underline decoration-dashed decoration-gray-200 underline-offset-4">
             Method: {order?.fulfillment.method} Delivery
           </div>
 
           {/* Barcode & Footer */}
           <div className="mt-10 text-center">
-            <div className="inline-block border-2 border-black p-2 mb-4">
-              <div className="h-10 w-40 bg-[url('https://bwipjs-api.metafloor.com/?bcid=code128&text=PROMPTWIZARD')] bg-no-repeat bg-center bg-contain"></div>
+            <div className="inline-block border border-gray-100 p-2 mb-4">
+              <div className="h-8 w-40 bg-[url('https://bwipjs-api.metafloor.com/?bcid=code128&text=PROMPTWIZARD')] bg-no-repeat bg-center bg-contain opacity-70"></div>
             </div>
-            <p className="font-bold text-xs uppercase tracking-tighter">Thank You!</p>
+            <p className="font-black text-sm uppercase tracking-tighter">Thank You!</p>
             <p className="text-[10px] text-gray-400 mt-1">Please keep this receipt for your records.</p>
           </div>
 

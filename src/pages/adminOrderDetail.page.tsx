@@ -208,7 +208,15 @@ const AdminOrderDetailPage = () => {
                   <Package className="w-5 h-5 text-[#4A0E64]" />
                   Ordered Items
                 </h2>
-                <span className="text-white/40 text-sm">{order.items.length} {order.items.length === 1 ? 'Item' : 'Items'}</span>
+                <span className="text-white/40 text-sm">
+                  {(() => {
+                    // Only count actual products, not delivery fees
+                    const productQty = order.items
+                      .filter(item => !item.productName.toLowerCase().includes('delivery') && !item.productName.toLowerCase().includes('shipping'))
+                      .reduce((sum, item) => sum + (item.quantity || 0), 0);
+                    return `${productQty} ${productQty === 1 ? 'Item' : 'Items'}`;
+                  })()}
+                </span>
               </div>
               <div className="p-0">
                 <table className="w-full">
@@ -221,40 +229,80 @@ const AdminOrderDetailPage = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {order.items.map((item, index) => (
-                      <tr key={index} className="hover:bg-white/5 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-lg bg-black/40 flex items-center justify-center overflow-hidden border border-white/5">
-                              {item.image ? (
-                                <img src={item.image} alt={item.productName} className="w-full h-full object-cover" />
-                              ) : (
-                                <Package className="w-5 h-5 text-white/20" />
-                              )}
+                    {order.items.map((item, index) => {
+                      // Smart Calculation for historical data:
+                      // If (unit_price * quantity) > total_paid, then the stored "price" 
+                      // is almost certainly the total for the line, not the unit price.
+                      const isPriceActuallyLineTotal = item.quantity > 1 &&
+                        (item.price * item.quantity) > (order.payment.amount + 0.01);
+
+                      const unitPrice = isPriceActuallyLineTotal ? item.price / item.quantity : item.price;
+                      const lineTotal = isPriceActuallyLineTotal ? item.price : (item.price * item.quantity);
+
+                      const isDeliveryItem = item.productName.toLowerCase().includes('delivery') ||
+                        item.productName.toLowerCase().includes('shipping');
+
+                      return (
+                        <tr key={index} className={`hover:bg-white/5 transition-colors ${isDeliveryItem ? 'bg-orange-500/5' : ''}`}>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-lg bg-black/40 flex items-center justify-center overflow-hidden border border-white/5">
+                                {isDeliveryItem ? (
+                                  <Truck className="w-5 h-5 text-orange-400" />
+                                ) : item.image ? (
+                                  <img src={item.image} alt={item.productName} className="w-full h-full object-cover" />
+                                ) : (
+                                  <Package className="w-5 h-5 text-white/20" />
+                                )}
+                              </div>
+                              <div>
+                                <p className={`text-white font-medium ${isDeliveryItem ? 'text-orange-400' : ''}`}>
+                                  {item.productName}
+                                </p>
+                                {item.variant && <p className="text-white/40 text-xs">{item.variant}</p>}
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-white font-medium">{item.productName}</p>
-                              {item.variant && <p className="text-white/40 text-xs">{item.variant}</p>}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-center text-white/80">{item.quantity}</td>
-                        <td className="px-6 py-4 text-right text-white/80">{formatCurrency(item.price)}</td>
-                        <td className="px-6 py-4 text-right text-white font-bold">{formatCurrency(item.price * item.quantity)}</td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="px-6 py-4 text-center text-white/80">{item.quantity}</td>
+                          <td className="px-6 py-4 text-right text-white/80">{formatCurrency(unitPrice)}</td>
+                          <td className="px-6 py-4 text-right text-white font-bold">{formatCurrency(lineTotal)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
               <div className="p-6 bg-white/5 flex flex-col items-end gap-2">
-                <div className="flex justify-between w-full max-w-[240px] text-white/60">
-                  <span>Subtotal</span>
-                  <span>{formatCurrency(order.payment.amount)}</span>
-                </div>
-                <div className="flex justify-between w-full max-w-[240px] text-xl font-bold text-white pt-2 border-t border-white/10">
-                  <span>Order Total</span>
-                  <span className="text-[#00E676] font-mono">{formatCurrency(order.payment.amount)}</span>
-                </div>
+                {(() => {
+                  const itemsOnlyTotal = order.items
+                    .filter(item => !item.productName.toLowerCase().includes('delivery') && !item.productName.toLowerCase().includes('shipping'))
+                    .reduce((sum, item) => {
+                      const isPriceActuallyLineTotal = item.quantity > 1 &&
+                        (item.price * item.quantity) > (order.payment.amount + 0.01);
+                      return sum + (isPriceActuallyLineTotal ? item.price : (item.price * item.quantity));
+                    }, 0);
+
+                  const deliveryFee = order.payment.amount - itemsOnlyTotal;
+
+                  return (
+                    <>
+                      <div className="flex justify-between w-full max-w-[240px] text-white/60">
+                        <span>Products Subtotal</span>
+                        <span>{formatCurrency(itemsOnlyTotal)}</span>
+                      </div>
+                      {deliveryFee > 0 && (
+                        <div className="flex justify-between w-full max-w-[240px] text-orange-400">
+                          <span>Delivery Fee</span>
+                          <span>{formatCurrency(deliveryFee)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between w-full max-w-[240px] text-xl font-bold text-white pt-2 border-t border-white/10">
+                        <span>Total Payed</span>
+                        <span className="text-[#00E676] font-mono">{formatCurrency(order.payment.amount)}</span>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
 

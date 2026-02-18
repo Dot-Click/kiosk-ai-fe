@@ -1,9 +1,11 @@
 import { useState, useCallback } from "react";
 import { axios } from "@/config/axios";
+import { downloadCSV } from "@/utils/csv.util";
+import { downloadPDF } from "@/utils/pdf.util";
 
 /** Currency used for display (backend may store in cents or decimal) */
-export const CURRENCY_CODE = "EUR" as const;
-export const CURRENCY_SYMBOL = "€" as const;
+export const CURRENCY_CODE = "USD" as const;
+export const CURRENCY_SYMBOL = "$" as const;
 
 export interface OrderItem {
   productName: string;
@@ -70,9 +72,14 @@ interface GetOrderDetailsResponse {
 export interface OrdersFilters {
   status?: string;
   search?: string;
+  page?: number;
+  limit?: number;
 }
 
 export function formatCurrencyEur(amount: number): string {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    return `${CURRENCY_SYMBOL}0.00`;
+  }
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: CURRENCY_CODE,
@@ -88,11 +95,18 @@ interface UseAdminOrdersReturn {
   loadingDetail: boolean;
   updating: boolean;
   error: string | null;
+  pagination: {
+    total: number;
+    page: number;
+    pages: number;
+  };
   fetchOrders: (filters?: OrdersFilters) => Promise<void>;
   fetchOrderDetails: (id: string) => Promise<OrderDetail | null>;
   updateOrderStatus: (id: string, status: string) => Promise<boolean>;
   clearOrderDetail: () => void;
   formatCurrency: (amount: number) => string;
+  exportOrdersToCSV: (filters?: OrdersFilters) => Promise<void>;
+  exportOrdersToPDF: (filters?: OrdersFilters) => Promise<void>;
 }
 
 const getAuthHeaders = () => {
@@ -109,14 +123,21 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    pages: 1
+  });
 
   const fetchOrders = useCallback(async (filters?: OrdersFilters) => {
     setLoading(true);
     setError(null);
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = {};
       if (filters?.status && filters.status !== "all") params.status = filters.status;
       if (filters?.search) params.search = filters.search;
+      if (filters?.page) params.page = filters.page;
+      if (filters?.limit) params.limit = filters.limit;
 
       const response = await axios.get<GetOrdersResponse>("/admin/orders", {
         headers: getAuthHeaders(),
@@ -124,8 +145,11 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
       });
 
       if (response.data.success && response.data.data) {
-        // Correctly access the orders array from the data object
+        // Correctly access the orders array and pagination from the data object
         setOrders(response.data.data.orders ?? []);
+        if (response.data.data.pagination) {
+          setPagination(response.data.data.pagination);
+        }
       } else {
         setOrders([]);
         setError(response.data.message ?? "Failed to load orders");
@@ -196,6 +220,119 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
     setOrderDetail(null);
   }, []);
 
+  const exportOrdersToCSV = useCallback(async (filters?: OrdersFilters) => {
+    setLoading(true);
+    try {
+      const params: Record<string, string | number> = {
+        limit: 1000 // Fetch up to 1000 orders for export
+      };
+      if (filters?.status && filters.status !== "all") params.status = filters.status;
+      if (filters?.search) params.search = filters.search;
+
+      const response = await axios.get<GetOrdersResponse>("/admin/orders", {
+        headers: getAuthHeaders(),
+        params,
+      });
+
+      if (response.data.success && response.data.data?.orders) {
+        const ordersToExport = response.data.data.orders;
+
+        // Flatten orders for CSV with safety guards
+        const csvData = ordersToExport.map(order => {
+          const amount = order?.payment?.amount || 0;
+          const productQty = order?.items?.reduce((sum, item) => {
+            const isDelivery = item.productName.toLowerCase().includes('delivery') || item.productName.toLowerCase().includes('shipping');
+            return sum + (isDelivery ? 0 : (item.quantity || 0));
+          }, 0) || 0;
+
+          return {
+            'Order Number': order?.orderNumber || 'N/A',
+            'Date': order?.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A',
+            'Customer Name': order?.customer?.name || 'Unknown',
+            'Email': order?.customer?.email || 'N/A',
+            'Phone': order?.customer?.phone || 'N/A',
+            'Products (Qty)': productQty,
+            'Total Amount': amount.toFixed(2),
+            'Currency': order?.payment?.currency || 'USD',
+            'Method': order?.fulfillment?.method || 'N/A',
+            'Status': order?.status || 'pending',
+            'Payment Status': order?.payment?.status || 'unknown',
+            'Address': order?.fulfillment?.address
+              ? `${order.fulfillment.address.street || ''}, ${order.fulfillment.address.city || ''}`
+              : 'N/A'
+          };
+        });
+
+        const headers = [
+          'Order Number', 'Date', 'Customer Name', 'Email', 'Phone',
+          'Products (Qty)', 'Total Amount', 'Currency', 'Method',
+          'Status', 'Payment Status', 'Address'
+        ];
+
+        downloadCSV(csvData, `orders_export_${new Date().toISOString().split('T')[0]}.csv`, headers);
+      }
+    } catch (err: any) {
+      console.error("Export failed:", err);
+      setError("Failed to export CSV. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const exportOrdersToPDF = useCallback(async (filters?: OrdersFilters) => {
+    setLoading(true);
+    try {
+      const params: Record<string, string | number> = {
+        limit: 1000
+      };
+      if (filters?.status && filters.status !== "all") params.status = filters.status;
+      if (filters?.search) params.search = filters.search;
+
+      const response = await axios.get<GetOrdersResponse>("/admin/orders", {
+        headers: getAuthHeaders(),
+        params,
+      });
+
+      if (response.data.success && response.data.data?.orders) {
+        const ordersToExport = response.data.data.orders;
+
+        const pdfData = ordersToExport.map(order => {
+          const amount = order?.payment?.amount || 0;
+          const productQty = order?.items?.reduce((sum, item) => {
+            const isDelivery = item.productName.toLowerCase().includes('delivery') || item.productName.toLowerCase().includes('shipping');
+            return sum + (isDelivery ? 0 : (item.quantity || 0));
+          }, 0) || 0;
+
+          // Smart Calculation for historical data consistency in PDF
+          // Note: The specific details page is more complex, here we just ensure the amount/qty shown are accurate
+          return {
+            'Order #': order?.orderNumber || 'N/A',
+            'Date': order?.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A',
+            'Customer': order?.customer?.name || 'Unknown',
+            'Items': productQty,
+            'Amount': `${order?.payment?.currency?.toUpperCase() || 'USD'} ${amount.toFixed(2)}`,
+            'Status': order?.status || 'pending',
+            'Method': order?.fulfillment?.method || 'N/A'
+          };
+        });
+
+        const headers = ['Order #', 'Date', 'Customer', 'Items', 'Amount', 'Status', 'Method'];
+
+        downloadPDF(
+          pdfData,
+          `orders_export_${new Date().toISOString().split('T')[0]}.pdf`,
+          'Orders Management Report',
+          headers
+        );
+      }
+    } catch (err: any) {
+      console.error("PDF Export failed:", err);
+      setError("Failed to export PDF. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     orders,
     orderDetail,
@@ -208,5 +345,8 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
     updateOrderStatus,
     clearOrderDetail,
     formatCurrency: formatCurrencyEur,
+    pagination,
+    exportOrdersToCSV,
+    exportOrdersToPDF,
   };
 };
