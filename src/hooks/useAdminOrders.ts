@@ -7,12 +7,21 @@ import { downloadPDF } from "@/utils/pdf.util";
 export const CURRENCY_CODE = "USD" as const;
 export const CURRENCY_SYMBOL = "$" as const;
 
+export interface Customization {
+  color?: string;
+  colorName?: string;
+  designPosition?: [number, number, number];
+  designScale?: number;
+  originalDesign?: string;
+}
+
 export interface OrderItem {
   productName: string;
   quantity: number;
   price: number;
   image?: string;
   variant?: string;
+  customization?: Customization;
 }
 
 export interface ShippingAddress {

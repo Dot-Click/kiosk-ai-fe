@@ -41,7 +41,8 @@ const customColorOptions: ColorOption[] = [
 const ApplyMokupDesignPage = () => {
   const selectedImage = useImageStore((state) => state.selectedImage);
   const setMockupImageUrl = useImageStore((state) => state.setMockupImageUrl);
-  const [selectedProduct, setSelectedProduct] = useState<string>("cup");
+  const selectedProduct = useImageStore((state) => state.selectedProduct);
+  const setSelectedProduct = useImageStore((state) => state.setSelectedProduct);
   const [selectedColor, setSelectedColor] = useState<ColorOption>(customColorOptions[0]);
   const [zoomScale, setZoomScale] = useState(100);
   const [rotationAngle, setRotationAngle] = useState(0);
@@ -118,6 +119,14 @@ const ApplyMokupDesignPage = () => {
   const handleCheckout = async () => {
     setIsProcessing(true);
     try {
+      // Save customization details
+      useImageStore.getState().setCustomizationDetails({
+        color: selectedColor.hex,
+        colorName: selectedColor.name,
+        position: decalPosition,
+        scale: decalScale,
+      });
+
       let dataUrl: string | null = null;
 
       // Capture the current view

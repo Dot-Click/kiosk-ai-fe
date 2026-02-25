@@ -52,6 +52,13 @@ export interface GeneratedImage {
   prompt?: string;
 }
 
+export interface CustomizationDetails {
+  color: string;
+  colorName: string;
+  position: [number, number, number];
+  scale: number;
+}
+
 export interface ImageStore {
   // Single selected image (for current operation)
   selectedImage: string | null;
@@ -64,6 +71,12 @@ export interface ImageStore {
   // The prompt/description used
   promptDescription: string;
 
+  // Selected product type
+  selectedProduct: string;
+
+  // Customization details
+  customizationDetails: CustomizationDetails | null;
+
   // Actions
   setSelectedImage: (imageUrl: string | null) => void;
   setMockupImageUrl: (imageUrl: string | null) => void;
@@ -73,6 +86,8 @@ export interface ImageStore {
   clearAllImages: () => void;
   selectImageByIndex: (index: number) => void;
   selectImageByUrl: (url: string) => void;
+  setSelectedProduct: (product: string) => void;
+  setCustomizationDetails: (details: CustomizationDetails | null) => void;
 }
 
 export const useImageStore = create(
@@ -83,6 +98,8 @@ export const useImageStore = create(
         mockupImageUrl: null,
         generatedImages: [],
         promptDescription: "",
+        selectedProduct: "cup",
+        customizationDetails: null,
 
         setSelectedImage: (imageUrl) => {
           set((state) => {
@@ -142,7 +159,9 @@ export const useImageStore = create(
             return {
               selectedImage: null,
               generatedImages: [],
-              promptDescription: ""
+              promptDescription: "",
+              selectedProduct: "cup",
+              customizationDetails: null
             };
           });
         },
@@ -156,6 +175,14 @@ export const useImageStore = create(
 
         selectImageByUrl: (url: string) => {
           set({ selectedImage: url });
+        },
+
+        setSelectedProduct: (product: string) => {
+          set({ selectedProduct: product });
+        },
+
+        setCustomizationDetails: (details) => {
+          set({ customizationDetails: details });
         },
       }),
       {

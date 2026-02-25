@@ -40,6 +40,15 @@ const Checkout = () => {
   const navigate = useNavigate();
   const selectedImage = useImageStore((state) => state.selectedImage);
   const mockupImageUrl = useImageStore((state) => state.mockupImageUrl);
+  const selectedProduct = useImageStore((state) => state.selectedProduct);
+  const customizationDetails = useImageStore((state) => state.customizationDetails);
+
+  // Dynamic Product Info
+  const productInfo = {
+    name: selectedProduct === "tshirt" ? "AI-Generated T-Shirt" : "AI-Generated Mug",
+    description: selectedProduct === "tshirt" ? "Premium Cotton • Soft Feel" : "Premium ceramic • 11oz",
+    basePrice: UNIT_PRICE
+  };
 
   // State
   const [quantity, setQuantity] = useState(1);
@@ -58,7 +67,7 @@ const Checkout = () => {
   }, [fetchStripeConfig]);
 
   // Calculations
-  const subtotal = UNIT_PRICE * quantity;
+  const subtotal = productInfo.basePrice * quantity;
   const shippingCost = fulfillment === "doorstep" ? 5 : 0;
   const total = subtotal + shippingCost;
   const currency = config?.currency || "usd";
@@ -92,10 +101,17 @@ const Checkout = () => {
     try {
       const checkoutData = {
         items: [{
-          name: "AI-Generated Mug",
+          name: productInfo.name,
           quantity,
-          price: UNIT_PRICE * 100, // cents
-          image: mockupImageUrl || selectedImage
+          price: productInfo.basePrice * 100, // cents
+          image: mockupImageUrl || selectedImage,
+          customization: customizationDetails ? {
+            color: customizationDetails.color,
+            colorName: customizationDetails.colorName,
+            designPosition: customizationDetails.position,
+            designScale: customizationDetails.scale,
+            originalDesign: selectedImage
+          } : undefined
         }],
         customer: {
           name: contactInfo.name,
@@ -161,8 +177,8 @@ const Checkout = () => {
                   {/* Product Image */}
                   <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0 group">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#F70353]/30 to-transparent rounded-xl blur-md" />
-                    <div 
-                      className="relative w-full h-full bg-gradient-to-br from-white/20 to-transparent rounded-xl overflow-hidden flex items-center justify-center border border-white/10 group-hover:border-[#F70353]/50 transition-colors cursor-pointer" 
+                    <div
+                      className="relative w-full h-full bg-gradient-to-br from-white/20 to-transparent rounded-xl overflow-hidden flex items-center justify-center border border-white/10 group-hover:border-[#F70353]/50 transition-colors cursor-pointer"
                       onClick={() => setShowDesignPreview(true)}
                     >
                       {mockupImageUrl ? (
@@ -174,8 +190,8 @@ const Checkout = () => {
                       ) : (
                         <>
                           <img
-                            src="/general/cup.png"
-                            alt="Mug"
+                            src={selectedProduct === "tshirt" ? "/general/tshirt.png" : "/general/cup.png"}
+                            alt={selectedProduct === "tshirt" ? "T-Shirt" : "Mug"}
                             className="w-full h-full object-contain p-2"
                           />
                           {selectedImage && (
@@ -197,10 +213,10 @@ const Checkout = () => {
 
                   {/* Product Info */}
                   <div className="flex-1">
-                    <h2 className="text-base md:text-lg font-bold mb-1">AI-Generated Mug</h2>
-                    <p className="text-white/40 text-xs mb-2">Premium ceramic • 11oz</p>
+                    <h2 className="text-base md:text-lg font-bold mb-1">{productInfo.name}</h2>
+                    <p className="text-white/40 text-xs mb-2">{productInfo.description}</p>
                     <div className="flex items-center gap-2">
-                      <span className="text-lg md:text-xl font-bold text-[#F70353]">{formatAmount(UNIT_PRICE, currency)}</span>
+                      <span className="text-lg md:text-xl font-bold text-[#F70353]">{formatAmount(productInfo.basePrice, currency)}</span>
                       <span className="text-white/30 line-through text-xs">{formatAmount(39.99, currency)}</span>
                     </div>
                   </div>
@@ -491,8 +507,8 @@ const Checkout = () => {
 
               <div className="flex-1 flex items-center justify-center p-6 bg-[#080319]/50 rounded-xl overflow-hidden relative min-h-[300px]">
                 <img
-                  src="/general/cup.png"
-                  alt="Mug"
+                  src={selectedProduct === "tshirt" ? "/general/tshirt.png" : "/general/cup.png"}
+                  alt={selectedProduct === "tshirt" ? "T-Shirt" : "Mug"}
                   className="w-full h-full object-contain max-h-[300px]"
                 />
                 {selectedImage && (
@@ -506,7 +522,7 @@ const Checkout = () => {
 
               <div className="p-4 text-center">
                 <h3 className="text-base font-bold mb-1">Your Custom Masterpiece</h3>
-                <p className="text-white/40 text-xs">Preview of how your design will look on the mug</p>
+                <p className="text-white/40 text-xs">Preview of how your design will look on the {selectedProduct === "tshirt" ? "t-shirt" : "mug"}</p>
               </div>
             </motion.div>
           </div>

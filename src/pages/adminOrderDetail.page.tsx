@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment, Suspense } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
   ArrowLeft,
@@ -13,10 +13,15 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Info,
+  ExternalLink,
+  Copy
 } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAdminOrders } from "@/hooks/useAdminOrders";
+import ThreeMugViewer from "@/components/3dView/ThreeMugViewer";
+import TShirtMockupCanvas from "@/components/3dView/TShirtMockupCanvas";
 
 const AdminOrderDetailPage = () => {
   const { id } = useParams();
@@ -142,18 +147,18 @@ const AdminOrderDetailPage = () => {
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-white mb-1">Order #{order.orderNumber}</h1>
+              <h1 className="text-3xl font-bold text-white mb-1">Order #{order?.orderNumber || 'N/A'}</h1>
               <div className="flex items-center gap-3">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-bold border capitalize ${getStatusColor(
-                    order.status
+                    order?.status || 'pending'
                   )}`}
                 >
-                  {order.status}
+                  {order?.status || 'pending'}
                 </span>
                 <span className="text-white/40 text-sm flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
-                  {formatDate(order.createdAt)} at {formatTime(order.createdAt)}
+                  {formatDate(order?.createdAt || "")} at {formatTime(order?.createdAt || "")}
                 </span>
               </div>
             </div>
@@ -229,44 +234,199 @@ const AdminOrderDetailPage = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {order.items.map((item, index) => {
+                    {(order?.items || []).map((item, index) => {
                       // Smart Calculation for historical data:
-                      // If (unit_price * quantity) > total_paid, then the stored "price" 
-                      // is almost certainly the total for the line, not the unit price.
-                      const isPriceActuallyLineTotal = item.quantity > 1 &&
-                        (item.price * item.quantity) > (order.payment.amount + 0.01);
+                      const quantity = item?.quantity || 0;
+                      const price = item?.price || 0;
+                      const amount = order?.payment?.amount || 0;
 
-                      const unitPrice = isPriceActuallyLineTotal ? item.price / item.quantity : item.price;
-                      const lineTotal = isPriceActuallyLineTotal ? item.price : (item.price * item.quantity);
+                      const isPriceActuallyLineTotal = quantity > 1 &&
+                        (price * quantity) > (amount + 0.01);
 
-                      const isDeliveryItem = item.productName.toLowerCase().includes('delivery') ||
-                        item.productName.toLowerCase().includes('shipping');
+                      const unitPrice = isPriceActuallyLineTotal ? price / quantity : price;
+                      const lineTotal = isPriceActuallyLineTotal ? price : (price * quantity);
+
+                      const name = item?.productName || "Unknown Product";
+                      const lowerName = name.toLowerCase();
+                      const isDeliveryItem = lowerName.includes('delivery') ||
+                        lowerName.includes('shipping') ||
+                        lowerName.includes('fulfillment') ||
+                        lowerName.includes('fee') ||
+                        lowerName.includes('service');
+
+                      const hasCustomization = !!item?.customization && !isDeliveryItem;
+
+                      // Enhanced detection: assume cup unless we find shirt-related terms
+                      const isShirt = lowerName.includes('shirt') ||
+                        lowerName.includes('tshirt') ||
+                        lowerName.includes('tee') ||
+                        lowerName.includes('top') ||
+                        lowerName.includes('apparel');
+                      const productType = isShirt ? 'tshirt' : 'cup';
 
                       return (
-                        <tr key={index} className={`hover:bg-white/5 transition-colors ${isDeliveryItem ? 'bg-orange-500/5' : ''}`}>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-12 rounded-lg bg-black/40 flex items-center justify-center overflow-hidden border border-white/5">
-                                {isDeliveryItem ? (
-                                  <Truck className="w-5 h-5 text-orange-400" />
-                                ) : item.image ? (
-                                  <img src={item.image} alt={item.productName} className="w-full h-full object-cover" />
-                                ) : (
-                                  <Package className="w-5 h-5 text-white/20" />
-                                )}
+                        <Fragment key={index}>
+                          <tr className={`hover:bg-white/5 transition-colors ${isDeliveryItem ? 'bg-orange-500/5' : ''}`}>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-lg bg-black/40 flex items-center justify-center overflow-hidden border border-white/5 p-1">
+                                  {isDeliveryItem ? (
+                                    <Truck className="w-5 h-5 text-orange-400" />
+                                  ) : (
+                                    <img
+                                      src={productType === 'cup' ? '/general/cup.png' : '/general/tshirt.png'}
+                                      alt={name}
+                                      className="w-full h-full object-contain filter brightness-110"
+                                    />
+                                  )}
+                                </div>
+                                <div>
+                                  <p className={`text-white font-medium ${isDeliveryItem ? 'text-orange-400' : ''}`}>
+                                    {name}
+                                  </p>
+                                  {item.variant && <p className="text-white/40 text-xs">{item.variant}</p>}
+                                </div>
                               </div>
-                              <div>
-                                <p className={`text-white font-medium ${isDeliveryItem ? 'text-orange-400' : ''}`}>
-                                  {item.productName}
-                                </p>
-                                {item.variant && <p className="text-white/40 text-xs">{item.variant}</p>}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center text-white/80">{item.quantity}</td>
-                          <td className="px-6 py-4 text-right text-white/80">{formatCurrency(unitPrice)}</td>
-                          <td className="px-6 py-4 text-right text-white font-bold">{formatCurrency(lineTotal)}</td>
-                        </tr>
+                            </td>
+                            <td className="px-6 py-4 text-center text-white/80">{item.quantity}</td>
+                            <td className="px-6 py-4 text-right text-white/80">{formatCurrency(unitPrice)}</td>
+                            <td className="px-6 py-4 text-right text-white font-bold">{formatCurrency(lineTotal)}</td>
+                          </tr>
+                          {hasCustomization && (
+                            <tr key={`custom-${index}`}>
+                              <td colSpan={4} className="px-6 py-4 bg-white/[0.02]">
+                                <div className="flex flex-col md:flex-row gap-6">
+                                  {/* Left: Metadata */}
+                                  <div className="flex-1 space-y-4">
+                                    <div className="flex items-center gap-2 text-[#4A0E64] mb-2 font-bold text-sm tracking-widest uppercase">
+                                      <Info className="w-4 h-4" />
+                                      Design Analysis
+                                    </div>
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                      {/* Base Color */}
+                                      <div className="p-3 bg-black/40 rounded-xl border border-white/10 hover:border-white/20 transition-all group relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <Copy className="w-3 h-3 text-white/40 cursor-pointer hover:text-white" onClick={() => {
+                                            if (item.customization?.color) {
+                                              navigator.clipboard.writeText(item.customization.color);
+                                            }
+                                          }} />
+                                        </div>
+                                        <p className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
+                                          <div className="w-1 h-1 rounded-full bg-purple-500" />
+                                          Base Color
+                                        </p>
+                                        <div className="flex items-center gap-2.5">
+                                          <div
+                                            className="w-5 h-5 rounded-lg border border-white/20 shadow-lg"
+                                            style={{ backgroundColor: item.customization?.color || '#ffffff' }}
+                                          />
+                                          <div>
+                                            <p className="text-white text-sm font-bold leading-none">{item.customization?.colorName || 'N/A'}</p>
+                                            <p className="text-white/30 text-[10px] font-mono mt-1 uppercase">{item.customization?.color || ''}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Design Size */}
+                                      <div className="p-3 bg-black/40 rounded-xl border border-white/10 hover:border-white/20 transition-all">
+                                        <p className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
+                                          <div className="w-1 h-1 rounded-full bg-blue-500" />
+                                          Design Size
+                                        </p>
+                                        <div className="flex items-baseline gap-1">
+                                          <p className="text-white text-lg font-bold">
+                                            {item.customization?.designScale ? (item.customization.designScale * 100).toFixed(0) : '100'}
+                                          </p>
+                                          <span className="text-white/40 text-[10px] font-bold">%</span>
+                                        </div>
+                                      </div>
+
+                                      {/* Coordinates */}
+                                      <div className="p-3 bg-black/40 rounded-xl border border-white/10 hover:border-white/20 transition-all">
+                                        <p className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
+                                          <div className="w-1 h-1 rounded-full bg-green-500" />
+                                          Position (X, Y)
+                                        </p>
+                                        <div className="flex items-center gap-3">
+                                          <div className="space-y-0.5">
+                                            <p className="text-white/30 text-[8px] uppercase font-bold">X-Axis</p>
+                                            <p className="text-white text-xs font-mono font-bold">{item.customization?.designPosition?.[0]?.toFixed(2) || '0.00'}</p>
+                                          </div>
+                                          <div className="w-px h-6 bg-white/5" />
+                                          <div className="space-y-0.5">
+                                            <p className="text-white/30 text-[8px] uppercase font-bold">Y-Axis</p>
+                                            <p className="text-white text-xs font-mono font-bold">{item.customization?.designPosition?.[1]?.toFixed(2) || '0.00'}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Original Asset */}
+                                      <div className="p-3 bg-black/40 rounded-xl border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between">
+                                        <p className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
+                                          <div className="w-1 h-1 rounded-full bg-orange-500" />
+                                          Original Asset
+                                        </p>
+                                        {item.customization?.originalDesign ? (
+                                          <a
+                                            href={item.customization.originalDesign}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded-lg transition-all border border-blue-500/20"
+                                          >
+                                            <ExternalLink className="w-3 h-3" />
+                                            View Design
+                                          </a>
+                                        ) : (
+                                          <p className="text-white/20 text-xs font-medium">N/A</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Interactive 3D Inspector */}
+                                <div className="mt-6 hidden lg:block">
+                                  <div className="p-4 bg-black/30 rounded-2xl border border-white/10">
+                                    <div className="flex items-center justify-between mb-4">
+                                      <p className="text-white/60 text-xs font-bold uppercase tracking-widest">Interactive 3D Inspector</p>
+                                      <div className="flex gap-2">
+                                        <span className="px-2 py-0.5 bg-green-500/10 text-green-400 text-[10px] font-bold rounded border border-green-500/20 uppercase tracking-tighter">Rendered Live</span>
+                                      </div>
+                                    </div>
+                                    <div className="h-[400px] w-full bg-[#080319]/50 rounded-xl overflow-hidden relative">
+                                      <Fragment>
+                                        <Suspense fallback={
+                                          <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+                                            <Loader2 className="w-6 h-6 text-[#4A0E64] animate-spin" />
+                                            <p className="text-white/20 text-[10px] uppercase font-bold">Initializing 3D Engine...</p>
+                                          </div>
+                                        }>
+                                          {productType === 'cup' ? (
+                                            <ThreeMugViewer
+                                              color={item.customization?.color || '#ffffff'}
+                                              imageUrl={item.customization?.originalDesign || item.image || ""}
+                                              isApplied={true}
+                                              zoomScale={100}
+                                            />
+                                          ) : (
+                                            <TShirtMockupCanvas
+                                              color={item.customization?.color || '#ffffff'}
+                                              imageUrl={item.customization?.originalDesign || item.image || ""}
+                                              isApplied={true}
+                                              decalPosition={(Array.isArray(item.customization?.designPosition) && item.customization?.designPosition.length === 3) ? (item.customization?.designPosition as [number, number, number]) : [0, 0.04, 0.15]}
+                                              decalScale={item.customization?.designScale || 0.18}
+                                            />
+                                          )}
+                                        </Suspense>
+                                      </Fragment>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
                       );
                     })}
                   </tbody>
@@ -274,18 +434,22 @@ const AdminOrderDetailPage = () => {
               </div>
               <div className="p-6 bg-white/5 flex flex-col items-end gap-2">
                 {(() => {
-                  const itemsOnlyTotal = order.items
-                    .filter(item => !item.productName.toLowerCase().includes('delivery') && !item.productName.toLowerCase().includes('shipping'))
+                  const itemsOnlyTotal = (order?.items || [])
+                    .filter(item => {
+                      const itmName = item.productName || "";
+                      return !itmName.toLowerCase().includes('delivery') && !itmName.toLowerCase().includes('shipping');
+                    })
                     .reduce((sum, item) => {
                       const isPriceActuallyLineTotal = item.quantity > 1 &&
-                        (item.price * item.quantity) > (order.payment.amount + 0.01);
-                      return sum + (isPriceActuallyLineTotal ? item.price : (item.price * item.quantity));
+                        (item.price * item.quantity) > ((order?.payment?.amount || 0) + 0.01);
+                      return sum + (isPriceActuallyLineTotal ? item.price : (item.price * (item.quantity || 0)));
                     }, 0);
 
-                  const deliveryFee = order.payment.amount - itemsOnlyTotal;
+                  const totalAmount = order?.payment?.amount || 0;
+                  const deliveryFee = totalAmount - itemsOnlyTotal;
 
                   return (
-                    <>
+                    <Fragment>
                       <div className="flex justify-between w-full max-w-[240px] text-white/60">
                         <span>Products Subtotal</span>
                         <span>{formatCurrency(itemsOnlyTotal)}</span>
@@ -298,9 +462,9 @@ const AdminOrderDetailPage = () => {
                       )}
                       <div className="flex justify-between w-full max-w-[240px] text-xl font-bold text-white pt-2 border-t border-white/10">
                         <span>Total Payed</span>
-                        <span className="text-[#00E676] font-mono">{formatCurrency(order.payment.amount)}</span>
+                        <span className="text-[#00E676] font-mono">{formatCurrency(order?.payment?.amount || 0)}</span>
                       </div>
-                    </>
+                    </Fragment>
                   );
                 })()}
               </div>
@@ -317,23 +481,23 @@ const AdminOrderDetailPage = () => {
                   <div>
                     <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-1">Payment Status</p>
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${order.payment.status === 'paid' ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-                      <p className="text-white font-medium capitalize">{order.payment.status}</p>
+                      <span className={`w-2 h-2 rounded-full ${order?.payment?.status === 'paid' ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+                      <p className="text-white font-medium capitalize">{order?.payment?.status || 'pending'}</p>
                     </div>
                   </div>
                   <div>
                     <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-1">Transaction ID</p>
-                    <p className="text-white/80 font-mono text-xs break-all">{order.payment.paymentIntentId || 'N/A'}</p>
+                    <p className="text-white/80 font-mono text-xs break-all">{order?.payment?.paymentIntentId || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div>
                     <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-1">Stripe Session</p>
-                    <p className="text-white/80 font-mono text-xs break-all">{order.payment.stripeSessionId}</p>
+                    <p className="text-white/80 font-mono text-xs break-all">{order?.payment?.stripeSessionId || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-1">Currency</p>
-                    <p className="text-white font-medium uppercase">{order.payment.currency}</p>
+                    <p className="text-white font-medium uppercase">{order?.payment?.currency || 'USD'}</p>
                   </div>
                 </div>
               </div>
@@ -355,7 +519,7 @@ const AdminOrderDetailPage = () => {
                   </div>
                   <div>
                     <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-0.5">Full Name</p>
-                    <p className="text-white font-bold">{order.customer.name}</p>
+                    <p className="text-white font-bold">{order?.customer?.name || 'Unknown'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -364,7 +528,7 @@ const AdminOrderDetailPage = () => {
                   </div>
                   <div>
                     <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-0.5">Email Address</p>
-                    <p className="text-white font-medium break-all">{order.customer.email || 'N/A'}</p>
+                    <p className="text-white font-medium break-all">{order?.customer?.email || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -373,7 +537,7 @@ const AdminOrderDetailPage = () => {
                   </div>
                   <div>
                     <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-0.5">Phone Number</p>
-                    <p className="text-white font-medium">{order.customer.phone}</p>
+                    <p className="text-white font-medium">{order?.customer?.phone || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -388,29 +552,29 @@ const AdminOrderDetailPage = () => {
               <div className="space-y-6">
                 <div>
                   <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-2">Method</p>
-                  <div className={`px-4 py-3 rounded-xl border flex items-center justify-between ${order.fulfillment.method === 'express'
+                  <div className={`px-4 py-3 rounded-xl border flex items-center justify-between ${order?.fulfillment?.method === 'express'
                     ? 'bg-purple-500/10 border-purple-500/30'
                     : 'bg-orange-500/10 border-orange-500/30'
                     }`}>
-                    <span className={`font-bold uppercase tracking-widest text-sm ${order.fulfillment.method === 'express' ? 'text-purple-400' : 'text-orange-400'
+                    <span className={`font-bold uppercase tracking-widest text-sm ${order?.fulfillment?.method === 'express' ? 'text-purple-400' : 'text-orange-400'
                       }`}>
-                      {order.fulfillment.method}
+                      {order?.fulfillment?.method || 'Standard'}
                     </span>
-                    <Truck className={`w-5 h-5 ${order.fulfillment.method === 'express' ? 'text-purple-400' : 'text-orange-400'
+                    <Truck className={`w-5 h-5 ${order?.fulfillment?.method === 'express' ? 'text-purple-400' : 'text-orange-400'
                       }`} />
                   </div>
                 </div>
 
-                {order.fulfillment.address && (
+                {order?.fulfillment?.address && (
                   <div>
                     <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-2">Delivery Address</p>
                     <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
                       <div className="flex items-start gap-2 text-white/80">
                         <MapPin className="w-4 h-4 text-white/20 mt-1 shrink-0" />
                         <div className="text-sm">
-                          <p className="font-medium text-white">{order.fulfillment.address.street}</p>
-                          <p>{order.fulfillment.address.city}, {order.fulfillment.address.zip}</p>
-                          {order.fulfillment.address.country && <p>{order.fulfillment.address.country}</p>}
+                          <p className="font-medium text-white">{order?.fulfillment?.address?.street}</p>
+                          <p>{order?.fulfillment?.address?.city}, {order?.fulfillment?.address?.zip}</p>
+                          {order?.fulfillment?.address?.country && <p>{order?.fulfillment?.address?.country}</p>}
                         </div>
                       </div>
                     </div>
