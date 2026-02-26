@@ -50,6 +50,10 @@ const AdminOrdersPage = () => {
     switch (status) {
       case "completed":
         return "bg-green-500/20 text-green-400 border-green-500/50";
+      case "shipped":
+        return "bg-cyan-500/20 text-cyan-400 border-cyan-500/50";
+      case "delivered":
+        return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50";
       case "processing":
         return "bg-blue-500/20 text-blue-400 border-blue-500/50";
       case "pending":
@@ -138,6 +142,8 @@ const AdminOrdersPage = () => {
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
                 <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>

@@ -22,6 +22,8 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAdminOrders } from "@/hooks/useAdminOrders";
 import ThreeMugViewer from "@/components/3dView/ThreeMugViewer";
 import TShirtMockupCanvas from "@/components/3dView/TShirtMockupCanvas";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { Eye } from "lucide-react";
 
 const AdminOrderDetailPage = () => {
   const { id } = useParams();
@@ -39,6 +41,11 @@ const AdminOrderDetailPage = () => {
   } = useAdminOrders();
 
   const [localStatus, setLocalStatus] = useState<string>("");
+  const [show3DForItem, setShow3DForItem] = useState<Record<number, boolean>>({});
+
+  const toggle3D = (index: number) => {
+    setShow3DForItem(prev => ({ ...prev, [index]: !prev[index] }));
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -70,6 +77,10 @@ const AdminOrderDetailPage = () => {
     switch (status) {
       case "completed":
         return "bg-green-500/20 text-green-400 border-green-500/50";
+      case "shipped":
+        return "bg-cyan-500/20 text-cyan-400 border-cyan-500/50";
+      case "delivered":
+        return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50";
       case "processing":
         return "bg-blue-500/20 text-blue-400 border-blue-500/50";
       case "pending":
@@ -167,6 +178,7 @@ const AdminOrderDetailPage = () => {
           {/* Status Controls */}
           <div className="flex flex-wrap items-center gap-3 bg-[#16121E]/60 p-3 rounded-xl border border-white/10">
             <p className="text-white/40 text-xs font-bold uppercase tracking-wider w-full mb-1">Update Status</p>
+
             <button
               onClick={() => handleStatusUpdate("processing")}
               disabled={updating || order.status === "processing"}
@@ -178,17 +190,46 @@ const AdminOrderDetailPage = () => {
               {updating && localStatus === 'processing' ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               Processing
             </button>
-            <button
-              onClick={() => handleStatusUpdate("completed")}
-              disabled={updating || order.status === "completed"}
-              className={`flex-1 min-w-[120px] h-10 flex items-center justify-center gap-2 rounded-lg text-sm font-bold transition-all border ${order.status === 'completed'
-                ? 'bg-green-500/20 text-green-400 border-green-500/50 cursor-default'
-                : 'bg-white/5 text-white/60 border-white/10 hover:bg-green-500/20 hover:text-green-400 hover:border-green-500/50'
-                }`}
-            >
-              {updating && localStatus === 'completed' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-              Complete
-            </button>
+
+            {order.fulfillment.method === "express" ? (
+              <button
+                onClick={() => handleStatusUpdate("completed")}
+                disabled={updating || order.status === "completed"}
+                className={`flex-1 min-w-[120px] h-10 flex items-center justify-center gap-2 rounded-lg text-sm font-bold transition-all border ${order.status === 'completed'
+                  ? 'bg-green-500/20 text-green-400 border-green-500/50 cursor-default'
+                  : 'bg-white/5 text-white/60 border-white/10 hover:bg-green-500/20 hover:text-green-400 hover:border-green-500/50'
+                  }`}
+              >
+                {updating && localStatus === 'completed' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                Hand Off
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => handleStatusUpdate("shipped")}
+                  disabled={updating || order.status === "shipped"}
+                  className={`flex-1 min-w-[120px] h-10 flex items-center justify-center gap-2 rounded-lg text-sm font-bold transition-all border ${order.status === 'shipped'
+                    ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50 cursor-default'
+                    : 'bg-white/5 text-white/60 border-white/10 hover:bg-cyan-500/20 hover:text-cyan-400 hover:border-cyan-500/50'
+                    }`}
+                >
+                  {updating && localStatus === 'shipped' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Truck className="w-4 h-4" />}
+                  Shipped
+                </button>
+                <button
+                  onClick={() => handleStatusUpdate("delivered")}
+                  disabled={updating || order.status === "delivered"}
+                  className={`flex-1 min-w-[120px] h-10 flex items-center justify-center gap-2 rounded-lg text-sm font-bold transition-all border ${order.status === 'delivered'
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 cursor-default'
+                    : 'bg-white/5 text-white/60 border-white/10 hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/50'
+                    }`}
+                >
+                  {updating && localStatus === 'delivered' ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+                  Delivered
+                </button>
+              </>
+            )}
+
             <button
               onClick={() => handleStatusUpdate("cancelled")}
               disabled={updating || order.status === "cancelled"}
@@ -312,10 +353,10 @@ const AdminOrderDetailPage = () => {
                                             }
                                           }} />
                                         </div>
-                                        <p className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
+                                        <div className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
                                           <div className="w-1 h-1 rounded-full bg-purple-500" />
                                           Base Color
-                                        </p>
+                                        </div>
                                         <div className="flex items-center gap-2.5">
                                           <div
                                             className="w-5 h-5 rounded-lg border border-white/20 shadow-lg"
@@ -330,10 +371,10 @@ const AdminOrderDetailPage = () => {
 
                                       {/* Design Size */}
                                       <div className="p-3 bg-black/40 rounded-xl border border-white/10 hover:border-white/20 transition-all">
-                                        <p className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
+                                        <div className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
                                           <div className="w-1 h-1 rounded-full bg-blue-500" />
                                           Design Size
-                                        </p>
+                                        </div>
                                         <div className="flex items-baseline gap-1">
                                           <p className="text-white text-lg font-bold">
                                             {item.customization?.designScale ? (item.customization.designScale * 100).toFixed(0) : '100'}
@@ -344,10 +385,10 @@ const AdminOrderDetailPage = () => {
 
                                       {/* Coordinates */}
                                       <div className="p-3 bg-black/40 rounded-xl border border-white/10 hover:border-white/20 transition-all">
-                                        <p className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
+                                        <div className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
                                           <div className="w-1 h-1 rounded-full bg-green-500" />
                                           Position (X, Y)
-                                        </p>
+                                        </div>
                                         <div className="flex items-center gap-3">
                                           <div className="space-y-0.5">
                                             <p className="text-white/30 text-[8px] uppercase font-bold">X-Axis</p>
@@ -363,13 +404,17 @@ const AdminOrderDetailPage = () => {
 
                                       {/* Original Asset */}
                                       <div className="p-3 bg-black/40 rounded-xl border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between">
-                                        <p className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
+                                        <div className="text-white/40 text-[10px] uppercase font-bold mb-2 flex items-center gap-1.5">
                                           <div className="w-1 h-1 rounded-full bg-orange-500" />
                                           Original Asset
-                                        </p>
-                                        {item.customization?.originalDesign ? (
+                                        </div>
+                                        {item.customization?.originalDesign && (
                                           <a
-                                            href={item.customization.originalDesign}
+                                            href={
+                                              item.customization.originalDesign.startsWith('http') || item.customization.originalDesign.startsWith('blob:')
+                                                ? item.customization.originalDesign
+                                                : `${import.meta.env.VITE_BACKEND_URL || 'https://kiosk-ai-be-production.up.railway.app'}${item.customization.originalDesign}`
+                                            }
                                             target="_blank"
                                             rel="noreferrer"
                                             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-[10px] font-bold rounded-lg transition-all border border-blue-500/20"
@@ -377,7 +422,8 @@ const AdminOrderDetailPage = () => {
                                             <ExternalLink className="w-3 h-3" />
                                             View Design
                                           </a>
-                                        ) : (
+                                        )}
+                                        {!item.customization?.originalDesign && (
                                           <p className="text-white/20 text-xs font-medium">N/A</p>
                                         )}
                                       </div>
@@ -389,37 +435,63 @@ const AdminOrderDetailPage = () => {
                                 <div className="mt-6 hidden lg:block">
                                   <div className="p-4 bg-black/30 rounded-2xl border border-white/10">
                                     <div className="flex items-center justify-between mb-4">
-                                      <p className="text-white/60 text-xs font-bold uppercase tracking-widest">Interactive 3D Inspector</p>
+                                      <div className="text-white/60 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                                        <Eye className="w-3.5 h-3.5 text-[#4A0E64]" />
+                                        Interactive 3D Inspector
+                                      </div>
                                       <div className="flex gap-2">
-                                        <span className="px-2 py-0.5 bg-green-500/10 text-green-400 text-[10px] font-bold rounded border border-green-500/20 uppercase tracking-tighter">Rendered Live</span>
+                                        {!show3DForItem[index] ? (
+                                          <button
+                                            onClick={() => toggle3D(index)}
+                                            className="px-3 py-1 bg-[#4A0E64]/20 hover:bg-[#4A0E64]/40 text-[#A855F7] text-[10px] font-bold rounded border border-[#A855F7]/30 uppercase transition-all"
+                                          >
+                                            Load 3D Model
+                                          </button>
+                                        ) : (
+                                          <span className="px-2 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold rounded border border-green-500/20 uppercase tracking-tighter animate-pulse">
+                                            Live Viewer Active
+                                          </span>
+                                        )}
                                       </div>
                                     </div>
-                                    <div className="h-[400px] w-full bg-[#080319]/50 rounded-xl overflow-hidden relative">
-                                      <Fragment>
-                                        <Suspense fallback={
-                                          <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-                                            <Loader2 className="w-6 h-6 text-[#4A0E64] animate-spin" />
-                                            <p className="text-white/20 text-[10px] uppercase font-bold">Initializing 3D Engine...</p>
+                                    <div className="h-[400px] w-full bg-[#080319]/50 rounded-xl overflow-hidden relative border border-white/5">
+                                      {show3DForItem[index] ? (
+                                        <ErrorBoundary>
+                                          <Suspense fallback={
+                                            <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+                                              <Loader2 className="w-6 h-6 text-[#4A0E64] animate-spin" />
+                                              <p className="text-white/20 text-[10px] uppercase font-bold">Initializing 3D Engine...</p>
+                                            </div>
+                                          }>
+                                            {productType === 'cup' ? (
+                                              <ThreeMugViewer
+                                                color={item.customization?.color || '#ffffff'}
+                                                imageUrl={item.customization?.originalDesign || item.image || ""}
+                                                isApplied={true}
+                                                zoomScale={100}
+                                              />
+                                            ) : (
+                                              <TShirtMockupCanvas
+                                                color={item.customization?.color || '#ffffff'}
+                                                imageUrl={item.customization?.originalDesign || item.image || ""}
+                                                isApplied={true}
+                                                decalPosition={(Array.isArray(item.customization?.designPosition) && item.customization?.designPosition.length === 3) ? (item.customization?.designPosition as [number, number, number]) : [0, 0.04, 0.15]}
+                                                decalScale={item.customization?.designScale || 0.18}
+                                              />
+                                            )}
+                                          </Suspense>
+                                        </ErrorBoundary>
+                                      ) : (
+                                        <div className="w-full h-full flex flex-col items-center justify-center gap-4 group cursor-pointer" onClick={() => toggle3D(index)}>
+                                          <div className="w-12 h-12 rounded-full bg-[#4A0E64]/10 flex items-center justify-center group-hover:scale-110 transition-all duration-300">
+                                            <RefreshCw className="w-6 h-6 text-[#4A0E64]/60" />
                                           </div>
-                                        }>
-                                          {productType === 'cup' ? (
-                                            <ThreeMugViewer
-                                              color={item.customization?.color || '#ffffff'}
-                                              imageUrl={item.customization?.originalDesign || item.image || ""}
-                                              isApplied={true}
-                                              zoomScale={100}
-                                            />
-                                          ) : (
-                                            <TShirtMockupCanvas
-                                              color={item.customization?.color || '#ffffff'}
-                                              imageUrl={item.customization?.originalDesign || item.image || ""}
-                                              isApplied={true}
-                                              decalPosition={(Array.isArray(item.customization?.designPosition) && item.customization?.designPosition.length === 3) ? (item.customization?.designPosition as [number, number, number]) : [0, 0.04, 0.15]}
-                                              decalScale={item.customization?.designScale || 0.18}
-                                            />
-                                          )}
-                                        </Suspense>
-                                      </Fragment>
+                                          <div className="text-center">
+                                            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1">Heavy Resource Area</p>
+                                            <p className="text-white/20 text-[8px] uppercase">Click Load 3D Model to start GPU accelerator</p>
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                 </div>

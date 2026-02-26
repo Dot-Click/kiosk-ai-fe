@@ -3,14 +3,21 @@ import { useNavigate } from "react-router";
 import { ArrowLeft, User, Mail, Lock, Globe } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import CustomButton from "@/components/common/customButton";
-import { axios } from "@/config/axios";
+import { useAdminSettings } from "@/hooks/useAdminSettings";
 
 const AdminSettingsPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAdminAuth();
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const {
+    saving,
+    error,
+    success,
+    updateProfile,
+    changePassword,
+    updateSiteSettings,
+    clearMessages,
+    setError,
+  } = useAdminSettings();
 
   const [settings, setSettings] = useState({
     firstName: "",
@@ -41,123 +48,54 @@ const AdminSettingsPage = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setSettings((prev) => ({ ...prev, [field]: value }));
-    setError(null);
-    setSuccess(null);
+    clearMessages();
   };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const token = localStorage.getItem("adminToken");
-      const response = await axios.put(
-        "/admin/settings/profile",
-        {
-          firstName: settings.firstName,
-          lastName: settings.lastName,
-          email: settings.email,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success) {
-        setSuccess("Profile updated successfully!");
-        setTimeout(() => setSuccess(null), 3000);
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update profile");
-    } finally {
-      setSaving(false);
-    }
+    await updateProfile({
+      firstName: settings.firstName,
+      lastName: settings.lastName,
+      email: settings.email,
+    });
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    setError(null);
-    setSuccess(null);
+
+    // Using the previously destructured `setError` from `useAdminSettings()` above.
 
     if (settings.newPassword !== settings.confirmPassword) {
       setError("New passwords do not match");
-      setSaving(false);
       return;
     }
 
     if (settings.newPassword.length < 6) {
       setError("Password must be at least 6 characters");
-      setSaving(false);
       return;
     }
 
-    try {
-      const token = localStorage.getItem("adminToken");
-      const response = await axios.put(
-        "/admin/settings/password",
-        {
-          currentPassword: settings.currentPassword,
-          newPassword: settings.newPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const isSuccess = await changePassword({
+      currentPassword: settings.currentPassword,
+      newPassword: settings.newPassword,
+    });
 
-      if (response.data.success) {
-        setSuccess("Password changed successfully!");
-        setSettings((prev) => ({
-          ...prev,
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        }));
-        setTimeout(() => setSuccess(null), 3000);
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to change password");
-    } finally {
-      setSaving(false);
+    if (isSuccess) {
+      setSettings((prev) => ({
+        ...prev,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      }));
     }
   };
 
   const handleSaveSiteSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const token = localStorage.getItem("adminToken");
-      const response = await axios.put(
-        "/admin/settings/site",
-        {
-          siteName: settings.siteName,
-          siteUrl: settings.siteUrl,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success) {
-        setSuccess("Site settings updated successfully!");
-        setTimeout(() => setSuccess(null), 3000);
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update site settings");
-    } finally {
-      setSaving(false);
-    }
+    await updateSiteSettings({
+      siteName: settings.siteName,
+      siteUrl: settings.siteUrl,
+    });
   };
 
   if (!isAuthenticated) return null;

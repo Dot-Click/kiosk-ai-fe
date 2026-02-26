@@ -227,17 +227,32 @@ const ThreeMugViewer = forwardRef<ThreeMugViewerRef, ThreeMugViewerProps>(({
   useEffect(() => {
     if (imageUrl && wrapMeshRef.current && printMatRef.current) {
       const loader = new THREE.TextureLoader();
-      loader.load(imageUrl, (texture) => {
-        texture.repeat.set(-1, 1);
-        texture.offset.set(1, 0);
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.ClampToEdgeWrapping;
-        texture.anisotropy = rendererRef.current?.capabilities.getMaxAnisotropy() || 1;
+      loader.load(
+        imageUrl,
+        (texture) => {
+          texture.repeat.set(-1, 1);
+          texture.offset.set(1, 0);
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.ClampToEdgeWrapping;
+          texture.anisotropy = rendererRef.current?.capabilities.getMaxAnisotropy() || 1;
 
-        printMatRef.current!.map = texture;
-        printMatRef.current!.needsUpdate = true;
-        wrapMeshRef.current!.visible = isApplied;
-      });
+          if (printMatRef.current) {
+            printMatRef.current.map = texture;
+            printMatRef.current.needsUpdate = true;
+          }
+          if (wrapMeshRef.current) {
+            wrapMeshRef.current.visible = isApplied;
+          }
+        },
+        undefined,
+        (err) => {
+          console.error("Failed to load 3D texture:", imageUrl, err);
+          // Don't crash, just hide the wrap
+          if (wrapMeshRef.current) {
+            wrapMeshRef.current.visible = false;
+          }
+        }
+      );
     }
   }, [imageUrl, isApplied]);
 

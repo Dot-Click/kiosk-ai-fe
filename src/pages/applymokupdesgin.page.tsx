@@ -119,7 +119,35 @@ const ApplyMokupDesignPage = () => {
   const handleCheckout = async () => {
     setIsProcessing(true);
     try {
-      // Save customization details
+      let finalOriginalImage = selectedImage;
+
+      // 1. If original image is a blob, upload it first
+      if (selectedImage && selectedImage.startsWith("blob:")) {
+        try {
+          const res = await fetch(selectedImage);
+          const blob = await res.blob();
+          const formData = new FormData();
+          const code = `ORIGINAL-${Date.now()}`;
+          formData.append("code", code);
+          formData.append("image", blob, "original.png");
+
+          const response = await axios.post("/upload/upload", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+
+          if (response.data.success) {
+            finalOriginalImage = response.data.data.imageUrl;
+            // Update store so checkout page uses the real URL
+            useImageStore.getState().setSelectedImage(finalOriginalImage);
+          }
+        } catch (error) {
+          console.error("Error uploading original design:", error);
+        }
+      }
+
+      // 2. Save customization details
       useImageStore.getState().setCustomizationDetails({
         color: selectedColor.hex,
         colorName: selectedColor.name,
@@ -129,7 +157,7 @@ const ApplyMokupDesignPage = () => {
 
       let dataUrl: string | null = null;
 
-      // Capture the current view
+      // 3. Capture the current view (Mockup)
       if (selectedProduct === "cup" && cupRef.current) {
         dataUrl = cupRef.current.capture();
       } else if (selectedProduct === "tshirt" && tshirtCaptureRef.current) {

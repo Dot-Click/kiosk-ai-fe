@@ -52,7 +52,7 @@ export interface Order {
     currency: string;
     status: "pending" | "paid" | "failed";
   };
-  status: "pending" | "processing" | "completed" | "cancelled";
+  status: "pending" | "processing" | "shipped" | "delivered" | "completed" | "cancelled";
   createdAt: string;
   updatedAt: string;
 }
