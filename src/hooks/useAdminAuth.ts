@@ -55,7 +55,29 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
   // Check if authenticated
   const isAuthenticated = useCallback((): boolean => {
     const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-    return !!token;
+    if (!token) return false;
+
+    try {
+      // Decode JWT payload (without verifying signature)
+      const payloadBase64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const decodedJson = atob(payloadBase64);
+      const decoded = JSON.parse(decodedJson);
+
+      // Check if token has expired
+      const exp = decoded.exp;
+      if (exp && Date.now() >= exp * 1000) {
+        // Token is expired, remove it to force re-login
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      // If token is invalid/malformed, remove it
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      return false;
+    }
   }, []);
 
   // Login function

@@ -26,3 +26,21 @@ export const axios = ax.create({
   withCredentials: true,
 });
 
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // If we get an unauthorized error (like jwt expired), force logout
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("adminToken");
+        if (token) {
+          localStorage.removeItem("adminToken");
+          localStorage.removeItem("adminUser");
+          window.location.href = "/login";
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
