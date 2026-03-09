@@ -94,7 +94,7 @@ const AdminOrderDetailPage = () => {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString("en-US", {
+      return new Date(dateString).toLocaleDateString("en-IN", {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -106,7 +106,7 @@ const AdminOrderDetailPage = () => {
 
   const formatTime = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleTimeString("en-US", {
+      return new Date(dateString).toLocaleTimeString("en-IN", {
         hour: "2-digit",
         minute: "2-digit",
       });
@@ -569,7 +569,7 @@ const AdminOrderDetailPage = () => {
                   </div>
                   <div>
                     <p className="text-white/40 text-xs uppercase font-bold tracking-wider mb-1">Currency</p>
-                    <p className="text-white font-medium uppercase">{order?.payment?.currency || 'USD'}</p>
+                    <p className="text-white font-medium uppercase">{order?.payment?.currency || 'INR'}</p>
                   </div>
                 </div>
               </div>

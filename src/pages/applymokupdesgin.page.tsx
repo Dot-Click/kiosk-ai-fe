@@ -20,10 +20,12 @@ import RotationControl from "@/components/common/RotationControl";
 import ImagePositionControl from "@/components/common/ImagePositionControl";
 import { axios } from "@/config/axios";
 import { Loader2 } from "lucide-react";
+import { useProducts } from "@/hooks/useProducts";
+// import Price from "@/components/common/Price";
 
 const productOptions = [
-  { id: "cup", label: "Cup", image: "/general/cup.png" },
-  { id: "tshirt", label: "Shirt", image: "/general/tshirt.png" },
+  { id: "cup", label: "Cup", image: "/general/cup.png", price: 300.00 },
+  { id: "tshirt", label: "Shirt", image: "/general/tshirt.png", price: 500.00 },
 ];
 
 const customColorOptions: ColorOption[] = [
@@ -57,6 +59,19 @@ const ApplyMokupDesignPage = () => {
   const tshirtCaptureRef = useRef<any>(null);
 
   const navigate = useNavigate();
+  const { products } = useProducts();
+
+
+
+  // Update productOptions labels to include prices if products are loaded
+  const dynamicProductOptions = products.length > 0 ? productOptions.map(opt => {
+    const p = products.find(dbProd => {
+      const searchCode = opt.id === "tshirt" ? "price-tshirt" : "price-mug";
+      const searchName = opt.id === "tshirt" ? "t-shirt" : "mug";
+      return dbProd.code === searchCode || dbProd.productCategory.toLowerCase().includes(searchName);
+    });
+    return p ? { ...opt, price: p.price } : opt;
+  }) : productOptions;
 
   const handleZoomIn = () => {
     setZoomScale((prev) => Math.min(prev + 10, 200));
@@ -214,8 +229,18 @@ const ApplyMokupDesignPage = () => {
           <ProductOptions
             selectedProduct={selectedProduct}
             onProductSelect={setSelectedProduct}
-            options={productOptions}
+            options={dynamicProductOptions}
           />
+
+          {/* Dynamic Price Display */}
+          {/* <div className="bg-[#130E29]/50 backdrop-blur-xl border border-white/10 rounded-2xl py-3 px-6 flex flex-col items-center gap-1 mb-2 w-full max-w-[330px]">
+            <span className="text-[10px] text-white/40 uppercase font-bold tracking-[2px]">Special Price</span>
+            {productsLoading ? (
+              <div className="h-10 w-24 bg-white/5 animate-pulse rounded-lg" />
+            ) : (
+              <Price amount={productPrice} className="text-3xl text-[#F70353]" showStrikethrough strikethroughAmount={productPrice + 10} />
+            )}
+          </div> */}
 
           <DesignCard
             selectedImage={selectedImage ?? undefined}

@@ -25,16 +25,9 @@ import {
   X
 } from "lucide-react";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
-
-const UNIT_PRICE = 29.99;
-
-function formatAmount(amount: number, currency: string): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency.toUpperCase(),
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
+import { useProducts } from "@/hooks/useProducts";
+import Price from "@/components/common/Price";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -42,12 +35,24 @@ const Checkout = () => {
   const mockupImageUrl = useImageStore((state) => state.mockupImageUrl);
   const selectedProduct = useImageStore((state) => state.selectedProduct);
   const customizationDetails = useImageStore((state) => state.customizationDetails);
+  const { } = useCurrency();
+
+  // Hooks
+  const {  fetchStripeConfig, createCheckoutSession } = useStripeCheckout();
+  const { products } = useProducts();
 
   // Dynamic Product Info
+  const activeProduct = products.find(p => {
+    const searchCode = selectedProduct === "tshirt" ? "price-tshirt" : "price-mug";
+    const searchName = selectedProduct === "tshirt" ? "t-shirt" : "mug";
+    return p.code === searchCode || p.productCategory.toLowerCase().includes(searchName);
+  });
+  const basePrice = activeProduct?.price || (selectedProduct === "tshirt" ? 500.00 : 300.00);
+
   const productInfo = {
     name: selectedProduct === "tshirt" ? "AI-Generated T-Shirt" : "AI-Generated Mug",
     description: selectedProduct === "tshirt" ? "Premium Cotton • Soft Feel" : "Premium ceramic • 11oz",
-    basePrice: UNIT_PRICE
+    basePrice: basePrice
   };
 
   // State
@@ -59,9 +64,6 @@ const Checkout = () => {
   const [showAddress, setShowAddress] = useState(false);
   const [showDesignPreview, setShowDesignPreview] = useState(false);
 
-  // Hooks
-  const { config, fetchStripeConfig, createCheckoutSession } = useStripeCheckout();
-
   useEffect(() => {
     fetchStripeConfig();
   }, [fetchStripeConfig]);
@@ -70,7 +72,7 @@ const Checkout = () => {
   const subtotal = productInfo.basePrice * quantity;
   const shippingCost = fulfillment === "doorstep" ? 5 : 0;
   const total = subtotal + shippingCost;
-  const currency = config?.currency || "usd";
+
 
   // Handle fulfillment change
   const handleFulfillmentChange = (type: "express" | "doorstep") => {
@@ -216,8 +218,7 @@ const Checkout = () => {
                     <h2 className="text-base md:text-lg font-bold mb-1">{productInfo.name}</h2>
                     <p className="text-white/40 text-xs mb-2">{productInfo.description}</p>
                     <div className="flex items-center gap-2">
-                      <span className="text-lg md:text-xl font-bold text-[#F70353]">{formatAmount(productInfo.basePrice, currency)}</span>
-                      <span className="text-white/30 line-through text-xs">{formatAmount(39.99, currency)}</span>
+                      <Price amount={productInfo.basePrice} className="text-lg md:text-xl text-[#F70353]" />
                     </div>
                   </div>
                 </div>
@@ -252,19 +253,17 @@ const Checkout = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-white/60">
                     <span>Subtotal ({quantity} item{quantity > 1 ? 's' : ''})</span>
-                    <span>{formatAmount(subtotal, currency)}</span>
+                    <Price amount={subtotal} className="text-white/60 font-normal" />
                   </div>
                   <div className="flex justify-between text-white/60">
                     <span>Shipping</span>
                     <span className={fulfillment === "doorstep" ? "text-white" : "text-green-400"}>
-                      {fulfillment === "doorstep" ? "+$5.00" : "Free"}
+                      {fulfillment === "doorstep" ? "+₹5.00" : "Free"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t border-white/10 mt-2">
                     <span className="font-bold">Total</span>
-                    <span className="text-xl font-black text-[#F70353]">
-                      {formatAmount(total, currency)}
-                    </span>
+                    <Price amount={total} className="text-xl text-[#F70353]" />
                   </div>
                 </div>
               </div>
@@ -388,7 +387,7 @@ const Checkout = () => {
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-sm">Doorstep Delivery</span>
                           <span className={fulfillment === "doorstep" ? "text-[#F70353] text-sm font-medium" : "text-white/40 text-sm"}>
-                            +$5.00
+                            +₹5.00
                           </span>
                         </div>
                         <p className="text-white/40 text-xs mt-0.5">2-3 business days • Tracked shipping</p>
@@ -458,7 +457,7 @@ const Checkout = () => {
                   ) : (
                     <>
                       <CreditCard size={16} />
-                      Pay {formatAmount(total, currency)}
+                      Pay <Price amount={total} className="text-white inline-block ml-1" />
                     </>
                   )}
                 </button>

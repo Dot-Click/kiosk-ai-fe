@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   ShoppingCart,
-  DollarSign,
+  IndianRupee,
   Settings,
   Package,
   LogOut,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { axios } from "@/config/axios";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface DashboardStats {
   totalOrders: number;
@@ -22,6 +23,7 @@ interface DashboardStats {
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
   const { logout, isAuthenticated } = useAdminAuth();
+  const { symbol } = useCurrency();
   const [stats, setStats] = useState<DashboardStats>({
     totalOrders: 0,
     totalRevenue: 0,
@@ -147,8 +149,8 @@ const AdminDashboardPage = () => {
           />
           <StatCard
             title="Total Revenue"
-            value={`$${(Number(stats?.totalRevenue) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-            icon={DollarSign}
+            value={`${symbol}${(Number(stats?.totalRevenue) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            icon={IndianRupee}
             color="bg-[#1B5E20]"
           />
           <StatCard
@@ -175,8 +177,13 @@ const AdminDashboardPage = () => {
               onClick={() => navigate("/admin/orders")}
             />
             <ActionButton
+              title="Product Management"
+              icon={Package}
+              onClick={() => navigate("/admin/products")}
+            />
+            <ActionButton
               title="Stripe Settings"
-              icon={DollarSign}
+              icon={IndianRupee}
               onClick={() => navigate("/admin/stripe-settings")}
             />
             <ActionButton

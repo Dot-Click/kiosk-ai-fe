@@ -95,7 +95,7 @@ export const useStripeSettings = (): UseStripeSettingsReturn => {
           publishableKey: payload.publishableKey,
           webhookSecret: payload.webhookSecret ?? "",
           isActive: payload.isActive ?? false,
-          currency: payload.currency ?? "usd",
+          currency: payload.currency ?? "inr",
         };
         if (
           payload.secretKey &&

@@ -207,12 +207,14 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { CheckCircle, Printer, Home, Loader2 } from "lucide-react";
 import { useReactToPrint } from "react-to-print";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function CheckoutSuccessPage() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const navigate = useNavigate();
   const { verifySession } = useStripeCheckout();
+  const { symbol } = useCurrency();
 
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -356,10 +358,10 @@ export default function CheckoutSuccessPage() {
                   <div className="max-w-[75%]">
                     <p className="font-bold leading-tight uppercase text-base">{item.productName}</p>
                     <p className="text-gray-400 mt-1 text-xs">
-                      {item.quantity} x ${unitPrice.toFixed(2)}
+                      {item.quantity} x {symbol}{unitPrice.toFixed(2)}
                     </p>
                   </div>
-                  <span className="font-bold text-base">${lineTotal.toFixed(2)}</span>
+                  <span className="font-bold text-base">{symbol}{lineTotal.toFixed(2)}</span>
                 </div>
               );
             })}
@@ -369,17 +371,17 @@ export default function CheckoutSuccessPage() {
           <div className="border-t-2 border-dashed border-gray-200 pt-4 space-y-2">
             <div className="flex justify-between text-gray-500 uppercase text-[11px] font-bold">
               <span>Subtotal</span>
-              <span className="text-black text-sm">${totals.subtotal.toFixed(2)}</span>
+              <span className="text-black text-sm">{symbol}{totals.subtotal.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between text-gray-500 uppercase text-[11px] font-bold">
               <span>Shipping</span>
-              <span className="text-black text-sm">${totals.shipping.toFixed(2)}</span>
+              <span className="text-black text-sm">{symbol}{totals.shipping.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between text-2xl font-black pt-4 border-t-2 border-black mt-2">
               <span>TOTAL</span>
-              <span className="text-[#F70353]">${totals.total.toFixed(2)}</span>
+              <span className="text-[#F70353]">{symbol}{totals.total.toFixed(2)}</span>
             </div>
           </div>
 
@@ -390,7 +392,7 @@ export default function CheckoutSuccessPage() {
           {/* Barcode & Footer */}
           <div className="mt-10 text-center">
             <div className="inline-block border border-gray-100 p-2 mb-4">
-              <div className="h-8 w-40 bg-[url('https://bwipjs-api.metafloor.com/?bcid=code128&text=PROMPTWIZARD')] bg-no-repeat bg-center bg-contain opacity-70"></div>
+              <div className="h-8 w-40 bg-[url('https://bwipjs-api.metafloor.com/?bcid=code128&text=Kiosk Ai')] bg-no-repeat bg-center bg-contain opacity-70"></div>
             </div>
             <p className="font-black text-sm uppercase tracking-tighter">Thank You!</p>
             <p className="text-[10px] text-gray-400 mt-1">Please keep this receipt for your records.</p>

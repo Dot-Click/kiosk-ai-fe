@@ -4,8 +4,8 @@ import { downloadCSV } from "@/utils/csv.util";
 import { downloadPDF } from "@/utils/pdf.util";
 
 /** Currency used for display (backend may store in cents or decimal) */
-export const CURRENCY_CODE = "USD" as const;
-export const CURRENCY_SYMBOL = "$" as const;
+export const CURRENCY_CODE = "INR" as const;
+export const CURRENCY_SYMBOL = "₹" as const;
 
 export interface Customization {
   color?: string;
@@ -85,11 +85,11 @@ export interface OrdersFilters {
   limit?: number;
 }
 
-export function formatCurrencyEur(amount: number): string {
+export function formatCurrencyInr(amount: number): string {
   if (typeof amount !== 'number' || isNaN(amount)) {
     return `${CURRENCY_SYMBOL}0.00`;
   }
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: CURRENCY_CODE,
     minimumFractionDigits: 2,
@@ -262,7 +262,7 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
             'Phone': order?.customer?.phone || 'N/A',
             'Products (Qty)': productQty,
             'Total Amount': amount.toFixed(2),
-            'Currency': order?.payment?.currency || 'USD',
+            'Currency': order?.payment?.currency || 'INR',
             'Method': order?.fulfillment?.method || 'N/A',
             'Status': order?.status || 'pending',
             'Payment Status': order?.payment?.status || 'unknown',
@@ -319,7 +319,7 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
             'Date': order?.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A',
             'Customer': order?.customer?.name || 'Unknown',
             'Items': productQty,
-            'Amount': `${order?.payment?.currency?.toUpperCase() || 'USD'} ${amount.toFixed(2)}`,
+            'Amount': `${order?.payment?.currency?.toUpperCase() || 'INR'} ${amount.toFixed(2)}`,
             'Status': order?.status || 'pending',
             'Method': order?.fulfillment?.method || 'N/A'
           };
@@ -353,7 +353,7 @@ export const useAdminOrders = (): UseAdminOrdersReturn => {
     fetchOrderDetails,
     updateOrderStatus,
     clearOrderDetail,
-    formatCurrency: formatCurrencyEur,
+    formatCurrency: formatCurrencyInr,
     pagination,
     exportOrdersToCSV,
     exportOrdersToPDF,

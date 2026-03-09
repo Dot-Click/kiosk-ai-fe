@@ -19,6 +19,7 @@ import StripeSettingsPage from "./pages/stripeSettings.page";
 import AdminSettingsPage from "./pages/adminSettings.page";
 import AdminOrdersPage from "./pages/adminOrders.page";
 import AdminOrderDetailPage from "./pages/adminOrderDetail.page";
+import AdminProductsPage from "./pages/adminProducts.page";
 
 export const Router = () => {
   return (
@@ -34,8 +35,8 @@ export const Router = () => {
           <Route
             path="/select-methods/capture-photo/describe-design"
             element={<DescribeDesignPage />}
-          /> 
-            <Route
+          />
+          <Route
             path="/upload"
             element={<MobileToWebTransfer />}
           /><Route
@@ -59,6 +60,7 @@ export const Router = () => {
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
         <Route path="/admin/orders" element={<AdminOrdersPage />} />
         <Route path="/admin/orders/:id" element={<AdminOrderDetailPage />} />
+        <Route path="/admin/products" element={<AdminProductsPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

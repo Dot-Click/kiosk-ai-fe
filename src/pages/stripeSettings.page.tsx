@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   ArrowLeft,
-  DollarSign,
+  IndianRupee,
   Key,
   Globe,
   Settings,
@@ -33,7 +33,7 @@ const StripeSettingsPage = () => {
     publishableKey: "",
     secretKey: "",
     webhookSecret: "",
-    currency: "USD",
+    currency: "INR",
     isActive: true,
   });
 
@@ -54,7 +54,7 @@ const StripeSettingsPage = () => {
         publishableKey: settings.publishableKey || "",
         secretKey: settings.secretKey || "",
         webhookSecret: settings.webhookSecret || "",
-        currency: settings.currency || "USD",
+        currency: settings.currency || "INR",
         isActive: settings.isActive ?? true,
       });
     }
@@ -189,20 +189,21 @@ const StripeSettingsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-[#16121E] border border-white/10 rounded-2xl p-6">
                 <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-[#4A0E64]" />
+                  <IndianRupee className="w-5 h-5 text-[#4A0E64]" />
                   Currency
                 </h2>
                 <div className="relative">
                   <select
-                    value={localSettings.currency}
-                    onChange={(e) => handleInputChange("currency", e.target.value)}
+                    value={localSettings.currency?.toLowerCase()}
+                    onChange={(e) => handleInputChange("currency", e.target.value.toLowerCase())}
                     className="w-full px-4 py-3 rounded-lg bg-[#211C2C] border border-white/10 text-white appearance-none focus:outline-none focus:border-[#4A0E64] cursor-pointer"
                   >
-                    <option value="EUR">Euro (€)</option>
-                    <option value="USD">US Dollar ($)</option>
-                    <option value="GBP">British Pound (£)</option>
-                    <option value="CAD">Canadian Dollar ($)</option>
-                    <option value="AUD">Australian Dollar ($)</option>
+                    <option value="inr">Indian Rupee (₹)</option>
+                    <option value="usd">US Dollar</option>
+                    <option value="eur">Euro (€)</option>
+                    <option value="gbp">British Pound (£)</option>
+                    <option value="cad">Canadian Dollar</option>
+                    <option value="aud">Australian Dollar</option>
                   </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
                     <RefreshCw className="w-4 h-4" />

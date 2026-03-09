@@ -67,7 +67,7 @@ const AdminOrdersPage = () => {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString("en-US", {
+      return new Date(dateString).toLocaleDateString("en-IN", {
         year: "numeric",
         month: "short",
         day: "numeric",
@@ -108,7 +108,7 @@ const AdminOrdersPage = () => {
           </button>
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-white mb-2">Orders Management</h1>
-            <p className="text-white/60">View and manage all customer orders (amounts in $)</p>
+            <p className="text-white/60">View and manage all customer orders (amounts in ₹)</p>
           </div>
         </div>
 
@@ -172,7 +172,7 @@ const AdminOrdersPage = () => {
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Order #</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Customer</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Items</th>
-                    <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Amount ($)</th>
+                    <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Amount (₹)</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Fulfillment</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Status</th>
                     <th className="px-6 py-4 text-left text-white/80 font-semibold text-sm">Date</th>
