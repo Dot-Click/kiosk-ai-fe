@@ -16,6 +16,8 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [config, setConfig] = useState<StripeConfig | null>(null);
     const [loading, setLoading] = useState(true);
 
+
+    
     const refreshConfig = useCallback(async () => {
         setLoading(true);
         try {

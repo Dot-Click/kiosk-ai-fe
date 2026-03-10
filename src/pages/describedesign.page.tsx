@@ -17,6 +17,9 @@ const DescribeDesignPage = () => {
   const [numberOfPages, setNumberOfPages] = useState(1);
   const navigate = useNavigate();
 
+
+
+  
   const handleProcessImage = () => {
     console.log("Processing image...");
     toast.success("Image processed successfully!");

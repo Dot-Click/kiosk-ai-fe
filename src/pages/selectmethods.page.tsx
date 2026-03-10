@@ -42,6 +42,8 @@ const MethodCard = ({
           background: "linear-gradient(180deg, #712F72 0%, #1B181E 100%)",
         }}
       >
+
+        
         <Box
           className="absolute top-0 left-14 max-sm:left-0 w-full h-full"
           style={{

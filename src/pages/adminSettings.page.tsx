@@ -19,6 +19,9 @@ const AdminSettingsPage = () => {
     setError,
   } = useAdminSettings();
 
+
+
+  
   const [settings, setSettings] = useState({
     firstName: "",
     lastName: "",
