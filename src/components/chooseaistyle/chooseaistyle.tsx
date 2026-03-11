@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { cn } from "@/utils/cn.util";
@@ -6,6 +6,7 @@ import CustomButton from "../common/customButton";
 import { Center } from "../ui/center";
 import { additionalStyles } from "@/utils/freepik.util";
 import { toast } from "sonner";
+import { useImageStore } from "@/store/image.store";
 
 interface StyleOption {
   id: string;
@@ -79,21 +80,63 @@ const styleOptions: StyleOption[] = [
 ];
 
 const ChooseAiStyle = () => {
-  const [selectedStyle, setSelectedStyle] = useState<string>("caricature");
-  const [selectedAdditionalStyle, setSelectedAdditionalStyle] = useState<
-    string | null
-  >(null);
+  const storedStyle = useImageStore((s) => s.selectedStyle);
+  const storedAdditional = useImageStore((s) => s.selectedAdditionalStyle);
 
-  return (
-    <Box className="w-full mt-12 bg-[#303030] rounded-2xl p-[1px]">
-      {/* Main Container with Gradient Border */}
-      <Box
-        className="w-full rounded-2xl p-[1px] bg-[#303030]"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(56, 56, 56, 0) 0%, #707070 100%)",
-        }}
-      >
+  const [selectedStyle, setSelectedStyle] = useState<string>(
+    storedStyle || "caricature"
+  );
+  const [selectedAdditionalStyle, setSelectedAdditionalStyle] =
+    useState<string | null>(storedAdditional || null);
+  const storeSetStyle = useImageStore((s) => s.setSelectedStyle);
+  // Removed invalid setSelectedAdditionalStyle usage
+
+  // debug values to investigate render-time errors
+  console.log("ChooseAiStyle init", {
+    storedStyle,
+    storedAdditional,
+    selectedStyle,
+    selectedAdditionalStyle,
+    styleOptionsCount: styleOptions?.length ?? 0,
+    additionalStylesCount: additionalStyles?.length ?? 0,
+  });
+
+  // keep local state in sync with store when it changes externally
+  useEffect(() => {
+    if (storedStyle && storedStyle !== selectedStyle) {
+      setSelectedStyle(storedStyle);
+    }
+  }, [storedStyle]);
+
+  useEffect(() => {
+    if (storedAdditional !== selectedAdditionalStyle) {
+      setSelectedAdditionalStyle(storedAdditional);
+    }
+  }, [storedAdditional]);
+
+  // keep global store in sync
+  const handleStyleChange = (style: string) => {
+    setSelectedStyle(style);
+    storeSetStyle(style);
+  };
+
+  const handleAdditionalChange = (style: string | null) => {
+    setSelectedAdditionalStyle(style);
+    // storeSetAdditional(style); // Removed: no setter in store
+  };
+
+  // Render inside try/catch so we can log unexpected failures
+  try {
+    return (
+      <Box className="w-full mt-12 bg-[#303030] rounded-2xl p-[1px]">
+        {/* Main Container with Gradient Border */}
+        <Box
+          className="w-full rounded-2xl p-[1px] bg-[#303030]"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(56, 56, 56, 0) 0%, #707070 100%)",
+          }}
+        >
         <Box
           className="w-full h-full rounded-2xl p-6 sm:p-8 md:p-10"
           style={{
@@ -131,7 +174,18 @@ const ChooseAiStyle = () => {
             {/* Apply Filter Button */}
             <CustomButton
               title="Apply Filter"
-              onClick={() => console.log("Apply Filter clicked")}
+              onClick={() => {
+                try {
+                  if (selectedAdditionalStyle) {
+                    // storeSetAdditional(selectedAdditionalStyle); // Removed: no setter in store
+                    toast.success(`Filter ${selectedAdditionalStyle} applied`);
+                  } else {
+                    toast.error("Please select an additional style first");
+                  }
+                } catch (err) {
+                  console.error("Error in Apply Filter handler:", err);
+                }
+              }}
               wrapperClassName="w-full max-w-[150px] h-[45px]"
               className="font-semibol tracking-widest"
             />
@@ -153,7 +207,7 @@ const ChooseAiStyle = () => {
               }}
             >
               <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {styleOptions.map((style) => {
+                {(styleOptions || []).map((style) => {
                   const isSelected = selectedStyle === style.id;
 
                   return (
@@ -176,7 +230,7 @@ const ChooseAiStyle = () => {
                                 "linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, #707070 100%)",
                             }
                       }
-                      onClick={() => setSelectedStyle(style.id)}
+                      onClick={() => handleStyleChange(style.id)}
                     >
                       {/* Inner Content Box */}
                       <Center
@@ -265,27 +319,32 @@ const ChooseAiStyle = () => {
                     : "Apply more style"
                 }
                 onClick={() => {
-                  if (selectedAdditionalStyle) {
-                    const selectedStyleData = additionalStyles.find(
-                      (style) => style.id === selectedAdditionalStyle
-                    );
-                    if (selectedStyleData) {
-                      console.log(
-                        "Processing selected style:",
-                        selectedStyleData
-                      );
-                      // Show success toast with selected image details
-                      toast.success("Style Selected!", {
-                        description: `Processing "${selectedStyleData.title}" style...`,
+                  try {
+                    if (selectedAdditionalStyle) {
+                      const selectedStyleData =
+                        (additionalStyles || []).find(
+                          (style) => style.id === selectedAdditionalStyle
+                        );
+                      if (selectedStyleData) {
+                        console.log(
+                          "Processing selected style:",
+                          selectedStyleData
+                        );
+                        // Show success toast with selected image details
+                        toast.success("Style Selected!", {
+                          description: `Processing "${selectedStyleData.title}" style...`,
+                          duration: 3000,
+                        });
+                      }
+                    } else {
+                      toast.error("Please select an image first!", {
+                        description:
+                          "Click on an image from the grid below to select it.",
                         duration: 3000,
                       });
                     }
-                  } else {
-                    toast.error("Please select an image first!", {
-                      description:
-                        "Click on an image from the grid below to select it.",
-                      duration: 3000,
-                    });
+                  } catch (err) {
+                    console.error("Error in Proceed/Apply more handler:", err);
                   }
                 }}
                 wrapperClassName="w-full max-w-[210px] h-[45px]"
@@ -295,7 +354,7 @@ const ChooseAiStyle = () => {
 
             {/* Additional Styles Grid */}
             <Box className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mt-6">
-              {additionalStyles.map((style) => {
+              {(additionalStyles || []).map((style) => {
                 const isSelected = selectedAdditionalStyle === style.id;
                 return (
                   <Box
@@ -304,7 +363,7 @@ const ChooseAiStyle = () => {
                       "cursor-pointer rounded-xl transition-all duration-300 hover:scale-105 active:scale-95",
                       isSelected ? "p-[2px]" : "p-[1px]"
                     )}
-                    onClick={() => setSelectedAdditionalStyle(style.id)}
+                    onClick={() => handleAdditionalChange(style.id)}
                   >
                     <Center className="rounded-xl h-full gap-3 text-start justify-start p-3">
                       <Flex className="flex-col text-center items-center gap-1 w-full">
@@ -320,7 +379,7 @@ const ChooseAiStyle = () => {
                                   borderRadius: "20px",
                                 }
                           }
-                          src={style.previewUrl}
+                          src={style.previewUrl || ""}
                           alt={style.title}
                         />
                         <h3
@@ -343,6 +402,14 @@ const ChooseAiStyle = () => {
       </Box>
     </Box>
   );
+  } catch (err) {
+    console.error("ChooseAiStyle render error:", err);
+    return (
+      <Box className="w-full p-4 bg-red-600 text-white">
+        <p>Unexpected error rendering style chooser.</p>
+      </Box>
+    );
+  }
 };
 
 export default ChooseAiStyle;

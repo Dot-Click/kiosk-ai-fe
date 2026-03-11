@@ -1,14 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box } from "@/components/ui/box";
 import { Flex } from "@/components/ui/flex";
 import { Textarea } from "@/components/ui/textarea";
 import { BiMicrophone } from "react-icons/bi";
 import { cn } from "@/utils/cn.util";
 
-const DesignDescriptionInput = () => {
-  const [promptText, setPromptText] = useState("");
+interface DesignDescriptionInputProps {
+  value?: string;
+  onChange?: (text: string) => void;
+}
+
+const DesignDescriptionInput = ({ value, onChange }: DesignDescriptionInputProps) => {
+  const [promptText, setPromptText] = useState<string>(value ?? "");
   const [readByAI, setReadByAI] = useState(false);
   const [isListening, setIsListening] = useState(false);
+
+  // if parent controls value, keep internal state in sync
+  useEffect(() => {
+    if (value !== undefined && value !== promptText) {
+      setPromptText(value);
+    }
+  }, [value]);
 
   const handleMicClick = () => {
     setIsListening(!isListening);
@@ -80,7 +92,10 @@ const DesignDescriptionInput = () => {
       >
         <Textarea
           value={promptText}
-          onChange={(e) => setPromptText(e.target.value)}
+          onChange={(e) => {
+            setPromptText(e.target.value);
+            onChange?.(e.target.value);
+          }}
           placeholder="a cool dragon breathing fire in comic book style..."
           className="w-full h-[160px] bg-transparent border-none p-0 pb-16 resize-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#9999AE]"
           style={{

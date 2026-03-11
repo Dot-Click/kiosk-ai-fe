@@ -1,20 +1,21 @@
-// import { cn } from "@/utils/cn.util";
-// import { useNavigate } from "react-router";
-// import { Flex } from "../components/ui/flex";
-// import { Stack } from "../components/ui/stack";
-// import { BiArrowBack } from "react-icons/bi";
-// import { Center } from "../components/ui/center";
-// import { useImageStore } from "@/store/image.store";
-// import { useState, useEffect, useRef } from "react";
-// import { Box } from "@/components/ui/box";
-// import { Mic, MicOff, RotateCcw } from "lucide-react";
-// import { BsStars } from "react-icons/bs";
-// import { toast } from "sonner";
+import { cn } from "@/utils/cn.util";
+import { useNavigate } from "react-router";
+import { Flex } from "@/components/ui/flex";
+import { Stack } from "@/components/ui/stack";
+import { BiArrowBack } from "react-icons/bi";
+import { Center } from "@/components/ui/center";
+import { useImageStore } from "@/store/image.store";
+import { useState, useEffect, useRef } from "react";
+import { Box } from "@/components/ui/box";
+import { Mic, MicOff, RotateCcw } from "lucide-react";
+import { BsStars } from "react-icons/bs";
+import { toast } from "sonner";
 
-// // Custom Components
-// import DesignDescriptionInput from "@/components/designdescriptionreadbleandeditable/designdescriptionreadbleandeditable";
-// import CustomButton from "@/components/common/customButton";
-// import CustomBlackButton from "@/components/common/customBlackButton";
+// Custom Components
+import DesignDescriptionInput from "@/components/designdescriptionreadbleandeditable/designdescriptionreadbleandeditable";
+import CustomButton from "@/components/common/customButton";
+import CustomBlackButton from "@/components/common/customBlackButton";
+import { axios } from "@/config/axios";  // for image generation
 
 
 // const NavbarWrapper = ({
@@ -936,25 +937,7 @@
 // export default SpeakPrompt;
 
 
-
-
-import { cn } from "@/utils/cn.util";
-import { useNavigate } from "react-router";
-import { Flex } from "../components/ui/flex";
-import { Stack } from "../components/ui/stack";
-import { BiArrowBack } from "react-icons/bi";
-import { Center } from "../components/ui/center";
-import { useImageStore } from "@/store/image.store";
-import { useState, useEffect, useRef } from "react";
-import { Box } from "@/components/ui/box";
-import { Mic, MicOff, RotateCcw } from "lucide-react";
-import { BsStars } from "react-icons/bs";
-import { toast } from "sonner";
-
-// Custom Components
-import DesignDescriptionInput from "@/components/designdescriptionreadbleandeditable/designdescriptionreadbleandeditable";
-import CustomButton from "@/components/common/customButton";
-import CustomBlackButton from "@/components/common/customBlackButton";
+// Custom Components (imports already at top of file)
 
 const NavbarWrapper = ({
   children,
@@ -1144,7 +1127,7 @@ const SpeakPrompt = () => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
-  const { setGeneratedImages, selectImageByUrl, selectedImage } =
+  const { setGeneratedImages, selectImageByUrl, selectedImage, selectedStyle, selectedAdditionalStyle } =
     useImageStore();
 
   const recognitionRef = useRef<any>(null);
@@ -1427,7 +1410,7 @@ const SpeakPrompt = () => {
     }
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!transcript.trim()) {
       toast.error("Please speak or type your design description first!");
       return;
@@ -1443,27 +1426,32 @@ const SpeakPrompt = () => {
     setIsButtonDisabled(true);
     const loadingToast = toast.loading("Generating your designs...");
 
-    // Simulate API call with timeout
-    setTimeout(() => {
-      // Generate mock images based on transcript
-      const mockImages = [
-        `https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
-        `https://images.unsplash.com/photo-1508921912186-1d1a45ebb3c1?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
-        `https://images.unsplash.com/photo-1575936123452-b67c3203c357?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
-        `https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
-      ];
-
+    try {
+      const resp = await axios.post("/ai/generate", {
+        prompt: transcript,
+        style: selectedStyle,
+        additionalStyle: selectedAdditionalStyle,
+        count: numberOfPages,
+      });
+      const urls: string[] = resp.data.images || [];
       setIsGenerated(true);
       setIsLoading(false);
-      const selectedImages = mockImages.slice(0, numberOfPages);
+      const selectedImages = urls.slice(0, numberOfPages);
       setImages(selectedImages);
-      setGeneratedImages(selectedImages, transcript); // <--- ADD THIS LINE
-      // Update toast
+      setGeneratedImages(selectedImages, transcript);
       toast.dismiss(loadingToast);
-      toast.success(
-        `Successfully generated ${selectedImages.length} design variations!`
+      toast.success(`Successfully generated ${selectedImages.length} design variations!`);
+    } catch (err: any) {
+      console.error("image generation failed", err);
+      toast.dismiss(loadingToast);
+      const serverMsg = err?.response?.data?.message || err?.response?.data?.error;
+      toast.error(
+        `Failed to generate images. ${serverMsg ? serverMsg : "Please try again."}`
       );
-    }, 1000);
+    } finally {
+      setIsLoading(false);
+      // keep button disabled until transcript changes (handled by effect)
+    }
   };
 
   const handleProceed = () => {
@@ -1631,38 +1619,42 @@ const SpeakPrompt = () => {
             <div className="flex flex-col gap-3 mt-6 sm:mt-8">
               {!isGenerated ? (
                 <>
-                  <CustomButton
-                    wrapperClassName={`w-full h-[55px] rounded-2xl ${
-                      isButtonDisabled || isLoading
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                    title={isLoading ? "Generating..." : "Generate Designs"}
-                    icon={<BsStars className="size-5" />}
-                    onClick={handleGenerate}
-                    disabled={isButtonDisabled || isLoading}
-                  />
-                  <div className="text-center text-xs text-white/40 mt-2">
-                    {isButtonDisabled
-                      ? "← Speak or type description first"
-                      : `Ready to generate ${numberOfPages} variations`}
-                  </div>
+                  <Box className="w-full rounded-2xl border-2 border-[#F70353] bg-[#F70353]/10 p-2 mb-2">
+                    <CustomButton 
+                      wrapperClassName={`w-full h-[55px] rounded-2xl ${
+                        isButtonDisabled || isLoading 
+                          ? 'opacity-50 cursor-not-allowed' 
+                          : ''
+                      }`}
+                      title={isLoading ? "Generating..." : "Generate Designs"}
+                      icon={<BsStars className="size-5" />}
+                      onClick={handleGenerate}
+                      disabled={isButtonDisabled || isLoading}
+                    />
+                    <div className="text-center text-xs text-white/40 mt-2">
+                      {isButtonDisabled 
+                        ? "← Speak or type description first" 
+                        : `Ready to generate ${numberOfPages} variations`}
+                    </div>
+                  </Box>
                 </>
               ) : (
                 <>
-                  <CustomButton
-                    wrapperClassName="w-full h-[55px] rounded-2xl bg-indigo-600 hover:bg-indigo-700"
-                    title="Try New Design"
-                    icon={<RotateCcw className="size-5" />}
-                    onClick={handleReset}
-                    disabled={isLoading}
-                  />
-                  <CustomBlackButton
-                    wrapperClassName="w-full h-[55px] rounded-2xl border border-white/10"
-                    title="Proceed With Selected Design"
-                    onClick={handleProceed} // <--- CHANGE THIS
-                    disabled={images.length === 0 || isLoading}
-                  />
+                  <Box className="w-full rounded-2xl border-2 border-[#F70353] bg-[#F70353]/10 p-2 mb-2">
+                    <CustomButton 
+                      wrapperClassName="w-full h-[55px] rounded-2xl bg-indigo-600 hover:bg-indigo-700" 
+                      title="Try New Design" 
+                      icon={<RotateCcw className="size-5" />} 
+                      onClick={handleReset}
+                      disabled={isLoading}
+                    />
+                    <CustomBlackButton 
+                      wrapperClassName="w-full h-[55px] rounded-2xl border border-white/10" 
+                      title="Proceed With Selected Design" 
+                      onClick={handleProceed}
+                      disabled={images.length === 0 || isLoading}
+                    />
+                  </Box>
                 </>
               )}
             </div>

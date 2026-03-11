@@ -21,7 +21,7 @@ const AdminSettingsPage = () => {
 
 
 
-  
+
   const [settings, setSettings] = useState({
     firstName: "",
     lastName: "",

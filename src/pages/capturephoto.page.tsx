@@ -14,9 +14,13 @@ const CapturePhotoPage = () => {
   const setSelectedImage = useImageStore((state) => state.setSelectedImage);
 
   const handleCapturePhoto = () => {
+    // clear previous preview so camera appears empty on each open
+    setSelectedImage(null);
+
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
+    input.capture = "environment"; // force device camera instead of gallery
     input.onchange = (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
@@ -59,7 +63,8 @@ const CapturePhotoPage = () => {
         <Flex className="items-center gap-4 max-sm:flex-col">
           <CustomButton
             wrapperClassName="w-[188px] h-[48px]"
-            title={selectedImage ? "Re-capture photo" : "Capture Photo"}
+            // always show capture wording; camera opens fresh when tapped
+            title="Capture Photo"
             icon={<BiSolidCamera />}
             onClick={handleCapturePhoto}
           />
@@ -67,7 +72,7 @@ const CapturePhotoPage = () => {
           {selectedImage && (
             <CustomBlackButton
               wrapperClassName="w-[198px] h-[48px]"
-              title="Proceed With This Image?"
+              title="Proceed With This Image!"
               onClick={handleProcessImage}
             />
           )}
