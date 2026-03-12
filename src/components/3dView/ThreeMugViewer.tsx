@@ -8,6 +8,10 @@ interface ThreeMugViewerProps {
   isApplied: boolean;
   zoomScale?: number;
   rotationAngle?: number;
+  // fraction of circumference that can be printed (0-1). 0.5 means half the mug.
+  coverage?: number;
+  // additional rotation applied to the wrap mesh (radians)
+  wrapOffset?: number;
 }
 
 export interface ThreeMugViewerRef {
@@ -22,8 +26,8 @@ const ThreeMugViewer = forwardRef<ThreeMugViewerRef, ThreeMugViewerProps>(({
   color,
   isApplied,
   zoomScale = 100,
-  rotationAngle = 0,
-}, ref) => {
+  rotationAngle = 0,  coverage = 0.5,
+  wrapOffset = 0,}, ref) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -145,11 +149,15 @@ const ThreeMugViewer = forwardRef<ThreeMugViewerRef, ThreeMugViewerProps>(({
     mugGroup.add(body);
 
     // 2. IMAGE WRAP
-    const gap = 0.6;
+    // determine how much of the circumference is printable; default to 90% for backwards compatibility
+    const cov = coverage !== undefined ? coverage : 0.9;
+    // gap around circumference = 2π * (1 - cov)
+    const gap = 2 * Math.PI * (1 - cov);
     const wrapGeom = new THREE.CylinderGeometry(1.005, 1.005, 2.1, 128, 1, true, gap / 2, Math.PI * 2 - gap);
     const wrapMesh = new THREE.Mesh(wrapGeom, printMat);
     wrapMesh.position.y = 1.35;
-    wrapMesh.rotation.y = Math.PI / 2;
+    // base rotation keeps printable section facing front; we can add wrapOffset to allow horizontal shifting
+    wrapMesh.rotation.y = Math.PI / 2 + (wrapOffset || 0);
     wrapMesh.visible = false;
     wrapMeshRef.current = wrapMesh;
     mugGroup.add(wrapMesh);
@@ -267,6 +275,13 @@ const ThreeMugViewer = forwardRef<ThreeMugViewerRef, ThreeMugViewerProps>(({
     const distance = MIN_DISTANCE + (MAX_DISTANCE - MIN_DISTANCE) * Math.max(0, Math.min(1, t));
     camera.position.copy(target).add(dir.multiplyScalar(distance));
   }, [zoomScale]);
+
+  // Update wrap mesh rotation when offset prop changes
+  useEffect(() => {
+    if (wrapMeshRef.current) {
+      wrapMeshRef.current.rotation.y = Math.PI / 2 + (wrapOffset || 0);
+    }
+  }, [wrapOffset]);
 
   // Apply rotation angle to mug group
   useEffect(() => {

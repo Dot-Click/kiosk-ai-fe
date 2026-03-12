@@ -57,6 +57,8 @@ export interface CustomizationDetails {
   colorName: string;
   position: [number, number, number];
   scale: number;
+  // horizontal offset around cup circumference (radians). present only for cup product
+  cupOffset?: number;
 }
 
 export interface ImageStore {

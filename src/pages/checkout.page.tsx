@@ -112,6 +112,7 @@ const Checkout = () => {
             colorName: customizationDetails.colorName,
             designPosition: customizationDetails.position,
             designScale: customizationDetails.scale,
+            ...(customizationDetails.cupOffset !== undefined ? { cupOffset: customizationDetails.cupOffset } : {}),
             originalDesign: selectedImage
           } : undefined
         }],

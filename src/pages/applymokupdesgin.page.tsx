@@ -18,6 +18,7 @@ import ColorSelector, { ColorOption } from "@/components/common/ColorSelector";
 import ScaleControl from "@/components/common/ScaleControl";
 import RotationControl from "@/components/common/RotationControl";
 import ImagePositionControl from "@/components/common/ImagePositionControl";
+import CupPositionControl from "@/components/common/CupPositionControl";
 import { axios } from "@/config/axios";
 import { Loader2 } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
@@ -52,6 +53,9 @@ const ApplyMokupDesignPage = () => {
   const [decalPosition, setDecalPosition] = useState<[number, number, number]>([0, 0.04, 0.15]);
   const [decalScale, setDecalScale] = useState(0.18);
   const [decalRotation,] = useState(0);
+  // for cup viewer: how far around the circumference the print should sit
+  // value is in radians, 0 = default orientation
+  const [cupOffset, setCupOffset] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Refs for capturing 3D view
@@ -60,6 +64,9 @@ const ApplyMokupDesignPage = () => {
 
   const navigate = useNavigate();
   const { products } = useProducts();
+
+  // ref for the control panel so we can bring the position control into view
+  const controlsPanelRef = useRef<HTMLDivElement>(null);
 
 
 
@@ -109,6 +116,11 @@ const ApplyMokupDesignPage = () => {
       const maxScale = decalPosition[2] < 0 ? 0.23 : 0.8;
       return Math.max(0.05, Math.min(maxScale, newScale));
     });
+  };
+
+  // adjust cup offset (horizontal position) when printing to mug
+  const handleCupOffsetChange = (delta: number) => {
+    setCupOffset((prev) => prev + delta);
   };
 
   // Toggle design application
@@ -168,6 +180,8 @@ const ApplyMokupDesignPage = () => {
         colorName: selectedColor.name,
         position: decalPosition,
         scale: decalScale,
+        // if cup is selected include horizontal offset so backend/order can reflect it
+        ...(selectedProduct === "cup" ? { cupOffset } : {}),
       });
 
       let dataUrl: string | null = null;
@@ -209,11 +223,12 @@ const ApplyMokupDesignPage = () => {
     }
   };
 
+  // whenever the tshirt position control becomes active, scroll the panel top
   useEffect(() => {
-    return () => {
-      // Optional cleanup
-    };
-  }, []);
+    if (selectedProduct === "tshirt" && isApplied && selectedImage) {
+      controlsPanelRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [selectedProduct, isApplied, selectedImage]);
 
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">
@@ -260,6 +275,9 @@ const ApplyMokupDesignPage = () => {
               isApplied={isApplied}
               zoomScale={zoomScale}
               rotationAngle={rotationAngle}
+              // only half the mug surface should be printable by default
+              coverage={0.5}
+              wrapOffset={cupOffset}
             />
           ) : (
             <TShirtMockupCanvas
@@ -277,12 +295,32 @@ const ApplyMokupDesignPage = () => {
         </Box>
 
         {/* Right Side - Functional Controls */}
-        <Box className="flex flex-col items-center justify-center gap-4 mr-18 xl:gap-8 flex-shrink-0 bg-transparent">
+        <Box ref={controlsPanelRef} className="flex flex-col items-center justify-center gap-4 mr-18 xl:gap-8 flex-shrink-0 bg-transparent overflow-y-auto max-h-[calc(100vh-6rem)]">
           <ColorSelector
             selectedColor={selectedColor}
             onColorSelect={setSelectedColor}
             colors={customColorOptions}
           />
+
+          {/* Image position -- show first for tshirt so users don't have to scroll */}
+          {selectedProduct === "tshirt" && isApplied && selectedImage && (
+            <ImagePositionControl
+              positionY={decalPosition[1]}
+              scale={decalScale}
+              onPositionYChange={handleDecalPositionYChange}
+              onScaleChange={handleDecalScaleChange}
+              onSetPositionAndScale={handleSetDecalPositionAndScale}
+              onCurrentPositionChange={handleSetDecalPosition}
+            />
+          )}
+
+          {/* Cup horizontal offset control (coverage hard‑coded to 50%) */}
+          {selectedProduct === "cup" && isApplied && selectedImage && (
+            <CupPositionControl
+              offset={cupOffset}
+              onOffsetChange={handleCupOffsetChange}
+            />
+          )}
 
           <ScaleControl
             zoomScale={zoomScale}
@@ -294,18 +332,6 @@ const ApplyMokupDesignPage = () => {
             onRotateLeft={handleRotateLeft}
             onRotateRight={handleRotateRight}
           />
-
-          {/* Image Position Control - only show for t-shirt when image is applied */}
-          {selectedProduct === "tshirt" && isApplied && selectedImage && (
-            <ImagePositionControl
-              positionY={decalPosition[1]}
-              scale={decalScale}
-              onPositionYChange={handleDecalPositionYChange}
-              onScaleChange={handleDecalScaleChange}
-              onSetPositionAndScale={handleSetDecalPositionAndScale}
-              onCurrentPositionChange={handleSetDecalPosition}
-            />
-          )}
         </Box>
       </Box>
     </Box>
