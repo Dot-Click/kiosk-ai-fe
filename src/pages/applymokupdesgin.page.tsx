@@ -88,12 +88,23 @@ const ApplyMokupDesignPage = () => {
     setZoomScale((prev) => Math.max(prev - 10, 50));
   };
 
+  // Rotation handlers differ based on product type
   const handleRotateLeft = () => {
-    setRotationAngle((prev) => prev - 15);
+    if (selectedProduct === "tshirt") {
+      // always show front
+      setRotationAngle(0);
+    } else {
+      setRotationAngle((prev) => prev - 15);
+    }
   };
 
   const handleRotateRight = () => {
-    setRotationAngle((prev) => prev + 15);
+    if (selectedProduct === "tshirt") {
+      // always show back
+      setRotationAngle(180);
+    } else {
+      setRotationAngle((prev) => prev + 15);
+    }
   };
 
   const handleDecalPositionYChange = (delta: number) => {
@@ -230,6 +241,16 @@ const ApplyMokupDesignPage = () => {
     }
   }, [selectedProduct, isApplied, selectedImage]);
 
+  // reset rotation when product changes
+  useEffect(() => {
+    setRotationAngle(0);
+  }, [selectedProduct]);
+
+  // callback used by the position control to let user swap the design
+  const handleChangeDesign = () => {
+    navigate("/upload");
+  };
+
   return (
     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/describmokupbg.png')] bg-cover 3xl:bg-center bg-no-repeat overflow-y-auto p-2 xl:p-2 2xl:p-8">
       {isProcessing && (
@@ -311,6 +332,7 @@ const ApplyMokupDesignPage = () => {
               onScaleChange={handleDecalScaleChange}
               onSetPositionAndScale={handleSetDecalPositionAndScale}
               onCurrentPositionChange={handleSetDecalPosition}
+              onUploadDesign={handleChangeDesign}
             />
           )}
 
@@ -331,6 +353,12 @@ const ApplyMokupDesignPage = () => {
           <RotationControl
             onRotateLeft={handleRotateLeft}
             onRotateRight={handleRotateRight}
+            leftTitle={
+              selectedProduct === "tshirt" ? "Front of shirt" : "Show Front Side"
+            }
+            rightTitle={
+              selectedProduct === "tshirt" ? "Back of shirt" : "Show Back Side"
+            }
           />
         </Box>
       </Box>

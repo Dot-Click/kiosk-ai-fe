@@ -21,8 +21,6 @@ import {
   Star,
   Heart,
   User,
-  Eye,
-  X
 } from "lucide-react";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useProducts } from "@/hooks/useProducts";
@@ -62,7 +60,7 @@ const Checkout = () => {
   const [contactInfo, setContactInfo] = useState({ name: "", email: "", phone: "" });
   const [address, setAddress] = useState({ street: "", city: "", zip: "" });
   const [showAddress, setShowAddress] = useState(false);
-  const [showDesignPreview, setShowDesignPreview] = useState(false);
+  const [, setShowDesignPreview] = useState(false);
 
   useEffect(() => {
     fetchStripeConfig();
@@ -112,7 +110,6 @@ const Checkout = () => {
             colorName: customizationDetails.colorName,
             designPosition: customizationDetails.position,
             designScale: customizationDetails.scale,
-            ...(customizationDetails.cupOffset !== undefined ? { cupOffset: customizationDetails.cupOffset } : {}),
             originalDesign: selectedImage
           } : undefined
         }],
@@ -208,9 +205,9 @@ const Checkout = () => {
                       )}
 
                       {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      {/* <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Eye className="text-white w-4 h-4" />
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
@@ -480,8 +477,8 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+{/* 
 
-      {/* Design Preview Modal */}
       <AnimatePresence>
         {showDesignPreview && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -527,7 +524,7 @@ const Checkout = () => {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </div>
   );
 };

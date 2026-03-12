@@ -6,9 +6,11 @@ import { Redo2, RotateCw, Undo2 } from "lucide-react";
 interface RotationControlProps {
   onRotateLeft: () => void;
   onRotateRight: () => void;
+  leftTitle?: string;
+  rightTitle?: string;
 }
 
-const RotationControl = ({ onRotateLeft, onRotateRight }: RotationControlProps) => {
+const RotationControl = ({ onRotateLeft, onRotateRight, leftTitle = "Show Front Side", rightTitle = "Show Back Side" }: RotationControlProps) => {
   return (
     <Box
       className="relative w-[275px] xl:w-[320px] 2xl:w-[360px] p-4 xl:p-5 rounded-[24px] border border-white/10 bg-cover bg-center shadow-2xl"
@@ -25,7 +27,7 @@ const RotationControl = ({ onRotateLeft, onRotateRight }: RotationControlProps) 
         <button
           onClick={onRotateLeft}
           className="w-14 h-12 flex flex-col items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] active:scale-95 transition-all group"
-          title="Show Front Side"
+          title={leftTitle}
         >
           <Undo2 className="w-5 h-5 text-white" />
         </button>
@@ -33,7 +35,7 @@ const RotationControl = ({ onRotateLeft, onRotateRight }: RotationControlProps) 
         <button
           onClick={onRotateRight}
           className="w-14 h-12 flex flex-col items-center justify-center rounded-xl bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] active:scale-95 transition-all group"
-          title="Show Back Side"
+          title={rightTitle}
         >
           <Redo2 className="w-5 h-5 text-white" />
         </button>

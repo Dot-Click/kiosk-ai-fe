@@ -139,7 +139,7 @@ const SelectMethodsPage = () => {
       },
     },
       {
-      title: "Via QR Scanner",
+      title: "Upload from Phone",
       description: "Use your Camera",
       imageSrc: "/general/qrscannerss.png",
       onClick: () => {

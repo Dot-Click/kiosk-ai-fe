@@ -14,9 +14,8 @@ export interface ApiResponse<T = unknown> {
   message: string;
 }
 
-// Backend base URL – use VITE_BACKEND_URL in .env to override (e.g. http://localhost:5000)
 export const backendDomain =
-  import.meta.env.VITE_BACKEND_URL ?? "http://localhost:5000";
+  // import.meta.env.VITE_BACKEND_URL ?? "http://localhost:5000";
   import.meta.env.VITE_BACKEND_URL ?? "https://kiosk-ai-be-production.up.railway.app";
 export const apiBaseUrl = `${backendDomain}/api`;
 

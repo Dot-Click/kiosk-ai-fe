@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Box} from "../../components/ui/box";
 import { Flex} from "../../components/ui/flex";
-import { cn } from "@/utils/cn.util";
+// import { cn } from "@/utils/cn.util";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { createPortal } from "react-dom";
 import ColorPicker from "./ColorPicker";
@@ -22,7 +22,7 @@ interface ColorSelectorProps {
 const ColorSelector = ({ 
   selectedColor, 
   onColorSelect, 
-  colors = [] 
+  // colors = [] 
 }: ColorSelectorProps) => {
   const [isColorsOpen, setIsColorsOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
