@@ -15,8 +15,8 @@ export interface ApiResponse<T = unknown> {
 }
 
 export const backendDomain =
-  import.meta.env.VITE_BACKEND_URL ?? "http://localhost:5000";
-  // import.meta.env.VITE_BACKEND_URL ?? "https://kiosk-ai-be-production.up.railway.app";
+  // import.meta.env.VITE_BACKEND_URL ?? "http://localhost:5000";
+  import.meta.env.VITE_BACKEND_URL ?? "https://kiosk-ai-be-production.up.railway.app";
 export const apiBaseUrl = `${backendDomain}/api`;
 
 // Pre-configured axios instance for the frontend
