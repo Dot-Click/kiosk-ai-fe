@@ -13,6 +13,12 @@ export interface FreePikStyle {
 
 export const additionalStyles: FreePikStyle[] = [
   {
+    id: "none",
+    title: "None",
+    description: "No additional filter applied",
+    previewUrl: "/general/capture-photo.png", // or some placeholder
+  },
+  {
     id: "dramatic-retro-chic",
     title: "Dramatic Retro Chic",
     description: "Bold retro aesthetic with dramatic flair",

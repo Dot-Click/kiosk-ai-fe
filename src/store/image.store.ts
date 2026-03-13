@@ -77,7 +77,7 @@ export interface ImageStore {
   selectedProduct: string;
 
   // Selected AI style/filter options
-  selectedStyle: string;
+  selectedStyle: string | null;
   selectedAdditionalStyle: string | null;
 
   // Customization details
@@ -93,7 +93,8 @@ export interface ImageStore {
   selectImageByIndex: (index: number) => void;
   selectImageByUrl: (url: string) => void;
   setSelectedProduct: (product: string) => void;
-  setSelectedStyle: (style: string) => void;
+  setSelectedStyle: (style: string | null) => void;
+  setSelectedAdditionalStyle: (style: string | null) => void;
   setCustomizationDetails: (details: CustomizationDetails | null) => void;
 }
 
@@ -106,7 +107,7 @@ export const useImageStore = create(
         generatedImages: [],
         promptDescription: "",
         selectedProduct: "cup",
-        selectedStyle: "caricature",
+        selectedStyle: null,
         selectedAdditionalStyle: null,
         customizationDetails: null,
 
@@ -190,8 +191,8 @@ export const useImageStore = create(
           set({ selectedProduct: product });
         },
 
-        setSelectedStyle: (style) => { set({ selectedStyle: style }); },
-        setSelectedAdditionalStyle: (style: string) => { set({ selectedAdditionalStyle: style }); },
+        setSelectedStyle: (style: string | null) => { set({ selectedStyle: style }); },
+        setSelectedAdditionalStyle: (style: string | null) => { set({ selectedAdditionalStyle: style }); },
         setCustomizationDetails: (details) => {
           set({ customizationDetails: details });
         },

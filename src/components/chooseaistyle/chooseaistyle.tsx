@@ -18,6 +18,13 @@ interface StyleOption {
 
 const styleOptions: StyleOption[] = [
   {
+    id: "none",
+    title: "None",
+    description: "No specific style applied",
+    icon: <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs">N</div>,
+    iconColor: "#6B7280",
+  },
+  {
     id: "caricature",
     title: "Caricature",
     description: "Convert your selfie into a fun caricature portrait",
@@ -83,13 +90,13 @@ const ChooseAiStyle = () => {
   const storedStyle = useImageStore((s) => s.selectedStyle);
   const storedAdditional = useImageStore((s) => s.selectedAdditionalStyle);
 
-  const [selectedStyle, setSelectedStyle] = useState<string>(
-    storedStyle || "caricature"
+  const [selectedStyle, setSelectedStyle] = useState<string | null>(
+    storedStyle || null
   );
   const [selectedAdditionalStyle, setSelectedAdditionalStyle] =
     useState<string | null>(storedAdditional || null);
   const storeSetStyle = useImageStore((s) => s.setSelectedStyle);
-  // Removed invalid setSelectedAdditionalStyle usage
+  const storeSetAdditional = useImageStore((s) => s.setSelectedAdditionalStyle);
 
   // debug values to investigate render-time errors
   console.log("ChooseAiStyle init", {
@@ -116,13 +123,15 @@ const ChooseAiStyle = () => {
 
   // keep global store in sync
   const handleStyleChange = (style: string) => {
-    setSelectedStyle(style);
-    storeSetStyle(style);
+    const value = style === "none" ? null : style;
+    setSelectedStyle(value);
+    storeSetStyle(value);
   };
 
   const handleAdditionalChange = (style: string | null) => {
-    setSelectedAdditionalStyle(style);
-    // storeSetAdditional(style); // Removed: no setter in store
+    const value = style === "none" ? null : style;
+    setSelectedAdditionalStyle(value);
+    storeSetAdditional(value);
   };
 
   // Render inside try/catch so we can log unexpected failures
@@ -208,7 +217,7 @@ const ChooseAiStyle = () => {
             >
               <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {(styleOptions || []).map((style) => {
-                  const isSelected = selectedStyle === style.id;
+                  const isSelected = (style.id === "none" ? selectedStyle === null : selectedStyle === style.id);
 
                   return (
                     <Box
@@ -355,7 +364,7 @@ const ChooseAiStyle = () => {
             {/* Additional Styles Grid */}
             <Box className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mt-6">
               {(additionalStyles || []).map((style) => {
-                const isSelected = selectedAdditionalStyle === style.id;
+                const isSelected = (style.id === "none" ? selectedAdditionalStyle === null : selectedAdditionalStyle === style.id);
                 return (
                   <Box
                     key={style.id}

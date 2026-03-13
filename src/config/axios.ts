@@ -15,14 +15,16 @@ export interface ApiResponse<T = unknown> {
 }
 
 export const backendDomain =
-  // import.meta.env.VITE_BACKEND_URL ?? "http://localhost:5000";
-  import.meta.env.VITE_BACKEND_URL ?? "https://kiosk-ai-be-production.up.railway.app";
+  import.meta.env.VITE_BACKEND_URL ?? "http://localhost:5000";
+  // import.meta.env.VITE_BACKEND_URL ?? "https://kiosk-ai-be-production.up.railway.app";
 export const apiBaseUrl = `${backendDomain}/api`;
 
 // Pre-configured axios instance for the frontend
 export const axios = ax.create({
   baseURL: apiBaseUrl,
   withCredentials: true,
+  timeout: 60000, // 60 seconds timeout for large image responses
+  maxContentLength: 50 * 1024 * 1024, // 50MB max content length
 });
 
 axios.interceptors.response.use(

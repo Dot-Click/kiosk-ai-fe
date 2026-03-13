@@ -104,7 +104,7 @@ const Checkout = () => {
           name: productInfo.name,
           quantity,
           price: productInfo.basePrice * 100, // cents
-          image: mockupImageUrl || selectedImage,
+          image: (mockupImageUrl || selectedImage)?.startsWith('data:') ? undefined : (mockupImageUrl || selectedImage),
           customization: customizationDetails ? {
             color: customizationDetails.color,
             colorName: customizationDetails.colorName,

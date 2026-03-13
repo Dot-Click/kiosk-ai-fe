@@ -8,9 +8,10 @@ import { cn } from "@/utils/cn.util";
 interface DesignDescriptionInputProps {
   value?: string;
   onChange?: (text: string) => void;
+  disabled?: boolean;
 }
 
-const DesignDescriptionInput = ({ value, onChange }: DesignDescriptionInputProps) => {
+const DesignDescriptionInput = ({ value, onChange, disabled }: DesignDescriptionInputProps) => {
   const [promptText, setPromptText] = useState<string>(value ?? "");
   const [readByAI, setReadByAI] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -106,6 +107,7 @@ const DesignDescriptionInput = ({ value, onChange }: DesignDescriptionInputProps
             lineHeight: "20px",
             color: "#9999AE",
           }}
+          disabled={disabled}
         />
 
         {/* Switch and Mic inside textarea area */}
