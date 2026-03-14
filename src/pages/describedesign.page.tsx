@@ -298,7 +298,7 @@ const DescribeDesignPage = () => {
         </Box>
 
         {/* Center - Image Display */}
-        <Box className="flex-1 flex items-center justify-center min-w-0 max-md:w-full max-md:flex-1 max-md:mt-4">
+        <Box className="flex-1 mt-20 flex items-center justify-center min-w-0 max-md:w-full max-md:flex-1 max-md:mt-4">
           {isGenerated && images.length > 0 ? (
             /* --- FULLY RESPONSIVE IMAGE GRID LIKE SPEAKPROMPT --- */
             <div className="w-full px-4 sm:px-0 flex flex-col items-center">
@@ -321,7 +321,7 @@ const DescribeDesignPage = () => {
               </div>
 
               {/* The Responsive Grid: Always 2 columns to prevent images from being "too big" on mobile */}
-              <div className="grid grid-cols-2 gap-3 sm:gap-6 w-full max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] mx-auto animate-in fade-in zoom-in-95 duration-500">
+              <div className="grid grid-cols-2 gap-3 sm:gap-6 w-full max-w-[500px] xl:max-w-[450px] 2xl:max-w-[600px] mx-auto animate-in fade-in zoom-in-95 duration-500">
                 {images.map((url, i) => {
                   const isSelected = selectedImage === url;
                   return (

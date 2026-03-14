@@ -1427,13 +1427,24 @@ const SpeakPrompt = () => {
     const loadingToast = toast.loading("Generating your designs...");
 
     try {
+      // Always append 16:9 aspect ratio instruction for best fit
+      const promptWithAspect = `${transcript.trim()} (a wide 16:9 aspect ratio image, no borders, no cropping, fully visible subject, fits perfectly in a 16:9 frame)`;
       const resp = await axios.post("/ai/generate", {
-        prompt: transcript,
+        prompt: promptWithAspect,
         style: selectedStyle,
         additionalStyle: selectedAdditionalStyle,
         count: numberOfPages,
       });
       const urls: string[] = resp.data.images || [];
+      // Print the image URLs and log their info for debugging
+      console.log('Image URLs from LLM:', urls);
+      if (urls.length > 0) {
+        const img = new window.Image();
+        img.onload = function() {
+          console.log('First image natural size:', img.naturalWidth, 'x', img.naturalHeight);
+        };
+        img.src = urls[0];
+      }
       setIsGenerated(true);
       setIsLoading(false);
       const selectedImages = urls.slice(0, numberOfPages);
@@ -1735,19 +1746,39 @@ const SpeakPrompt = () => {
                 </button>
               </div>
 
-              {/* The Responsive Grid: Always 2 columns to prevent images from being "too big" on mobile */}
-              <div className="grid grid-cols-2 gap-3 sm:gap-6 w-full max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] mx-auto animate-in fade-in zoom-in-95 duration-500">
+              {/* Dynamic Grid Layout Based on Number of Images */}
+              <div className={`w-full mx-auto animate-in fade-in zoom-in-95 duration-500 ${
+                images.length === 1
+                  ? "max-w-[600px] xl:max-w-[700px] 2xl:max-w-[800px] flex justify-center" // Single large image centered
+                  : "max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] grid grid-cols-2 gap-3 sm:gap-6" // 2-column grid for 2+ images
+              }`}>
                 {images.map((url, i) => {
                   const isSelected = selectedImage === url;
                   return (
                     <div
                       key={i}
-                      className="group relative cursor-pointer"
+                      className={`group relative cursor-pointer ${
+                        images.length === 1 ? "w-full max-w-[600px]" : ""
+                      }`}
                       onClick={() => selectImageByUrl(url)}
                     >
-                      {/* Image Container with Dynamic Scale and Ring Glow */}
+                      {/* Blurred Background Image for Glassmorphism */}
                       <div
-                        className={`aspect-square rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 relative ${
+                        className="absolute inset-0 rounded-xl sm:rounded-2xl overflow-hidden blur-sm opacity-30"
+                        style={{
+                          backgroundImage: `url(${url})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                        }}
+                      />
+
+                      {/* Main Image Container */}
+                      <div
+                        className={`relative rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 ${
+                          images.length === 1
+                            ? "h-auto max-h-[400px] xl:max-h-[500px] 2xl:max-h-[600px]" // Natural height for single image
+                            : "aspect-square" // Square for grid
+                        } ${
                           isSelected
                             ? "border-[#F70353] scale-[1.03] z-10 shadow-[0_0_25px_rgba(247,3,83,0.3)]"
                             : "border-white/10 hover:border-white/30 hover:scale-[1.01]"
@@ -1756,7 +1787,11 @@ const SpeakPrompt = () => {
                         <img
                           src={url}
                           alt={`Design variation ${i + 1}`}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          className={`w-full h-full object-contain transition-transform duration-700 ${
+                            images.length === 1
+                              ? "group-hover:scale-105"
+                              : "group-hover:scale-110"
+                          }`}
                         />
 
                         {/* Overlay on hover */}
@@ -1781,137 +1816,30 @@ const SpeakPrompt = () => {
             </div>
           )}
         </div>
-
-        {/* RIGHT COLUMN - Side Panel */}
-        <div className="w-full xl:w-[350px] flex flex-col items-center justify-center z-30 order-3 gap-4 sm:gap-6 mt-4 sm:mt-0">
-          {isGenerated ? (
-            <>
-              <div className="p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5 w-full">
-                <p className="text-center text-xs sm:text-sm uppercase tracking-widest text-white/30 mb-4">
-                  Modify Design
-                </p>
-                {/* Replace the old <MicVisual size="small" /> with this: */}
-                <MicVisual
-                  size="small"
-                  isListening={isListening}
-                  isLoading={isLoading}
-                  permissionDenied={permissionDenied}
-                  isSpeechSupported={isSpeechSupported}
-                  toggleListening={toggleListening}
-                />
-                <p className="text-center text-xs sm:text-sm text-white/60 mt-4">
-                  Speak to modify or create new variations
-                </p>
-
-                <div className="mt-4 sm:mt-6 space-y-2">
-                  <button
-                    onClick={() =>
-                      setTranscript(transcript + " Make it more colorful.")
-                    }
-                    className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs sm:text-sm text-left"
-                  >
-                    "Add more color"
-                  </button>
-                  <button
-                    onClick={() =>
-                      setTranscript(transcript + " Make it minimal and clean.")
-                    }
-                    className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs sm:text-sm text-left"
-                  >
-                    "Make it minimalist"
-                  </button>
-                  <button
-                    onClick={startListening}
-                    disabled={
-                      isListening ||
-                      isLoading ||
-                      permissionDenied ||
-                      !isSpeechSupported
-                    }
-                    className={`w-full p-3 rounded-lg transition-colors text-xs sm:text-sm ${
-                      isListening ||
-                      isLoading ||
-                      permissionDenied ||
-                      !isSpeechSupported
-                        ? "bg-gray-700/50 cursor-not-allowed text-gray-400"
-                        : "bg-blue-500/20 hover:bg-blue-500/30"
-                    }`}
-                  >
-                    {isListening ? "Listening..." : "Start Speaking Again"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="w-full p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5">
-                <h4 className="font-bold mb-3 text-center text-sm">
-                  Quick Actions
-                </h4>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => {
-                      if (transcript) {
-                        handleGenerate();
-                      } else {
-                        toast.error("Please add a description first");
-                      }
-                    }}
-                    disabled={isLoading}
-                    className={`w-full p-3 rounded-lg text-xs sm:text-sm transition-colors ${
-                      isLoading
-                        ? "bg-gray-700/50 cursor-not-allowed text-gray-400"
-                        : "bg-green-500/20 hover:bg-green-500/30"
-                    }`}
-                  >
-                    {isLoading ? "Generating..." : "Regenerate Designs"}
-                  </button>
-                  <button
-                    onClick={handleReset}
-                    className="w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs sm:text-sm"
-                  >
-                    Start Over Completely
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="w-full p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5">
-              <h4 className="font-bold mb-4 text-center text-sm sm:text-base">
-                Voice Commands Examples
-              </h4>
-              <div className="space-y-3">
-                <div className="p-3 bg-white/5 rounded-lg">
-                  <p className="text-xs sm:text-sm text-white/60 mb-1">
-                    For Images:
-                  </p>
-                  <p className="text-white/90 text-xs sm:text-sm">
-                    "Create a Ghibli art"
-                  </p>
-                </div>
-                <div className="p-3 bg-white/5 rounded-lg">
-                  <p className="text-xs sm:text-sm text-white/60 mb-1">
-                    For websites:
-                  </p>
-                  <p className="text-white/90 text-xs sm:text-sm">
-                    "Design a photo like spider man"
-                  </p>
-                </div>
-                <div className="p-3 bg-white/5 rounded-lg">
-                  <p className="text-xs sm:text-sm text-white/60 mb-1">
-                    For colors:
-                  </p>
-                  <p className="text-white/90 text-xs sm:text-sm">
-                    "Make it blue and white"
-                  </p>
-                </div>
-              </div>
-              {/* <div className="mt-6 pt-6 border-t border-white/10">
-                <p className="text-xs text-white/40 text-center">
-                  You can also just type in the left panel if voice doesn't work
-                </p>
-              </div> */}
-            </div>
-          )}
+{/* RIGHT COLUMN - Side Panel */}
+<div className="w-full xl:w-[350px] flex flex-col items-stretch z-30 order-3 gap-5 mt-6 xl:mt-0">
+  {/* Voice Command Examples - Always show */}
+  <div className="w-full p-6 bg-white/[0.03] backdrop-blur-xl rounded-[2.5rem] border border-white/10">
+    <h4 className="font-bold mb-6 text-center text-sm tracking-tight text-white/90">Voice Command Examples</h4>
+    <div className="space-y-3">
+      {[
+        { label: "For Images", text: "Create Ghibli art", dot: "bg-amber-500" },
+        { label: "For Websites", text: "Design a landing page", dot: "bg-blue-500" },
+        { label: "For Colors", text: "Use blue and white", dot: "bg-pink-500" }
+      ].map((item, i) => (
+        <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+             <span className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
+             <p className="text-[10px] text-white/30 uppercase font-black">{item.label}</p>
+          </div>
+          <p className="text-sm text-white/80 italic font-medium">"{item.text}"</p>
         </div>
+      ))}
+    </div>
+  </div>
+
+ 
+</div>
       </main>
 
       {/* Mobile Instructions Bottom Sheet */}
