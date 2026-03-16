@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Package, Edit2, Check, X, RefreshCw, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Package, Edit2, Check, X, RefreshCw, Plus } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useProducts, Product } from "@/hooks/useProducts";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -9,7 +9,7 @@ import { axios } from "@/config/axios";
 const AdminProductsPage = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAdminAuth();
-    const { products, loading, fetchProducts, createProduct, updateProduct, deleteProduct } = useProducts();
+    const { products, loading, fetchProducts, createProduct, updateProduct } = useProducts();
     const { formatPrice } = useCurrency();
 
     // Editing State
@@ -77,11 +77,11 @@ const AdminProductsPage = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (window.confirm("Are you sure you want to delete this product?")) {
-            await deleteProduct(id);
-        }
-    };
+    // const handleDelete = async (id: string) => {
+    //     if (window.confirm("Are you sure you want to delete this product?")) {
+    //         await deleteProduct(id);
+    //     }
+    // };
 
     if (!isAuthenticated) return null;
 
@@ -272,13 +272,13 @@ const AdminProductsPage = () => {
                                             >
                                                 <Edit2 className="w-5 h-5" />
                                             </button>
-                                            <button
+                                            {/* <button
                                                 onClick={() => handleDelete(product._id)}
                                                 className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500/60 hover:text-red-500 hover:bg-red-500/20 transition-all"
                                                 title="Delete Product"
                                             >
                                                 <Trash2 className="w-5 h-5" />
-                                            </button>
+                                            </button> */}
                                         </div>
                                     </div>
                                 </div>
