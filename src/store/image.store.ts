@@ -100,7 +100,7 @@ export interface ImageStore {
 
 export const useImageStore = create(
   devtools(
-    persist<ImageStore>(
+    persist<ImageStore, any>(
       (set, get) => ({
         selectedImage: null,
         mockupImageUrl: null,
@@ -199,6 +199,13 @@ export const useImageStore = create(
       }),
       {
         name: "image-storage",
+        partialize: ((state: ImageStore) => ({
+          promptDescription: state.promptDescription,
+          selectedProduct: state.selectedProduct,
+          selectedStyle: state.selectedStyle,
+          selectedAdditionalStyle: state.selectedAdditionalStyle,
+          customizationDetails: state.customizationDetails,
+        })) as any,
       }
     ),
     {

@@ -23,7 +23,7 @@ export const apiBaseUrl = `${backendDomain}/api`;
 export const axios = ax.create({
   baseURL: apiBaseUrl,
   withCredentials: true,
-  timeout: 60000, // 60 seconds timeout for large image responses
+  timeout: 300000, // 5 minutes timeout for large image responses
   maxContentLength: 50 * 1024 * 1024, // 50MB max content length
 });
 
