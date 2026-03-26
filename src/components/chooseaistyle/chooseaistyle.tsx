@@ -90,11 +90,11 @@ const ChooseAiStyle = () => {
   const storedStyle = useImageStore((s) => s.selectedStyle);
   const storedAdditional = useImageStore((s) => s.selectedAdditionalStyle);
 
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(
-    storedStyle || null
+  const [selectedStyle, setSelectedStyle] = useState<string>(
+    storedStyle || "none"
   );
   const [selectedAdditionalStyle, setSelectedAdditionalStyle] =
-    useState<string | null>(storedAdditional || null);
+    useState<string>(storedAdditional || "none");
   const storeSetStyle = useImageStore((s) => s.setSelectedStyle);
   const storeSetAdditional = useImageStore((s) => s.setSelectedAdditionalStyle);
 
@@ -110,28 +110,31 @@ const ChooseAiStyle = () => {
 
   // keep local state in sync with store when it changes externally
   useEffect(() => {
-    if (storedStyle && storedStyle !== selectedStyle) {
-      setSelectedStyle(storedStyle);
+    const value = storedStyle || "none";
+    if (value !== selectedStyle) {
+      setSelectedStyle(value);
     }
   }, [storedStyle]);
 
   useEffect(() => {
-    if (storedAdditional !== selectedAdditionalStyle) {
-      setSelectedAdditionalStyle(storedAdditional);
+    const value = storedAdditional || "none";
+    if (value !== selectedAdditionalStyle) {
+      setSelectedAdditionalStyle(value);
     }
   }, [storedAdditional]);
 
   // keep global store in sync
   const handleStyleChange = (style: string) => {
-    const value = style === "none" ? null : style;
-    setSelectedStyle(value);
-    storeSetStyle(value);
+    setSelectedStyle(style);
+    storeSetStyle(style === "none" ? null : style);
   };
 
-  const handleAdditionalChange = (style: string | null) => {
-    const value = style === "none" ? null : style;
-    setSelectedAdditionalStyle(value);
-    storeSetAdditional(value);
+  const handleAdditionalChange = (style: string) => {
+    setSelectedAdditionalStyle(style);
+    // Note: we don't necessarily update store on every click if we want "Apply" button to be the main trigger,
+    // but the current UI seems to highlight them immediately. 
+    // Let's keep store in sync for immediate feedback in other components if any.
+    storeSetAdditional(style === "none" ? null : style);
   };
 
   // Render inside try/catch so we can log unexpected failures
@@ -156,28 +159,28 @@ const ChooseAiStyle = () => {
           {/* Header Section */}
           <Flex className="items-center justify-between mb-8 flex-wrap gap-4">
             <Flex className="gap-0">
-              <h2
-                className="bg-clip-text text-transparent tracking-wide sm:text-[0.75rem] text-base lg:text-[1.75rem] xl:text-[1.50rem] font-semibold"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(5deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 0%, #E5E5E1 40%, #E5E5E5 100%)",
-                }}
-              >
-                Choose AI
-              </h2>
-              <Box className="relative inline-flex items-center justify-center ml-2">
-                <Box
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40px] h-[40px] sm:w-[50px] sm:h-[50px] md:w-[60px] md:h-[60px] lg:w-[60px] lg:h-[60px] rounded-full"
+                <h2
+                  className="bg-clip-text text-transparent tracking-wide sm:text-[0.75rem] text-base lg:text-[1.75rem] xl:text-[1.50rem] font-semibold"
                   style={{
-                    background:
-                      "radial-gradient(circle, rgba(247, 3, 83, 0.4) 0%, rgba(247, 3, 83, 0.2) 40%, transparent 70%)",
-                    filter: "blur(20px)",
+                    backgroundImage:
+                      "linear-gradient(5deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 0%, #E5E5E1 40%, #E5E5E5 100%)",
                   }}
-                />
-                <h1 className="text-[#F70353] sm:text-[1.10rem] text-xl lg:text-[2.15rem] xl:text-[1.90rem] p-0 relative z-10 font-semibold">
-                  Style
-                </h1>
-              </Box>
+                >
+                  Choose AI
+                </h2>
+                <Box className="relative inline-flex items-center justify-center ml-2">
+                  <Box
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40px] h-[40px] sm:w-[50px] sm:h-[50px] md:w-[60px] md:h-[60px] lg:w-[60px] lg:h-[60px] rounded-full"
+                    style={{
+                      background:
+                        "radial-gradient(circle, rgba(247, 3, 83, 0.4) 0%, rgba(247, 3, 83, 0.2) 40%, transparent 70%)",
+                      filter: "blur(20px)",
+                    }}
+                  />
+                  <h1 className="text-[#F70353] sm:text-[1.10rem] text-xl lg:text-[2.15rem] xl:text-[1.90rem] p-0 relative z-10 font-semibold">
+                    Filter
+                  </h1>
+                </Box>
             </Flex>
 
             {/* Apply Filter Button */}
@@ -186,10 +189,10 @@ const ChooseAiStyle = () => {
               onClick={() => {
                 try {
                   if (selectedAdditionalStyle) {
-                    // storeSetAdditional(selectedAdditionalStyle); // Removed: no setter in store
-                    toast.success(`Filter ${selectedAdditionalStyle} applied`);
+                    storeSetAdditional(selectedAdditionalStyle === "none" ? null : selectedAdditionalStyle);
+                    toast.success(`Filter ${selectedAdditionalStyle === "none" ? "cleared" : selectedAdditionalStyle} applied`);
                   } else {
-                    toast.error("Please select an additional style first");
+                    toast.error("Please select an additional filter first");
                   }
                 } catch (err) {
                   console.error("Error in Apply Filter handler:", err);
@@ -217,7 +220,7 @@ const ChooseAiStyle = () => {
             >
               <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {(styleOptions || []).map((style) => {
-                  const isSelected = (style.id === "none" ? selectedStyle === null : selectedStyle === style.id);
+                  const isSelected = selectedStyle === style.id;
 
                   return (
                     <Box
@@ -302,7 +305,7 @@ const ChooseAiStyle = () => {
                       "linear-gradient(5deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 0%, #E5E5E1 40%, #E5E5E5 100%)",
                   }}
                 >
-                  Discover more
+                  Other Filters &amp;
                 </h2>
                 <Box className="relative inline-flex items-center justify-center ml-2">
                   <Box
@@ -314,7 +317,7 @@ const ChooseAiStyle = () => {
                     }}
                   />
                   <h1 className="text-[#F70353] sm:text-[1.10rem] text-xl lg:text-[2.15rem] xl:text-[1.90rem] p-0 relative z-10 font-semibold">
-                    Style
+                    Options
                   </h1>
                 </Box>
               </Flex>
@@ -324,8 +327,8 @@ const ChooseAiStyle = () => {
               <CustomButton
                 title={
                   selectedAdditionalStyle
-                    ? "Proceed selected style"
-                    : "Apply more style"
+                    ? "Proceed selected filter"
+                    : "Apply more filters"
                 }
                 onClick={() => {
                   try {
@@ -340,8 +343,8 @@ const ChooseAiStyle = () => {
                           selectedStyleData
                         );
                         // Show success toast with selected image details
-                        toast.success("Style Selected!", {
-                          description: `Processing "${selectedStyleData.title}" style...`,
+                        toast.success("Filter Selected!", {
+                          description: `Processing "${selectedStyleData.title}" filter...`,
                           duration: 3000,
                         });
                       }
@@ -364,7 +367,7 @@ const ChooseAiStyle = () => {
             {/* Additional Styles Grid */}
             <Box className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mt-6">
               {(additionalStyles || []).map((style) => {
-                const isSelected = (style.id === "none" ? selectedAdditionalStyle === null : selectedAdditionalStyle === style.id);
+                const isSelected = selectedAdditionalStyle === style.id;
                 return (
                   <Box
                     key={style.id}

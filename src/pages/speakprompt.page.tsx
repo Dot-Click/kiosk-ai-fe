@@ -158,7 +158,7 @@ import { axios } from "@/config/axios";  // for image generation
 //   useEffect(() => {
 //     const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
 //     setIsSpeechSupported(hasSpeechRecognition);
-    
+
 //     if (!hasSpeechRecognition) {
 //       toast.error("Your browser doesn't support voice recognition. Please use Chrome, Edge or Safari.");
 //     }
@@ -169,7 +169,7 @@ import { axios } from "@/config/axios";  // for image generation
 //     if (!isSpeechSupported) return;
 
 //     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    
+
 //     if (!SpeechRecognition) {
 //       setIsSpeechSupported(false);
 //       return;
@@ -187,17 +187,17 @@ import { axios } from "@/config/axios";  // for image generation
 //         setPermissionDenied(false);
 //         toast.info("Listening... Speak now");
 //       };
-      
+
 //       recognition.onresult = (event: any) => {
 //         console.log("Speech recognition result received");
-        
+
 //         let interimTranscript = '';
 //         let finalTranscript = '';
-        
+
 //         for (let i = 0; i < event.results.length; i++) {
 //           const result = event.results[i];
 //           const transcriptPart = result[0].transcript;
-          
+
 //           if (result.isFinal) {
 //             // This is a final result - user stopped speaking
 //             finalTranscript += transcriptPart;
@@ -226,7 +226,7 @@ import { axios } from "@/config/axios";  // for image generation
 //       recognition.onerror = (event: any) => {
 //         console.error("Speech recognition error:", event.error);
 //         setIsListening(false);
-        
+
 //         if (event.error === 'not-allowed' || event.error === 'audio-capture') {
 //           setPermissionDenied(true);
 //           toast.error("Microphone access denied. Please allow microphone access in browser settings.", {
@@ -242,12 +242,12 @@ import { axios } from "@/config/axios";  // for image generation
 //           toast.error(`Voice recognition error: ${event.error}`);
 //         }
 //       };
-      
+
 //       recognition.onend = () => {
 //         console.log("Speech recognition ended");
 //         setIsListening(false);
 //         accumulatedTranscript.current = transcript; // Save current transcript
-        
+
 //         // Only restart if user is still supposed to be listening
 //         if (isListening && !permissionDenied) {
 //           setTimeout(() => {
@@ -356,13 +356,13 @@ import { axios } from "@/config/axios";  // for image generation
 //           toast.error("Failed to start voice recognition");
 //         }
 //       }, 200);
-      
+
 //       setIsListening(true);
 //       toast.info("Microphone activated. Start speaking...");
 //     } catch (error: any) {
 //       console.error("Error starting voice recognition:", error);
 //       setIsListening(false);
-      
+
 //       // If permission error, show specific message
 //       if (error.toString().includes('Permission') || error.toString().includes('NotAllowed')) {
 //         setPermissionDenied(true);
@@ -427,7 +427,7 @@ import { axios } from "@/config/axios";  // for image generation
 //         `https://images.unsplash.com/photo-1575936123452-b67c3203c357?w=400&h=400&fit=crop&q=80&t=${Date.now()}`,
 //         `https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&fit=crop&q=80&t=${Date.now()}`
 //       ];
-  
+
 //       setIsGenerated(true);
 //       setIsLoading(false);
 //       const selectedImages = mockImages.slice(0, numberOfPages);
@@ -436,7 +436,7 @@ import { axios } from "@/config/axios";  // for image generation
 //       // Update toast
 //       toast.dismiss(loadingToast);
 //       toast.success(`Successfully generated ${selectedImages.length} design variations!`);
-      
+
 //     }, 1000);
 //   };
 
@@ -462,7 +462,7 @@ import { axios } from "@/config/axios";  // for image generation
 //     setImages([]);
 //     setIsButtonDisabled(true);
 //     stopListening();
-    
+
 //     toast.info("Ready for new design description");
 //   };
 
@@ -549,12 +549,12 @@ import { axios } from "@/config/axios";  // for image generation
 
 //   return (
 //     <Box className="min-h-screen w-full bg-[#080319] bg-[url('/general/fdsfdahf.PNG')] bg-cover bg-center bg-no-repeat text-white relative flex flex-col overflow-x-hidden">
-      
+
 //       <DescribeDesignNavbar />
 
 //       {/* MAIN CONTENT AREA - Responsive layout */}
 //       <main className="flex-1 mt-32 flex flex-col xl:flex-row items-start justify-between px-4 sm:px-6 lg:px-20 py-6 sm:py-10 gap-6 sm:gap-10">
-        
+
 //         {/* LEFT PANEL - Transcription + Manual Typing + Buttons */}
 //         <div className="w-full xl:w-[350px] flex flex-col gap-4 sm:gap-6 z-30 order-2 lg:order-1">
 //           <div className="  backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
@@ -580,7 +580,7 @@ import { axios } from "@/config/axios";  // for image generation
 //                 )}
 //               </div>
 //             </div>
-            
+
 //             {/* Use the fixed DesignDescriptionInput component */}
 //             <DesignDescriptionInput 
 //               value={transcript}
@@ -691,7 +691,7 @@ import { axios } from "@/config/axios";  // for image generation
 //               )}
 //             </div>
 //           </div>
-          
+
 //           {/* Instructions - Hidden on mobile when generated */}
 //           {!isGenerated && (
 //             <div className="text-xs text-white/50 bg-black/20 p-4 rounded-xl hidden sm:block">
@@ -779,7 +779,7 @@ import { axios } from "@/config/axios";  // for image generation
 //                   alt={`Design variation ${i + 1}`} 
 //                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
 //                 />
-                
+
 //                 {/* Overlay on hover */}
 //                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 //               </div>
@@ -820,7 +820,7 @@ import { axios } from "@/config/axios";  // for image generation
 //                 <p className="text-center text-xs sm:text-sm text-white/60 mt-4">
 //                   Speak to modify or create new variations
 //                 </p>
-                
+
 //                 <div className="mt-4 sm:mt-6 space-y-2">
 //                   <button 
 //                     onClick={() => setTranscript(transcript + " Make it more colorful.")}
@@ -847,7 +847,7 @@ import { axios } from "@/config/axios";  // for image generation
 //                   </button>
 //                 </div>
 //               </div>
-              
+
 //               <div className="w-full p-4 sm:p-6 bg-black/20 backdrop-blur-md rounded-2xl border border-white/5">
 //                 <h4 className="font-bold mb-3 text-center text-sm">Quick Actions</h4>
 //                 <div className="space-y-2">
@@ -1064,9 +1064,8 @@ const MicVisual = ({
     className={`flex flex-col items-center justify-center gap-6 w-full animate-in fade-in zoom-in duration-500`}
   >
     <div
-      className={`relative ${
-        size === "large" ? "scale-125 lg:scale-150" : "scale-100"
-      } flex items-center justify-center`}
+      className={`relative ${size === "large" ? "scale-125 lg:scale-150" : "scale-100"
+        } flex items-center justify-center`}
     >
       {isListening && (
         <div className="absolute w-[130px] h-[130px] border border-[#F70353]/40 rounded-full animate-ping" />
@@ -1075,17 +1074,16 @@ const MicVisual = ({
       <button
         onClick={toggleListening}
         disabled={isLoading || permissionDenied || !isSpeechSupported}
-        className={`relative p-5 rounded-full shadow-lg border border-red-400/30 flex items-center justify-center transition-all ${
-          permissionDenied
+        className={`relative p-5 rounded-full shadow-lg border border-red-400/30 flex items-center justify-center transition-all ${permissionDenied
             ? "bg-gray-600 cursor-not-allowed opacity-50"
             : !isSpeechSupported
-            ? "bg-gray-600 cursor-not-allowed opacity-50"
-            : isListening
-            ? "bg-red-600 animate-pulse"
-            : isLoading
-            ? "bg-gray-600 cursor-not-allowed"
-            : "bg-red-500/20 backdrop-blur-md hover:bg-red-500/30"
-        }`}
+              ? "bg-gray-600 cursor-not-allowed opacity-50"
+              : isListening
+                ? "bg-red-600 animate-pulse"
+                : isLoading
+                  ? "bg-gray-600 cursor-not-allowed"
+                  : "bg-red-500/20 backdrop-blur-md hover:bg-red-500/30"
+          }`}
       >
         {permissionDenied || !isSpeechSupported ? (
           <MicOff className="w-7 h-7 text-gray-400" />
@@ -1440,7 +1438,7 @@ const SpeakPrompt = () => {
       console.log('Image URLs from LLM:', urls);
       if (urls.length > 0) {
         const img = new window.Image();
-        img.onload = function() {
+        img.onload = function () {
           console.log('First image natural size:', img.naturalWidth, 'x', img.naturalHeight);
         };
         img.src = urls[0];
@@ -1559,8 +1557,8 @@ const SpeakPrompt = () => {
                 permissionDenied
                   ? "Microphone access denied. Click allow to use voice."
                   : isListening
-                  ? "Speaking... Your words appear here..."
-                  : "Click microphone to speak OR type here..."
+                    ? "Speaking... Your words appear here..."
+                    : "Click microphone to speak OR type here..."
               }
               disabled={isLoading}
               isListening={isListening}
@@ -1631,20 +1629,19 @@ const SpeakPrompt = () => {
               {!isGenerated ? (
                 <>
                   <Box className="w-full rounded-2xl border-2 border-[#F70353] bg-[#F70353]/10 p-2 mb-2">
-                    <CustomButton 
-                      wrapperClassName={`w-full h-[55px] rounded-2xl ${
-                        isButtonDisabled || isLoading 
-                          ? 'opacity-50 cursor-not-allowed' 
+                    <CustomButton
+                      wrapperClassName={`w-full h-[55px] rounded-2xl ${isButtonDisabled || isLoading
+                          ? 'opacity-50 cursor-not-allowed'
                           : ''
-                      }`}
+                        }`}
                       title={isLoading ? "Generating..." : "Generate Designs"}
                       icon={<BsStars className="size-5" />}
                       onClick={handleGenerate}
                       disabled={isButtonDisabled || isLoading}
                     />
                     <div className="text-center text-xs text-white/40 mt-2">
-                      {isButtonDisabled 
-                        ? "← Speak or type description first" 
+                      {isButtonDisabled
+                        ? "← Speak or type description first"
                         : `Ready to generate ${numberOfPages} variations`}
                     </div>
                   </Box>
@@ -1652,16 +1649,16 @@ const SpeakPrompt = () => {
               ) : (
                 <>
                   <Box className="w-full rounded-2xl border-2 border-[#F70353] bg-[#F70353]/10 p-2 mb-2">
-                    <CustomButton 
-                      wrapperClassName="w-full h-[55px] rounded-2xl bg-indigo-600 hover:bg-indigo-700" 
-                      title="Try New Design" 
-                      icon={<RotateCcw className="size-5" />} 
+                    <CustomButton
+                      wrapperClassName="w-full h-[55px] rounded-2xl bg-indigo-600 hover:bg-indigo-700"
+                      title="Try New Design"
+                      icon={<RotateCcw className="size-5" />}
                       onClick={handleReset}
                       disabled={isLoading}
                     />
-                    <CustomBlackButton 
-                      wrapperClassName="w-full h-[55px] rounded-2xl border border-white/10" 
-                      title="Proceed With Selected Design" 
+                    <CustomBlackButton
+                      wrapperClassName="w-full h-[55px] rounded-2xl border border-white/10"
+                      title="Proceed With Selected Design"
                       onClick={handleProceed}
                       disabled={images.length === 0 || isLoading}
                     />
@@ -1747,19 +1744,17 @@ const SpeakPrompt = () => {
               </div>
 
               {/* Dynamic Grid Layout Based on Number of Images */}
-              <div className={`w-full mx-auto animate-in fade-in zoom-in-95 duration-500 ${
-                images.length === 1
+              <div className={`w-full mx-auto animate-in fade-in zoom-in-95 duration-500 ${images.length === 1
                   ? "max-w-[600px] xl:max-w-[700px] 2xl:max-w-[800px] flex justify-center" // Single large image centered
                   : "max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] grid grid-cols-2 gap-3 sm:gap-6" // 2-column grid for 2+ images
-              }`}>
+                }`}>
                 {images.map((url, i) => {
                   const isSelected = selectedImage === url;
                   return (
                     <div
                       key={i}
-                      className={`group relative cursor-pointer ${
-                        images.length === 1 ? "w-full max-w-[600px]" : ""
-                      }`}
+                      className={`group relative cursor-pointer ${images.length === 1 ? "w-full max-w-[600px]" : ""
+                        }`}
                       onClick={() => selectImageByUrl(url)}
                     >
                       {/* Blurred Background Image for Glassmorphism */}
@@ -1774,24 +1769,21 @@ const SpeakPrompt = () => {
 
                       {/* Main Image Container */}
                       <div
-                        className={`relative rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 ${
-                          images.length === 1
+                        className={`relative rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 ${images.length === 1
                             ? "h-auto max-h-[400px] xl:max-h-[500px] 2xl:max-h-[600px]" // Natural height for single image
                             : "aspect-square" // Square for grid
-                        } ${
-                          isSelected
+                          } ${isSelected
                             ? "border-[#F70353] scale-[1.03] z-10 shadow-[0_0_25px_rgba(247,3,83,0.3)]"
                             : "border-white/10 hover:border-white/30 hover:scale-[1.01]"
-                        }`}
+                          }`}
                       >
                         <img
                           src={url}
                           alt={`Design variation ${i + 1}`}
-                          className={`w-full h-full object-contain transition-transform duration-700 ${
-                            images.length === 1
+                          className={`w-full h-full object-contain transition-transform duration-700 ${images.length === 1
                               ? "group-hover:scale-105"
                               : "group-hover:scale-110"
-                          }`}
+                            }`}
                         />
 
                         {/* Overlay on hover */}
@@ -1816,30 +1808,30 @@ const SpeakPrompt = () => {
             </div>
           )}
         </div>
-{/* RIGHT COLUMN - Side Panel */}
-<div className="w-full xl:w-[350px] flex flex-col items-stretch z-30 order-3 gap-5 mt-6 xl:mt-0">
-  {/* Voice Command Examples - Always show */}
-  <div className="w-full p-6 bg-white/[0.03] backdrop-blur-xl rounded-[2.5rem] border border-white/10">
-    <h4 className="font-bold mb-6 text-center text-sm tracking-tight text-white/90">Voice Command Examples</h4>
-    <div className="space-y-3">
-      {[
-        { label: "For Images", text: "Create Ghibli art", dot: "bg-amber-500" },
-        { label: "For Websites", text: "Design a landing page", dot: "bg-blue-500" },
-        { label: "For Colors", text: "Use blue and white", dot: "bg-pink-500" }
-      ].map((item, i) => (
-        <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-             <span className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
-             <p className="text-[10px] text-white/30 uppercase font-black">{item.label}</p>
+        {/* RIGHT COLUMN - Side Panel */}
+        <div className="w-full xl:w-[350px] flex flex-col items-stretch z-30 order-3 gap-5 mt-6 xl:mt-0">
+          {/* Voice Command Examples - Always show */}
+          <div className="w-full p-6 bg-white/[0.03] backdrop-blur-xl rounded-[2.5rem] border border-white/10">
+            <h4 className="font-bold mb-6 text-center text-sm tracking-tight text-white/90">Voice Command Examples</h4>
+            <div className="space-y-3">
+              {[
+                { label: "For Images", text: "Create Ghibli art", dot: "bg-amber-500" },
+                { label: "For Websites", text: "Design a landing page", dot: "bg-blue-500" },
+                { label: "For Colors", text: "Use blue and white", dot: "bg-pink-500" }
+              ].map((item, i) => (
+                <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
+                    <p className="text-[10px] text-white/30 uppercase font-black">{item.label}</p>
+                  </div>
+                  <p className="text-sm text-white/80 italic font-medium">"{item.text}"</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-sm text-white/80 italic font-medium">"{item.text}"</p>
-        </div>
-      ))}
-    </div>
-  </div>
 
- 
-</div>
+
+        </div>
       </main>
 
       {/* Mobile Instructions Bottom Sheet */}

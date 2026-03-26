@@ -130,9 +130,13 @@ const DescribeDesignPage = () => {
   const navigate = useNavigate();
 
   // dynamic background switch similar to speakprompt page
-  const bgClasses = isGenerated || isLoading
-    ? "bg-[#080319] bg-[url('/general/fdsfdahf.PNG')] bg-cover bg-center bg-no-repeat text-white relative flex flex-col overflow-x-hidden"
-    : "bg-[#080319] bg-[url('/general/capture-bg.png')] bg-cover bg-no-repeat overflow-y-auto p-4";
+
+
+  // const bgClasses = isGenerated || isLoading
+  //   ? "bg-[#080319] bg-[url('/general/fdsfdahf.PNG')] bg-cover bg-center bg-no-repeat text-white relative flex flex-col overflow-x-hidden"
+  //   : "bg-[#080319] bg-[url('/general/capture-bg.png')] bg-cover bg-no-repeat overflow-y-auto p-4";
+
+
   // const containerClass = `min-h-screen w-full ${bgClasses}`;
 
 
@@ -247,40 +251,50 @@ const DescribeDesignPage = () => {
               />
             </div>
 
-            {/* Action Buttons */}
             <Box className="flex flex-col gap-4 w-full items-center mt-6 sm:mt-8">
               {!isGenerated ? (
-                <CustomButton
-                  wrapperClassName="w-full h-[48px]"
-                  className="text-[14px] sm:text-[16px] md:text-[18px]"
-                  title={isLoading ? "Generating…" : "Generate"}
-                  icon={isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <BsStars className="size-4 sm:size-5" />}
-                  onClick={handleGenerate}
-                  disabled={isLoading}
-                />
+                <>
+                  <CustomButton
+                    wrapperClassName="w-full h-[48px]"
+                    className="text-[14px] sm:text-[16px] md:text-[18px]"
+                    title={isLoading ? "Generating…" : "Generate"}
+                    icon={isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <BsStars className="size-4 sm:size-5" />}
+                    onClick={handleGenerate}
+                    disabled={isLoading}
+                  />
+                  <CustomBlackButton
+                    wrapperClassName="w-full h-[48px]"
+                    className="text-[14px] sm:text-[16px] md:text-[18px]"
+                    title="Proceed Without Modifications"
+                    onClick={() => navigate("/select-methods/capture-photo/describe-design/apply-mokup-design")}
+                    disabled={isLoading}
+                  />
+                </>
               ) : (
-                <CustomButton
-                  wrapperClassName="w-full h-[48px] bg-indigo-600 hover:bg-indigo-700"
-                  className="text-[14px] sm:text-[16px] md:text-[18px]"
-                  title="Try New Design"
-                  icon={<RotateCcw className="size-4 sm:size-5" />}
-                  onClick={() => {
-                    setImages([]);
-                    setIsGenerated(false);
-                    setGeneratedImages([], "");
-                    setPromptText("");
-                    toast.info("Ready for new design description");
-                  }}
-                  disabled={isLoading}
-                />
+                <>
+                  <CustomButton
+                    wrapperClassName="w-full h-[48px] bg-indigo-600 hover:bg-indigo-700"
+                    className="text-[14px] sm:text-[16px] md:text-[18px]"
+                    title="Try New Design"
+                    icon={<RotateCcw className="size-4 sm:size-5" />}
+                    onClick={() => {
+                      setImages([]);
+                      setIsGenerated(false);
+                      setGeneratedImages([], "");
+                      setPromptText("");
+                      toast.info("Ready for new design description");
+                    }}
+                    disabled={isLoading}
+                  />
+                  <CustomBlackButton
+                    wrapperClassName="w-full h-[48px]"
+                    className="text-[14px] sm:text-[16px] md:text-[18px]"
+                    title="Proceed With Selected Design"
+                    onClick={handleProceed}
+                    disabled={isLoading}
+                  />
+                </>
               )}
-              <CustomBlackButton
-                wrapperClassName="w-full h-[48px]"
-                className="text-[14px] sm:text-[16px] md:text-[18px]"
-                title="Proceed With Selected Design"
-                onClick={handleProceed}
-                disabled={!isGenerated}
-              />
             </Box>
           </div>
           
@@ -438,19 +452,23 @@ const DescribeDesignPage = () => {
         <div className="w-full xl:w-[350px] flex flex-col items-stretch z-30 order-3 gap-5 mt-6 xl:mt-0">
           {/* Examples - Always show */}
           <div className="w-full p-6 bg-white/[0.03] backdrop-blur-xl rounded-[2.5rem] border border-white/10">
-            <h4 className="font-bold mb-6 text-center text-sm tracking-tight text-white/90">Design Modifications</h4>
+            <h4 className="font-bold mb-6 text-center text-sm tracking-tight text-white/90 uppercase tracking-[0.2em] opacity-60">Try these ideas</h4>
             <div className="space-y-3">
               {[
                 { label: "Style Changes", text: "Make it look like a 90s anime", dot: "bg-amber-500" },
                 { label: "Backgrounds", text: "Change the background to a sunny beach", dot: "bg-blue-500" },
                 { label: "Atmosphere", text: "Make it moody and cinematic lighting", dot: "bg-pink-500" }
               ].map((item, i) => (
-                <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col gap-1">
+                <div 
+                  key={i} 
+                  onClick={() => setPromptText(item.text)}
+                  className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col gap-1 cursor-pointer hover:bg-white/10 hover:border-[#F70353]/30 transition-all duration-300 group/item active:scale-95"
+                >
                   <div className="flex items-center gap-2">
-                     <span className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
-                     <p className="text-[10px] text-white/30 uppercase font-black">{item.label}</p>
+                     <span className={`w-1.5 h-1.5 rounded-full ${item.dot} group-hover/item:scale-125 transition-transform`} />
+                     <p className="text-[10px] text-white/30 uppercase font-black group-hover/item:text-white/50 transition-colors">{item.label}</p>
                   </div>
-                  <p className="text-sm text-white/80 italic font-medium">"{item.text}"</p>
+                  <p className="text-sm text-white/80 italic font-medium group-hover/item:text-white transition-colors">"{item.text}"</p>
                 </div>
               ))}
             </div>
