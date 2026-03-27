@@ -207,7 +207,7 @@ const DescribeDesignPage = () => {
 
       {/* MAIN CONTENT AREA - Responsive layout */}
       <main className="flex-1 mt-32 flex flex-col xl:flex-row items-start justify-between px-4 sm:px-6 lg:px-20 py-6 sm:py-10 gap-6 sm:gap-10">
-        
+
         {/* LEFT PANEL - Text Input + Buttons */}
         <div className="w-full xl:w-[350px] flex flex-col gap-4 sm:gap-6 z-30 order-2 lg:order-1">
           <div className="backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/10 shadow-2xl">
@@ -217,7 +217,7 @@ const DescribeDesignPage = () => {
               </label>
               <div className="flex items-center gap-2">
                 {promptText && (
-                  <button 
+                  <button
                     onClick={() => setPromptText("")}
                     className="text-xs text-white/50 hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10"
                     title="Clear text"
@@ -227,8 +227,8 @@ const DescribeDesignPage = () => {
                 )}
               </div>
             </div>
-            
-            <DesignDescriptionInput 
+
+            <DesignDescriptionInput
               value={promptText}
               onChange={setPromptText}
               disabled={isLoading}
@@ -240,13 +240,13 @@ const DescribeDesignPage = () => {
                 <span className="text-white/60">Number of Variations</span>
                 <span className="bg-[#F70353] px-3 py-0.5 rounded-full text-xs font-bold">{numberOfImages}</span>
               </div>
-              <input 
-                type="range" 
-                min="1" 
-                max="4" 
-                value={numberOfImages} 
-                onChange={(e) => setNumberOfImages(Number(e.target.value))} 
-                className="w-full h-1.5 bg-white/10 rounded-lg accent-[#F70353]" 
+              <input
+                type="range"
+                min="1"
+                max="4"
+                value={numberOfImages}
+                onChange={(e) => setNumberOfImages(Number(e.target.value))}
+                className="w-full h-1.5 bg-white/10 rounded-lg accent-[#F70353]"
                 disabled={isLoading}
               />
             </div>
@@ -297,7 +297,7 @@ const DescribeDesignPage = () => {
               )}
             </Box>
           </div>
-          
+
           {/* Instructions - Hidden on mobile when generated */}
           {!isGenerated && (
             <div className="text-xs text-white/50 bg-black/20 p-4 rounded-xl hidden sm:block">
@@ -378,19 +378,17 @@ const DescribeDesignPage = () => {
               </div>
 
               {/* Dynamic Grid Layout Based on Number of Images */}
-              <div className={`w-full mx-auto animate-in fade-in zoom-in-95 duration-500 ${
-                images.length === 1
-                  ? "max-w-[600px] xl:max-w-[700px] 2xl:max-w-[800px] flex justify-center" 
-                  : "max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] grid grid-cols-2 gap-3 sm:gap-6" 
-              }`}>
+              <div className={`w-full mx-auto animate-in fade-in zoom-in-95 duration-500 ${images.length === 1
+                  ? "max-w-[600px] xl:max-w-[700px] 2xl:max-w-[800px] flex justify-center"
+                  : "max-w-[500px] xl:max-w-[650px] 2xl:max-w-[750px] grid grid-cols-2 gap-3 sm:gap-6"
+                }`}>
                 {images.map((url, i) => {
                   const isSelected = selectedImage === url;
                   return (
                     <div
                       key={i}
-                      className={`group relative cursor-pointer ${
-                        images.length === 1 ? "w-full max-w-[600px]" : ""
-                      }`}
+                      className={`group relative cursor-pointer ${images.length === 1 ? "w-full max-w-[600px]" : ""
+                        }`}
                       onClick={() => selectImageByUrl(url)}
                     >
                       {/* Blurred Background Image for Glassmorphism */}
@@ -405,24 +403,21 @@ const DescribeDesignPage = () => {
 
                       {/* Main Image Container */}
                       <div
-                        className={`relative rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 ${
-                          images.length === 1
-                            ? "h-auto max-h-[400px] xl:max-h-[500px] 2xl:max-h-[600px]" 
-                            : "aspect-square" 
-                        } ${
-                          isSelected
+                        className={`relative rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all duration-300 ${images.length === 1
+                            ? "h-auto max-h-[400px] xl:max-h-[500px] 2xl:max-h-[600px]"
+                            : "aspect-square"
+                          } ${isSelected
                             ? "border-[#F70353] scale-[1.03] z-10 shadow-[0_0_25px_rgba(247,3,83,0.3)]"
                             : "border-white/10 hover:border-white/30 hover:scale-[1.01]"
-                        }`}
+                          }`}
                       >
                         <img
                           src={url}
                           alt={`Design variation ${i + 1}`}
-                          className={`w-full h-full object-contain transition-transform duration-700 ${
-                            images.length === 1
+                          className={`w-full h-full object-contain transition-transform duration-700 ${images.length === 1
                               ? "group-hover:scale-105"
                               : "group-hover:scale-110"
-                          }`}
+                            }`}
                         />
 
                         {/* Overlay on hover */}
@@ -459,14 +454,14 @@ const DescribeDesignPage = () => {
                 { label: "Backgrounds", text: "Change the background to a sunny beach", dot: "bg-blue-500" },
                 { label: "Atmosphere", text: "Make it moody and cinematic lighting", dot: "bg-pink-500" }
               ].map((item, i) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   onClick={() => setPromptText(item.text)}
                   className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col gap-1 cursor-pointer hover:bg-white/10 hover:border-[#F70353]/30 transition-all duration-300 group/item active:scale-95"
                 >
                   <div className="flex items-center gap-2">
-                     <span className={`w-1.5 h-1.5 rounded-full ${item.dot} group-hover/item:scale-125 transition-transform`} />
-                     <p className="text-[10px] text-white/30 uppercase font-black group-hover/item:text-white/50 transition-colors">{item.label}</p>
+                    <span className={`w-1.5 h-1.5 rounded-full ${item.dot} group-hover/item:scale-125 transition-transform`} />
+                    <p className="text-[10px] text-white/30 uppercase font-black group-hover/item:text-white/50 transition-colors">{item.label}</p>
                   </div>
                   <p className="text-sm text-white/80 italic font-medium group-hover/item:text-white transition-colors">"{item.text}"</p>
                 </div>

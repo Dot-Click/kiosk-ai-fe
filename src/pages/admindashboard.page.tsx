@@ -168,28 +168,46 @@ const AdminDashboardPage = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-[#16121E]/80 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-          <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-[#16121E]/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#4A0E64]/5 blur-[100px] rounded-full -mr-16 -mt-16" />
+          
+          <h2 className="text-xl font-black text-white mb-8 flex items-center gap-3">
+             <div className="w-2 h-8 bg-gradient-to-b from-[#4A0E64] to-transparent rounded-full" />
+             Management Center
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             <ActionButton
-              title="View Orders"
+              title="Orders History"
+              subtitle="View and process all customer orders"
               icon={ShoppingCart}
               onClick={() => navigate("/admin/orders")}
+              accentColor="from-purple-500/20 to-transparent"
+              iconBg="bg-purple-500/10 text-purple-400"
             />
             <ActionButton
-              title="Product Management"
+              title="Product Catalog"
+              subtitle="Manage inventory, pricing and items"
               icon={Package}
               onClick={() => navigate("/admin/products")}
+              accentColor="from-blue-500/20 to-transparent"
+              iconBg="bg-blue-500/10 text-blue-400"
             />
             <ActionButton
-              title="Stripe Settings"
+              title="Stripe Gateway"
+              subtitle="Configure keys and payment settings"
               icon={IndianRupee}
               onClick={() => navigate("/admin/stripe-settings")}
+              accentColor="from-emerald-500/20 to-transparent"
+              iconBg="bg-emerald-500/10 text-emerald-400"
             />
             <ActionButton
-              title="Settings"
+              title="System Settings"
+              subtitle="Admin profile and site configuration"
               icon={Settings}
               onClick={() => navigate("/admin/settings")}
+              accentColor="from-slate-500/20 to-transparent"
+              iconBg="bg-slate-500/10 text-slate-400"
             />
           </div>
         </div>
@@ -200,19 +218,41 @@ const AdminDashboardPage = () => {
 
 const ActionButton = ({
   title,
+  subtitle,
   icon: Icon,
   onClick,
+  accentColor,
+  iconBg,
 }: {
   title: string;
+  subtitle: string;
   icon: any;
   onClick: () => void;
+  accentColor: string;
+  iconBg: string;
 }) => (
   <div
     onClick={onClick}
-    className="p-4 rounded-lg bg-[#211C2C] border border-white/10 hover:bg-[#2A2438] cursor-pointer transition-all flex items-center gap-3"
+    className="group relative bg-[#211C2C]/50 border border-white/5 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:border-white/10 hover:bg-[#2A2438] overflow-hidden shadow-xl"
   >
-    <Icon className="w-5 h-5 text-white" />
-    <span className="text-white font-medium">{title}</span>
+    <div className={`absolute inset-0 bg-gradient-to-br ${accentColor} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+    
+    <div className="relative z-10 flex items-center gap-5">
+      <div className={`w-14 h-14 rounded-xl ${iconBg} border border-white/5 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+        <Icon className="w-7 h-7" />
+      </div>
+      
+      <div className="flex-1">
+        <h4 className="text-lg font-black text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-white/60 transition-all">
+          {title}
+        </h4>
+        <p className="text-white/40 text-xs font-medium mt-1">{subtitle}</p>
+      </div>
+
+      <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
+        <div className="w-2 h-2 border-t border-r border-white rotate-45" />
+      </div>
+    </div>
   </div>
 );
 

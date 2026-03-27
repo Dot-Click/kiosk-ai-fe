@@ -1809,28 +1809,37 @@ const SpeakPrompt = () => {
           )}
         </div>
         {/* RIGHT COLUMN - Side Panel */}
+       {/* RIGHT COLUMN - Side Panel */}
         <div className="w-full xl:w-[350px] flex flex-col items-stretch z-30 order-3 gap-5 mt-6 xl:mt-0">
-          {/* Voice Command Examples - Always show */}
+          {/* Examples - Always show */}
           <div className="w-full p-6 bg-white/[0.03] backdrop-blur-xl rounded-[2.5rem] border border-white/10">
-            <h4 className="font-bold mb-6 text-center text-sm tracking-tight text-white/90">Voice Command Examples</h4>
+            <h4 className="font-bold mb-6 text-center text-sm tracking-tight text-white/90 uppercase tracking-[0.2em] opacity-60">Try these ideas</h4>
             <div className="space-y-3">
               {[
-                { label: "For Images", text: "Create Ghibli art", dot: "bg-amber-500" },
-                { label: "For Websites", text: "Design a landing page", dot: "bg-blue-500" },
-                { label: "For Colors", text: "Use blue and white", dot: "bg-pink-500" }
+                { label: "Style Changes", text: "Make it look like a 90s anime", dot: "bg-amber-500" },
+                { label: "Backgrounds", text: "Change the background to a sunny beach", dot: "bg-blue-500" },
+                { label: "Atmosphere", text: "Make it moody and cinematic lighting", dot: "bg-pink-500" }
               ].map((item, i) => (
-                <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col gap-1">
+                <div 
+                  key={i} 
+                  onClick={() => {
+                    handleManualType(item.text);
+                    // Scroll to input on mobile
+                    window.scrollTo({ top: 300, behavior: 'smooth' });
+                  }}
+                  className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col gap-1 cursor-pointer hover:bg-white/10 hover:border-[#F70353]/30 transition-all duration-300 group/item active:scale-95"
+                >
                   <div className="flex items-center gap-2">
-                    <span className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
-                    <p className="text-[10px] text-white/30 uppercase font-black">{item.label}</p>
+                     <span className={`w-1.5 h-1.5 rounded-full ${item.dot} group-hover/item:scale-125 transition-transform`} />
+                     <p className="text-[10px] text-white/30 uppercase font-black group-hover/item:text-white/50 transition-colors">{item.label}</p>
                   </div>
-                  <p className="text-sm text-white/80 italic font-medium">"{item.text}"</p>
+                  <p className="text-sm text-white/80 italic font-medium group-hover/item:text-white transition-colors">"{item.text}"</p>
                 </div>
               ))}
             </div>
           </div>
 
-
+          {/* Right panel logic kept simple; style selector moved back to the bottom */}
         </div>
       </main>
 
