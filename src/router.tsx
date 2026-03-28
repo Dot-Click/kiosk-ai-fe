@@ -50,6 +50,7 @@ export const Router = () => {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
           <Route path="/checkout/failed" element={<CheckoutFailedPage />} />
+          {/* <Route path="/track" element={<TrackPage />} /> */}
           <Route path="/select-methods/qrscanner" element={<QrScanner />} />
           <Route path="/select-methods/bluetooth" element={<Bluetooth />} />
         </Route>
