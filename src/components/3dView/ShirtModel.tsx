@@ -49,7 +49,7 @@ export default function ShirtModel({
   decalRotation = 0,
 }: ShirtModelProps) {
   const { nodes } = useGLTF("/shirt_baked.glb");
-  
+
   // Create completely matte material (no shine, proper cotton fabric)
   const mat = new THREE.MeshLambertMaterial({
     color: new THREE.Color(color),
