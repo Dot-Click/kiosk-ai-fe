@@ -1,6 +1,7 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { cn } from "@/utils/cn.util";
 
 interface ThreeMugViewerProps {
   imageUrl?: string;
@@ -12,6 +13,7 @@ interface ThreeMugViewerProps {
   coverage?: number;
   // additional rotation applied to the wrap mesh (radians)
   wrapOffset?: number;
+  className?: string;
 }
 
 export interface ThreeMugViewerRef {
@@ -27,7 +29,7 @@ const ThreeMugViewer = forwardRef<ThreeMugViewerRef, ThreeMugViewerProps>(({
   isApplied,
   zoomScale = 100,
   rotationAngle = 0,  coverage = 0.5,
-  wrapOffset = 0,}, ref) => {
+  wrapOffset = 0, className = "h-[500px] sm:h-[600px]" }, ref) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -95,6 +97,7 @@ const ThreeMugViewer = forwardRef<ThreeMugViewerRef, ThreeMugViewerProps>(({
     controls.minDistance = 3;
     controls.maxDistance = 15;
     controls.maxPolarAngle = Math.PI / 2 - 0.1;
+    controls.target.set(0, 1.25, 0); // Center on mug height (0 to 2.5)
     controlsRef.current = controls;
 
     // Lighting
@@ -294,7 +297,7 @@ const ThreeMugViewer = forwardRef<ThreeMugViewerRef, ThreeMugViewerProps>(({
   return (
     <div
       ref={mountRef}
-      className="w-full h-[500px] sm:h-[550px] md:h-[600px] lg:h-[650px] xl:h-[700px] 2xl:h-[750px] rounded-2xl xl:rounded-3xl 2xl:rounded-[32px] overflow-hidden bg-transparent"
+      className={cn("w-full bg-transparent overflow-hidden", className)}
     />
   );
 });

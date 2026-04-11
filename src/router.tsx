@@ -20,6 +20,7 @@ import AdminSettingsPage from "./pages/adminSettings.page";
 import AdminOrdersPage from "./pages/adminOrders.page";
 import AdminOrderDetailPage from "./pages/adminOrderDetail.page";
 import AdminProductsPage from "./pages/adminProducts.page";
+import TrackPage from "./pages/track.page";
 
 export const Router = () => {
   return (
@@ -50,7 +51,7 @@ export const Router = () => {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
           <Route path="/checkout/failed" element={<CheckoutFailedPage />} />
-          {/* <Route path="/track" element={<TrackPage />} /> */}
+          <Route path="/order-track" element={<TrackPage />} />
           <Route path="/select-methods/qrscanner" element={<QrScanner />} />
           <Route path="/select-methods/bluetooth" element={<Bluetooth />} />
         </Route>

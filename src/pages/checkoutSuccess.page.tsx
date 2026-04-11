@@ -396,6 +396,10 @@ export default function CheckoutSuccessPage() {
             </div>
             <p className="font-black text-sm uppercase tracking-tighter">Thank You!</p>
             <p className="text-[10px] text-gray-400 mt-1">Please keep this receipt for your records.</p>
+            <div className="mt-4 pt-4 border-t border-dashed border-gray-100">
+              <p className="text-[9px] font-bold text-gray-400 uppercase mb-1">Self Service Tracking</p>
+              <p className="text-[11px] font-black text-[#F70353]">{window.location.origin}/order-track</p>
+            </div>
           </div>
 
         </div>

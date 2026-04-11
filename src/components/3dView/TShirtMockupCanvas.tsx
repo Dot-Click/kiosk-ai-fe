@@ -1,6 +1,7 @@
 import { Suspense, useEffect } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { Center, OrbitControls } from "@react-three/drei";
+import { cn } from "@/utils/cn.util";
 import ShirtModel from "./ShirtModel";
 import CameraZoomSync from "./CameraZoomSync";
 
@@ -14,6 +15,7 @@ interface TShirtMockupCanvasProps {
   decalScale?: number;
   decalRotation?: number;
   captureRef?: React.MutableRefObject<any>;
+  className?: string;
 }
 
 const CaptureHandler = ({ captureRef }: { captureRef: React.MutableRefObject<any> }) => {
@@ -40,10 +42,11 @@ export default function TShirtMockupCanvas({
   decalPosition = [0, 0.04, 0.15],
   decalScale = 0.18,
   decalRotation = 0,
-  captureRef
+  captureRef,
+  className = "h-[500px] sm:h-[600px]"
 }: TShirtMockupCanvasProps) {
   return (
-    <div className="w-full h-[500px] sm:h-[550px] md:h-[600px] lg:h-[650px] xl:h-[700px] 2xl:h-[750px] rounded-2xl xl:rounded-3xl 2xl:rounded-[32px] overflow-hidden bg-transparent">
+    <div className={cn("w-full rounded-2xl overflow-hidden bg-transparent", className)}>
       <Canvas
         shadows={false}
         camera={{ position: [0, 0, 2.5], fov: 25 }}

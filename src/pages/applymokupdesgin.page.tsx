@@ -287,7 +287,7 @@ const ApplyMokupDesignPage = () => {
         </Box>
 
         {/* Center - 3D Model or 2D Image */}
-        <Box className="flex-1 flex items-center justify-center min-w-0 max-md:w-full max-md:flex-1 max-md:mt-4">
+        <Box className="flex-1 flex items-center justify-center min-w-0 max-md:w-full max-md:flex-1 max-md:mt-4 min-h-[500px] sm:min-h-[600px]">
           {selectedProduct === "cup" ? (
             <ThreeMugViewer
               ref={cupRef}
