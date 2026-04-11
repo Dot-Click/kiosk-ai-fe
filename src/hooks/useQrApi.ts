@@ -8,6 +8,7 @@ interface QrGenerateResponse {
     id?: string;
     code?: string;
     url: string;
+    expiresAt?: string;
   };
   message?: string;
 }

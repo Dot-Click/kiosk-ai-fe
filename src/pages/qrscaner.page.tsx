@@ -716,7 +716,7 @@ const QRUploadPage = () => {
         const qrCode: QRCodeData = {
           code: qrCodeValue,
           qrImageUrl: data.data.url, // Using external QR service
-          expiresAt: new Date(Date.now() + 30 * 60000).toISOString(), // 30 minutes from now
+          expiresAt: data.data.expiresAt || new Date(Date.now() + 30 * 60000).toISOString(),
         };
 
         setQrCodeData(qrCode);
@@ -1112,4 +1112,3 @@ const QRUploadPage = () => {
 };
 
 export default QRUploadPage;
-

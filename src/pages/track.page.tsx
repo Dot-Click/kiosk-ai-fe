@@ -4,8 +4,8 @@ import { Box } from "@/components/ui/box";
 // import { Center } from "@/components/ui/center";
 // import { Stack } from "@/components/ui/stack";
 // import { Flex } from "@/components/ui/flex";
-import { Search, Package, Calendar, CreditCard, Loader2, CheckCircle2, Truck, Printer, Download, Eye  } from "lucide-react";
-import { useReactToPrint } from "react-to-print";
+import { Search, Package, Calendar, CreditCard, Loader2, CheckCircle2, Truck, Eye, Download } from "lucide-react";
+// import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
@@ -63,9 +63,9 @@ const TrackPage = () => {
   const navigate = useNavigate();
   const componentRef = useRef<HTMLDivElement>(null);
 
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
-  });
+  // const handlePrint = useReactToPrint({
+  //   contentRef: componentRef,
+  // });
 
   const handleDownloadPDF = async () => {
     if (!componentRef.current) return;
@@ -263,8 +263,22 @@ const TrackPage = () => {
                           {orderData.orderNumber?.toUpperCase()}
                         </h3>
                       </div>
-                      <div className={cn("px-6 py-3 rounded-2xl border text-[10px] font-black uppercase tracking-[0.2em] shadow-lg", getStatusColor(orderData.status))}>
-                        {orderData.status?.toUpperCase() || "PENDING"}
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={handleDownloadPDF}
+                          disabled={loading}
+                          className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] group/btn"
+                        >
+                          {loading && orderData ? (
+                            <Loader2 className="size-3 animate-spin" />
+                          ) : (
+                            <Download className="size-3 text-[#F70353] group-hover/btn:scale-110 transition-transform" />
+                          )}
+                          Receipt
+                        </button>
+                        <div className={cn("px-6 py-3 rounded-2xl border text-[10px] font-black uppercase tracking-[0.2em] shadow-lg", getStatusColor(orderData.status))}>
+                          {orderData.status?.toUpperCase() || "PENDING"}
+                        </div>
                       </div>
                     </div>
 
@@ -377,23 +391,7 @@ const TrackPage = () => {
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-8 flex flex-col w-full gap-4">
-                    <button 
-                      onClick={() => handlePrint()}
-                      className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-3"
-                    >
-                      <Printer className="size-4" /> Print Receipt
-                    </button>
-                    <button 
-                      onClick={() => handleDownloadPDF()}
-                      className="w-full py-5 rounded-2xl bg-[#F70353] text-white text-[11px] font-black uppercase tracking-[0.2em] hover:bg-[#F70353]/90 transition-all flex items-center justify-center gap-3 shadow-[0_10px_25_rgba(247,3,83,0.3)] active:scale-[0.98]"
-                    >
-                      <Download className="size-4" /> Download Slip (PDF)
-                    </button>
-                    <button className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all text-white/40">
-                      Issue with Order?
-                    </button>
-                  </div>
+
                   </div>
 
                   {/* Items List */}
@@ -541,7 +539,7 @@ const TrackPage = () => {
           {/* Slip Header */}
           <div className="text-center border-b-2 border-dashed border-gray-200 pb-6 mb-6" style={{ borderColor: '#d1d5db' }}>
             <h2 className="text-xl font-black uppercase tracking-tighter" style={{ color: '#000000' }}>
-              PROMPT<span style={{ color: '#F70353' }}>WIZARD</span>
+              KIOSK<span style={{ color: '#F70353' }}>AI</span>
             </h2>
             <p className="text-[10px] text-gray-400 mt-1 uppercase" style={{ color: '#6b7280' }}>Terminal #88742 • Official Receipt</p>
           </div>
