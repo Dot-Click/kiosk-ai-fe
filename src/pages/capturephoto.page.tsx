@@ -69,6 +69,12 @@ const CapturePhotoPage = () => {
             onClick={handleCapturePhoto}
           />
 
+          <CustomBlackButton
+            wrapperClassName="w-[240px] h-[48px]"
+            title="Continue without upload"
+            onClick={() => navigate("/select-methods/capture-photo/describe-design")}
+          />
+
           {selectedImage && (
             <CustomBlackButton
               wrapperClassName="w-[198px] h-[48px]"
