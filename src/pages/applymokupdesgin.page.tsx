@@ -259,9 +259,9 @@ const ApplyMokupDesignPage = () => {
           <p className="text-white text-xl font-bold">Preparing your design...</p>
         </div>
       )}
-      <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-lg:flex-col max-lg:items-center items-start max-md:justify-start max-md:py-6 max-sm:mt-30 mt-30">
+      <Box className="w-full min-h-screen flex flex-row gap-4 sm:gap-6 md:gap-8 xl:gap-10 2xl:gap-12 p-2 xl:p-2 2xl:p-8 max-lg:flex-col max-lg:items-center items-start max-md:justify-start max-md:py-6 mt-20 lg:mt-30">
         {/* Left Side - Product Options & Design Card */}
-        <Box className="flex flex-col items-center ml-18 justify-start gap-1 flex-shrink-0">
+        <Box className="flex flex-col items-center ml-0 lg:ml-18 justify-start gap-1 flex-shrink-0">
           <ProductOptions
             selectedProduct={selectedProduct}
             onProductSelect={setSelectedProduct}
@@ -316,7 +316,7 @@ const ApplyMokupDesignPage = () => {
         </Box>
 
         {/* Right Side - Functional Controls */}
-        <Box ref={controlsPanelRef} className="flex flex-col items-center justify-center gap-4 mr-18 xl:gap-8 flex-shrink-0 bg-transparent overflow-y-auto max-h-[calc(100vh-6rem)]">
+        <Box ref={controlsPanelRef} className="flex flex-col items-center justify-center gap-4 mr-0 lg:mr-18 xl:gap-8 flex-shrink-0 bg-transparent overflow-y-auto max-h-[calc(100vh-6rem)]">
           <ColorSelector
             selectedColor={selectedColor}
             onColorSelect={setSelectedColor}

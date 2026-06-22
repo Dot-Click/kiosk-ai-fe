@@ -4,6 +4,7 @@ import { useUser } from "./providers/user.provider";
 import { useSocket } from "./store/socket.store";
 import { Toaster } from "./components/ui/sonner";
 import { Router } from "./router";
+import CustomCursor from "./components/CustomCursor";
 import { useEffect } from "react";
 
 const client = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={client}>
+      <CustomCursor />
       <Router />
       <Toaster />
       <ReactQueryDevtools />

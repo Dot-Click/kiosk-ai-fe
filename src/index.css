@@ -96,6 +96,39 @@
   margin-left: auto;
 }
 
+/* ─── Global scroll & overflow ───────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* ─── Custom cursor — hide native on mouse/trackpad devices ───── */
+@media (pointer: fine) {
+  *,
+  *::before,
+  *::after {
+    cursor: none !important;
+  }
+}
+
+/* Hide custom cursor elements on touch devices */
+.cursor-dot,
+.cursor-ring {
+  display: none;
+}
+
+@media (pointer: fine) {
+  .cursor-dot,
+  .cursor-ring {
+    display: block;
+  }
+}
+
+/* ─── Base layer ─────────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border outline-ring/50;

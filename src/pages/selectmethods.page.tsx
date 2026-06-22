@@ -101,7 +101,7 @@ const MethodCard = ({
             </h3>
 
             {/* Description */}
-            <p className="text-white/70 text-[10px] sm:text-xs md:text-sm lg:text-[0.72rem] text-center font-light min-w-46">
+            <p className="text-white/70 text-[10px] sm:text-xs md:text-sm lg:text-[0.72rem] text-center font-light w-full max-w-[11.5rem]">
               {description}
             </p>
           </Stack>
